@@ -6,4 +6,10 @@
     <dimen name="navigation_width">260dp</dimen>
 	<dimen name="search_bar_height">48dp</dimen>
 
+    <dimen name="detail_introtextsize">14sp</dimen>
+    <dimen name="detail_titletextsize">28sp</dimen>
+    <dimen name="item_introtextsize">12sp</dimen>
+    <dimen name="item_titletextsize">16sp</dimen>
+    <dimen name="item_icon_width">120dp</dimen>
+    <dimen name="item_icon_height">80dp</dimen>
 </resources>

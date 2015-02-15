@@ -193,4 +193,49 @@
     <string name="settings_privacy">Privacy Settings</string>
     <string name="settings_about">About</string>
     <string name="settings_about_explain">Details about version, author and license.</string>
+
+    <string name="do_fling">您是否需要投射此文件？</string>
+    <string name="action_fling">投射</string>
+    
+    <string name="castappname">NETCAST</string>
+    <string name="imguri">www.infthink.com</string>
+    <string name="title">NETCAST</string>
+
+    <string name="cast_app_name">"Cast"</string>
+    <string name="btnplay">play</string>
+    <string name="btnpause">pause</string>
+    <string name="btnpre">rewind</string>
+    <string name="btnnext">fastforward</string>
+    <string name="btnstop">stop</string>
+    <string name="tvshowtext">Ready to Cast</string>
+    
+    <string name="tvdeviceslist">Cast devices list</string>
+
+    <string name="cast_application_name">超级棒播放器</string>
+    <string name="cast_server_name">CastServer</string>
+    <string name="sender_app_name">Sender</string>
+    <string name="action_cast">Cast</string>
+    
+    <string name="start_service">Start Service</string>
+    <string name="stop_service">Stop Service</string>
+
+
+    <string name="start_local">local</string>
+    <string name="start_net">network</string>
+    <string name="config_setting">settings</string>
+    <string name="end_session">endSession</string>
+    <string name="send">send</string>
+    <string name="ip_addr">ip_addr</string>
+    <string name="port">port</string>
+    <string name="appname">AppName</string>
+
+    
+    <string name="radio_sender">"Sender"</string>
+    <string name="radio_cast">"Cast"</string>
+    
+    <string name="cmd_start_session">"Start Session"</string>
+    <string name="cmd_end_session">"End Session"</string>
+    
+    <string name="cmd_send_message">"Send Message"</string>
+    <string name="bufferingtext">Buffering...</string>
 </resources>

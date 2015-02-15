@@ -150,7 +150,7 @@ public class LightningView {
 			}
 		}
 	}
-
+	
 	public String getHomepage() {
 		String home;
 		home = HomepageVariables.HEAD;
@@ -605,6 +605,7 @@ public class LightningView {
 
 		@Override
 		public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+
 			if (mAdBlock.isAd(url)) {
 				ByteArrayInputStream EMPTY = new ByteArrayInputStream("".getBytes());
 				return new WebResourceResponse("text/plain", "utf-8", EMPTY);
@@ -844,6 +845,7 @@ public class LightningView {
 
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+	          Log.e("light","haha URL:" + url);
 			if (mBrowserController.isIncognito()) {
 				return super.shouldOverrideUrlLoading(view, url);
 			}
