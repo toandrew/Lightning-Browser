@@ -176,5 +176,7 @@
     <string name="do_fling">您是否需要投射此文件？</string>
     <string name="action_fling">投射</string>
     
+    <string name="flint">投射</string>
+    
     <!-- <string name="exit">退出</string> -->
 </resources>

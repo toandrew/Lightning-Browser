@@ -238,4 +238,6 @@
     
     <string name="cmd_send_message">"Send Message"</string>
     <string name="bufferingtext">Buffering...</string>
+    
+    <string name="flint">Fling</string>
 </resources>

@@ -105,12 +105,29 @@ public class LightningView {
 		mWebView.setResourceClient(new XWalkResourceClient(mWebView){
 		    @Override
 		    public void onLoadFinished(XWalkView view, String url) {
-		        super.onLoadFinished(view, url);    
+		        super.onLoadFinished(view, url);
+		        
+	            if (view.isShown()) {
+	                view.invalidate();
+	            }
+	            if (view.getTitle() == null || view.getTitle().isEmpty()) {
+	                mTitle.setTitle(mActivity.getString(R.string.untitled));
+	            } else {
+	                mTitle.setTitle(view.getTitle());
+	            }
+	            mBrowserController.update();
 		    }   
 		    
 		    @Override
 		    public void onLoadStarted(XWalkView view, String url) {
 		        super.onLoadStarted(view, url); 
+		        
+		          if (isShown()) {
+		                mBrowserController.updateUrl(url);
+		                mBrowserController.showActionBar();
+		            }
+		            mTitle.setFavicon(mWebpageBitmap);
+		            mBrowserController.update();
 		    }
 		    
             @Override
@@ -625,6 +642,10 @@ public class LightningView {
 	}
 
 	public String getTitle() {
+	    if (mWebView!= null) {
+	        return mWebView.getTitle();
+	    }
+	    
 		return mTitle.getTitle();
 	}
 

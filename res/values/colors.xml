@@ -12,4 +12,9 @@
     <color name="gray_list_bg">#0d000000</color>
     <color name="dark_text">#3f3f3f</color>
 
+
+  <color name="mediacontroller_bg_pressed">#ff53c1bd</color>
+  <color name="transparent">#00000000</color>
+  <color name="mediacontroller_bg">#99000000</color>
+
 </resources>
