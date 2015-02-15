@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.xwalk.core.XWalkView;
+
 public class IntentUtils {
 
 	private Activity mActivity;
@@ -33,7 +35,7 @@ public class IntentUtils {
 		mActivity = mController.getActivity();
 	}
 
-	public boolean startActivityForUrl(WebView tab, String url) {
+	public boolean startActivityForUrl(XWalkView tab, String url) {
 		Intent intent;
 		try {
 			intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);

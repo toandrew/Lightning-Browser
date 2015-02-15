@@ -782,14 +782,14 @@ public class BrowserActivity extends Activity implements BrowserController {
 		up.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mCurrentView.getWebView().findNext(false);
+//				mCurrentView.getWebView().findNext(false);
 			}
 		});
 		ImageButton down = (ImageButton) findViewById(R.id.button_back);
 		down.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mCurrentView.getWebView().findNext(true);
+//				mCurrentView.getWebView().findNext(true);
 			}
 		});
 
@@ -797,7 +797,7 @@ public class BrowserActivity extends Activity implements BrowserController {
 		quit.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mCurrentView.getWebView().clearMatches();
+//				mCurrentView.getWebView().clearMatches();
 				bar.setVisibility(View.GONE);
 			}
 		});
@@ -927,7 +927,7 @@ public class BrowserActivity extends Activity implements BrowserController {
 						if (mCurrentView != null) {
 							if (mCurrentView.getUrl().startsWith(Constants.FILE)
 									&& mCurrentView.getUrl().endsWith("bookmarks.html")) {
-								openBookmarkPage(mCurrentView.getWebView());
+								//openBookmarkPage(mCurrentView.getWebView());
 							}
 						}
 					}
@@ -1011,8 +1011,9 @@ public class BrowserActivity extends Activity implements BrowserController {
 
 	@Override
 	public void closeEmptyTab() {
-		if (mCurrentView != null && mCurrentView.getWebView().copyBackForwardList().getSize() == 0) {
-			closeCurrentTab();
+//		if (mCurrentView != null && mCurrentView.getWebView().copyBackForwardList().getSize() == 0) {
+	    if (mCurrentView != null && mCurrentView.getWebView().getNavigationHistory().size() == 0) {
+	        closeCurrentTab();
 		}
 	}
 
@@ -1656,7 +1657,6 @@ public class BrowserActivity extends Activity implements BrowserController {
 
 	@Override
 	public void updateProgress(int n) {
-
 		if (n > mProgressBar.getProgress()) {
 			ObjectAnimator animator = ObjectAnimator.ofInt(mProgressBar, "progress", n);
 			animator.setDuration(200);
@@ -1904,7 +1904,7 @@ public class BrowserActivity extends Activity implements BrowserController {
 		if (click != null) {
 			click.setTarget(mClickHandler);
 		}
-		mCurrentView.getWebView().requestFocusNodeHref(click);
+		//mCurrentView.getWebView().requestFocusNodeHref(click);
 	}
 
 	@Override
@@ -2058,7 +2058,7 @@ public class BrowserActivity extends Activity implements BrowserController {
 		}
 		newTab("", true);
 		WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-		transport.setWebView(mCurrentView.getWebView());
+//		transport.setWebView(mCurrentView.getWebView());
 		resultMsg.sendToTarget();
 	}
 
@@ -2098,185 +2098,185 @@ public class BrowserActivity extends Activity implements BrowserController {
 	 * thingy, if it is null, this method tries to deal with it and find a workaround
 	 */
 	public void longClickPage(final String url) {
-		HitTestResult result = null;
-		if (mCurrentView.getWebView() != null) {
-			result = mCurrentView.getWebView().getHitTestResult();
-		}
-		if (url != null) {
-			if (result != null) {
-				if (result.getType() == HitTestResult.SRC_IMAGE_ANCHOR_TYPE
-						|| result.getType() == HitTestResult.IMAGE_TYPE) {
-					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							switch (which) {
-								case DialogInterface.BUTTON_POSITIVE:
-									newTab(url, false);
-									break;
-
-								case DialogInterface.BUTTON_NEGATIVE:
-									mCurrentView.loadUrl(url);
-									break;
-
-								case DialogInterface.BUTTON_NEUTRAL:
-									if (API > 8) {
-										Utils.downloadFile(mActivity, url,
-												mCurrentView.getUserAgent(), "attachment", false);
-									}
-									break;
-							}
-						}
-					};
-
-					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
-					builder.setTitle(url.replace(Constants.HTTP, ""))
-							.setMessage(getResources().getString(R.string.dialog_image))
-							.setPositiveButton(getResources().getString(R.string.action_new_tab),
-									dialogClickListener)
-							.setNegativeButton(getResources().getString(R.string.action_open),
-									dialogClickListener)
-							.setNeutralButton(getResources().getString(R.string.action_download),
-									dialogClickListener).show();
-
-				} else {
-					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							switch (which) {
-								case DialogInterface.BUTTON_POSITIVE:
-									newTab(url, false);
-									break;
-
-								case DialogInterface.BUTTON_NEGATIVE:
-									mCurrentView.loadUrl(url);
-									break;
-
-								case DialogInterface.BUTTON_NEUTRAL:
-									ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-									ClipData clip = ClipData.newPlainText("label", url);
-									clipboard.setPrimaryClip(clip);
-									break;
-							}
-						}
-					};
-
-					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
-					builder.setTitle(url)
-							.setMessage(getResources().getString(R.string.dialog_link))
-							.setPositiveButton(getResources().getString(R.string.action_new_tab),
-									dialogClickListener)
-							.setNegativeButton(getResources().getString(R.string.action_open),
-									dialogClickListener)
-							.setNeutralButton(getResources().getString(R.string.action_copy),
-									dialogClickListener).show();
-				}
-			} else {
-				DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						switch (which) {
-							case DialogInterface.BUTTON_POSITIVE:
-								newTab(url, false);
-								break;
-
-							case DialogInterface.BUTTON_NEGATIVE:
-								mCurrentView.loadUrl(url);
-								break;
-
-							case DialogInterface.BUTTON_NEUTRAL:
-								ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-								ClipData clip = ClipData.newPlainText("label", url);
-								clipboard.setPrimaryClip(clip);
-
-								break;
-						}
-					}
-				};
-
-				AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
-				builder.setTitle(url)
-						.setMessage(getResources().getString(R.string.dialog_link))
-						.setPositiveButton(getResources().getString(R.string.action_new_tab),
-								dialogClickListener)
-						.setNegativeButton(getResources().getString(R.string.action_open),
-								dialogClickListener)
-						.setNeutralButton(getResources().getString(R.string.action_copy),
-								dialogClickListener).show();
-			}
-		} else if (result != null) {
-			if (result.getExtra() != null) {
-				final String newUrl = result.getExtra();
-				if (result.getType() == HitTestResult.SRC_IMAGE_ANCHOR_TYPE
-						|| result.getType() == HitTestResult.IMAGE_TYPE) {
-					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							switch (which) {
-								case DialogInterface.BUTTON_POSITIVE:
-									newTab(newUrl, false);
-									break;
-
-								case DialogInterface.BUTTON_NEGATIVE:
-									mCurrentView.loadUrl(newUrl);
-									break;
-
-								case DialogInterface.BUTTON_NEUTRAL:
-									if (API > 8) {
-										Utils.downloadFile(mActivity, newUrl,
-												mCurrentView.getUserAgent(), "attachment", false);
-									}
-									break;
-							}
-						}
-					};
-
-					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
-					builder.setTitle(newUrl.replace(Constants.HTTP, ""))
-							.setMessage(getResources().getString(R.string.dialog_image))
-							.setPositiveButton(getResources().getString(R.string.action_new_tab),
-									dialogClickListener)
-							.setNegativeButton(getResources().getString(R.string.action_open),
-									dialogClickListener)
-							.setNeutralButton(getResources().getString(R.string.action_download),
-									dialogClickListener).show();
-
-				} else {
-					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							switch (which) {
-								case DialogInterface.BUTTON_POSITIVE:
-									newTab(newUrl, false);
-									break;
-
-								case DialogInterface.BUTTON_NEGATIVE:
-									mCurrentView.loadUrl(newUrl);
-									break;
-
-								case DialogInterface.BUTTON_NEUTRAL:
-									ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-									ClipData clip = ClipData.newPlainText("label", newUrl);
-									clipboard.setPrimaryClip(clip);
-
-									break;
-							}
-						}
-					};
-
-					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
-					builder.setTitle(newUrl)
-							.setMessage(getResources().getString(R.string.dialog_link))
-							.setPositiveButton(getResources().getString(R.string.action_new_tab),
-									dialogClickListener)
-							.setNegativeButton(getResources().getString(R.string.action_open),
-									dialogClickListener)
-							.setNeutralButton(getResources().getString(R.string.action_copy),
-									dialogClickListener).show();
-				}
-
-			}
-
-		}
+//		HitTestResult result = null;
+//		if (mCurrentView.getWebView() != null) {
+//			result = mCurrentView.getWebView().getHitTestResult();
+//		}
+//		if (url != null) {
+//			if (result != null) {
+//				if (result.getType() == HitTestResult.SRC_IMAGE_ANCHOR_TYPE
+//						|| result.getType() == HitTestResult.IMAGE_TYPE) {
+//					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//						@Override
+//						public void onClick(DialogInterface dialog, int which) {
+//							switch (which) {
+//								case DialogInterface.BUTTON_POSITIVE:
+//									newTab(url, false);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEGATIVE:
+//									mCurrentView.loadUrl(url);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEUTRAL:
+//									if (API > 8) {
+//										Utils.downloadFile(mActivity, url,
+//												mCurrentView.getUserAgent(), "attachment", false);
+//									}
+//									break;
+//							}
+//						}
+//					};
+//
+//					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
+//					builder.setTitle(url.replace(Constants.HTTP, ""))
+//							.setMessage(getResources().getString(R.string.dialog_image))
+//							.setPositiveButton(getResources().getString(R.string.action_new_tab),
+//									dialogClickListener)
+//							.setNegativeButton(getResources().getString(R.string.action_open),
+//									dialogClickListener)
+//							.setNeutralButton(getResources().getString(R.string.action_download),
+//									dialogClickListener).show();
+//
+//				} else {
+//					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//						@Override
+//						public void onClick(DialogInterface dialog, int which) {
+//							switch (which) {
+//								case DialogInterface.BUTTON_POSITIVE:
+//									newTab(url, false);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEGATIVE:
+//									mCurrentView.loadUrl(url);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEUTRAL:
+//									ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+//									ClipData clip = ClipData.newPlainText("label", url);
+//									clipboard.setPrimaryClip(clip);
+//									break;
+//							}
+//						}
+//					};
+//
+//					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
+//					builder.setTitle(url)
+//							.setMessage(getResources().getString(R.string.dialog_link))
+//							.setPositiveButton(getResources().getString(R.string.action_new_tab),
+//									dialogClickListener)
+//							.setNegativeButton(getResources().getString(R.string.action_open),
+//									dialogClickListener)
+//							.setNeutralButton(getResources().getString(R.string.action_copy),
+//									dialogClickListener).show();
+//				}
+//			} else {
+//				DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//					@Override
+//					public void onClick(DialogInterface dialog, int which) {
+//						switch (which) {
+//							case DialogInterface.BUTTON_POSITIVE:
+//								newTab(url, false);
+//								break;
+//
+//							case DialogInterface.BUTTON_NEGATIVE:
+//								mCurrentView.loadUrl(url);
+//								break;
+//
+//							case DialogInterface.BUTTON_NEUTRAL:
+//								ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+//								ClipData clip = ClipData.newPlainText("label", url);
+//								clipboard.setPrimaryClip(clip);
+//
+//								break;
+//						}
+//					}
+//				};
+//
+//				AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
+//				builder.setTitle(url)
+//						.setMessage(getResources().getString(R.string.dialog_link))
+//						.setPositiveButton(getResources().getString(R.string.action_new_tab),
+//								dialogClickListener)
+//						.setNegativeButton(getResources().getString(R.string.action_open),
+//								dialogClickListener)
+//						.setNeutralButton(getResources().getString(R.string.action_copy),
+//								dialogClickListener).show();
+//			}
+//		} else if (result != null) {
+//			if (result.getExtra() != null) {
+//				final String newUrl = result.getExtra();
+//				if (result.getType() == HitTestResult.SRC_IMAGE_ANCHOR_TYPE
+//						|| result.getType() == HitTestResult.IMAGE_TYPE) {
+//					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//						@Override
+//						public void onClick(DialogInterface dialog, int which) {
+//							switch (which) {
+//								case DialogInterface.BUTTON_POSITIVE:
+//									newTab(newUrl, false);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEGATIVE:
+//									mCurrentView.loadUrl(newUrl);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEUTRAL:
+//									if (API > 8) {
+//										Utils.downloadFile(mActivity, newUrl,
+//												mCurrentView.getUserAgent(), "attachment", false);
+//									}
+//									break;
+//							}
+//						}
+//					};
+//
+//					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
+//					builder.setTitle(newUrl.replace(Constants.HTTP, ""))
+//							.setMessage(getResources().getString(R.string.dialog_image))
+//							.setPositiveButton(getResources().getString(R.string.action_new_tab),
+//									dialogClickListener)
+//							.setNegativeButton(getResources().getString(R.string.action_open),
+//									dialogClickListener)
+//							.setNeutralButton(getResources().getString(R.string.action_download),
+//									dialogClickListener).show();
+//
+//				} else {
+//					DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+//						@Override
+//						public void onClick(DialogInterface dialog, int which) {
+//							switch (which) {
+//								case DialogInterface.BUTTON_POSITIVE:
+//									newTab(newUrl, false);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEGATIVE:
+//									mCurrentView.loadUrl(newUrl);
+//									break;
+//
+//								case DialogInterface.BUTTON_NEUTRAL:
+//									ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+//									ClipData clip = ClipData.newPlainText("label", newUrl);
+//									clipboard.setPrimaryClip(clip);
+//
+//									break;
+//							}
+//						}
+//					};
+//
+//					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
+//					builder.setTitle(newUrl)
+//							.setMessage(getResources().getString(R.string.dialog_link))
+//							.setPositiveButton(getResources().getString(R.string.action_new_tab),
+//									dialogClickListener)
+//							.setNegativeButton(getResources().getString(R.string.action_open),
+//									dialogClickListener)
+//							.setNeutralButton(getResources().getString(R.string.action_copy),
+//									dialogClickListener).show();
+//				}
+//
+//			}
+//
+//		}
 
 	}
 

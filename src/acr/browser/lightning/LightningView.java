@@ -30,15 +30,20 @@ import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.PluginState;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
 import org.apache.http.util.ByteArrayBuffer;
+import org.xwalk.core.XWalkResourceClient;
+import org.xwalk.core.XWalkView;
+import org.xwalk.core.XWalkNavigationHistory;
 
 import java.io.*;
 import java.net.*;
 
 public class LightningView {
-
+    private static final String TAG ="LightningView";
+    
 	private Title mTitle;
-	private WebView mWebView;
+	private XWalkView mWebView;
 	private BrowserController mBrowserController;
 	private GestureDetector mGestureDetector;
 	private Activity mActivity;
@@ -57,13 +62,16 @@ public class LightningView {
 			0, 0, -1.0f, 0, 255, // blue
 			0, 0, 0, 1.0f, 0 // alpha
 	};
+	
+	
+	private int mCurrentLoadProgress = 0;
 
 	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	public LightningView(Activity activity, String url) {
 
 		mActivity = activity;
-		mWebView = new WebView(activity);
+		mWebView = new XWalkView(activity, activity);
 		mTitle = new Title(activity);
 		mAdBlock = new AdBlock(activity);
 		activity.getPackageName();
@@ -94,9 +102,36 @@ public class LightningView {
 		mWebView.setScrollbarFadingEnabled(true);
 		mWebView.setSaveEnabled(true);
 
+		mWebView.setResourceClient(new XWalkResourceClient(mWebView){
+		    @Override
+		    public void onLoadFinished(XWalkView view, String url) {
+		        super.onLoadFinished(view, url);    
+		    }   
+		    
+		    @Override
+		    public void onLoadStarted(XWalkView view, String url) {
+		        super.onLoadStarted(view, url); 
+		    }
+		    
+            @Override
+            public void onProgressChanged(XWalkView view, int progressInPercent) {
+                super.onProgressChanged(view, progressInPercent); 
+                
+                mCurrentLoadProgress = progressInPercent;
+                
+                if (isShown()) {
+                    mBrowserController.updateProgress(mCurrentLoadProgress);
+                }
+                
+                Log.e(TAG, "onProgressChanged:" + mCurrentLoadProgress + "[" + isShown() + "]");
+            }
+		});
+		
+		/*
 		mWebView.setWebChromeClient(new LightningChromeClient(activity));
 		mWebView.setWebViewClient(new LightningWebClient(activity));
 		mWebView.setDownloadListener(new LightningDownloadListener(activity));
+		*/
 		mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
 		mWebView.setOnTouchListener(new OnTouchListener() {
 
@@ -129,25 +164,26 @@ public class LightningView {
 			}
 
 		});
-		mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
-		mSettings = mWebView.getSettings();
-		initializeSettings(mWebView.getSettings(), activity);
+//		mDefaultUserAgent = mWebView.getSettings().getUserAgentString();
+//		mSettings = mWebView.getSettings();
+//		initializeSettings(mWebView.getSettings(), activity);
 		initializePreferences(activity);
 
 		if (url != null) {
 			if (!url.trim().isEmpty()) {
-				mWebView.loadUrl(url);
+				mWebView.load(url, null);
 			} else {
 				// don't load anything, the user is looking for a blank tab
 			}
 		} else {
-			if (mHomepage.startsWith("about:home")) {
-				mWebView.loadUrl(getHomepage());
-			} else if (mHomepage.startsWith("about:bookmarks")) {
-				mBrowserController.openBookmarkPage(mWebView);
-			} else {
-				mWebView.loadUrl(mHomepage);
-			}
+		    mWebView.load("file:///android_asset/sites/index.html", null);
+//			if (mHomepage.startsWith("about:home")) {
+//				mWebView.load(getHomepage(), null);
+//			} else if (mHomepage.startsWith("about:bookmarks")) {
+//				//mBrowserController.openBookmarkPage(mWebView);
+//			} else {
+//				mWebView.load(mHomepage, null);
+//			}
 		}
 	}
 	
@@ -256,100 +292,100 @@ public class LightningView {
 	@SuppressWarnings("deprecation")
 	@SuppressLint({ "NewApi", "SetJavaScriptEnabled" })
 	public synchronized void initializePreferences(Context context) {
-		mPreferences = context.getSharedPreferences(PreferenceConstants.PREFERENCES, 0);
-		mHomepage = mPreferences.getString(PreferenceConstants.HOMEPAGE, Constants.HOMEPAGE);
-		mAdBlock.updatePreference();
-		if (mSettings == null && mWebView != null) {
-			mSettings = mWebView.getSettings();
-		} else if (mSettings == null) {
-			return;
-		}
-
-		setColorMode(mPreferences.getInt(PreferenceConstants.RENDERING_MODE, 0));
-
-		mSettings.setGeolocationEnabled(mPreferences
-				.getBoolean(PreferenceConstants.LOCATION, false));
-		if (API < 19) {
-			switch (mPreferences.getInt(PreferenceConstants.ADOBE_FLASH_SUPPORT, 0)) {
-				case 0:
-					mSettings.setPluginState(PluginState.OFF);
-					break;
-				case 1:
-					mSettings.setPluginState(PluginState.ON_DEMAND);
-					break;
-				case 2:
-					mSettings.setPluginState(PluginState.ON);
-					break;
-				default:
-					break;
-			}
-		}
-
-		switch (mPreferences.getInt(PreferenceConstants.USER_AGENT, 1)) {
-			case 1:
-				if (API > 16) {
-					mSettings.setUserAgentString(WebSettings.getDefaultUserAgent(context));
-				} else {
-					mSettings.setUserAgentString(mDefaultUserAgent);
-				}
-				break;
-			case 2:
-				mSettings.setUserAgentString(Constants.DESKTOP_USER_AGENT);
-				break;
-			case 3:
-				mSettings.setUserAgentString(Constants.MOBILE_USER_AGENT);
-				break;
-			case 4:
-				mSettings.setUserAgentString(mPreferences.getString(
-						PreferenceConstants.USER_AGENT_STRING, mDefaultUserAgent));
-				break;
-		}
-
-		if (mPreferences.getBoolean(PreferenceConstants.SAVE_PASSWORDS, false)) {
-			if (API < 18) {
-				mSettings.setSavePassword(true);
-			}
-			mSettings.setSaveFormData(true);
-		}
-
-		if (mPreferences.getBoolean(PreferenceConstants.JAVASCRIPT, true)) {
-			mSettings.setJavaScriptEnabled(true);
-			mSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-		}
-
-		if (mPreferences.getBoolean(PreferenceConstants.TEXT_REFLOW, false)) {
-			mSettings.setLayoutAlgorithm(LayoutAlgorithm.NARROW_COLUMNS);
-		} else if (API >= android.os.Build.VERSION_CODES.KITKAT) {
-			mSettings.setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
-		} else {
-			mSettings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
-		}
-
-		mSettings.setBlockNetworkImage(mPreferences.getBoolean(PreferenceConstants.BLOCK_IMAGES,
-				false));
-		mSettings.setSupportMultipleWindows(mPreferences.getBoolean(PreferenceConstants.POPUPS,
-				true));
-		mSettings.setUseWideViewPort(mPreferences.getBoolean(PreferenceConstants.USE_WIDE_VIEWPORT,
-				true));
-		mSettings.setLoadWithOverviewMode(mPreferences.getBoolean(
-				PreferenceConstants.OVERVIEW_MODE, true));
-		switch (mPreferences.getInt(PreferenceConstants.TEXT_SIZE, 3)) {
-			case 1:
-				mSettings.setTextZoom(200);
-				break;
-			case 2:
-				mSettings.setTextZoom(150);
-				break;
-			case 3:
-				mSettings.setTextZoom(100);
-				break;
-			case 4:
-				mSettings.setTextZoom(75);
-				break;
-			case 5:
-				mSettings.setTextZoom(50);
-				break;
-		}
+//		mPreferences = context.getSharedPreferences(PreferenceConstants.PREFERENCES, 0);
+//		mHomepage = mPreferences.getString(PreferenceConstants.HOMEPAGE, Constants.HOMEPAGE);
+//		mAdBlock.updatePreference();
+//		if (mSettings == null && mWebView != null) {
+//			mSettings = mWebView.getSettings();
+//		} else if (mSettings == null) {
+//			return;
+//		}
+//
+//		setColorMode(mPreferences.getInt(PreferenceConstants.RENDERING_MODE, 0));
+//
+//		mSettings.setGeolocationEnabled(mPreferences
+//				.getBoolean(PreferenceConstants.LOCATION, false));
+//		if (API < 19) {
+//			switch (mPreferences.getInt(PreferenceConstants.ADOBE_FLASH_SUPPORT, 0)) {
+//				case 0:
+//					mSettings.setPluginState(PluginState.OFF);
+//					break;
+//				case 1:
+//					mSettings.setPluginState(PluginState.ON_DEMAND);
+//					break;
+//				case 2:
+//					mSettings.setPluginState(PluginState.ON);
+//					break;
+//				default:
+//					break;
+//			}
+//		}
+//
+//		switch (mPreferences.getInt(PreferenceConstants.USER_AGENT, 1)) {
+//			case 1:
+//				if (API > 16) {
+//					mSettings.setUserAgentString(WebSettings.getDefaultUserAgent(context));
+//				} else {
+//					mSettings.setUserAgentString(mDefaultUserAgent);
+//				}
+//				break;
+//			case 2:
+//				mSettings.setUserAgentString(Constants.DESKTOP_USER_AGENT);
+//				break;
+//			case 3:
+//				mSettings.setUserAgentString(Constants.MOBILE_USER_AGENT);
+//				break;
+//			case 4:
+//				mSettings.setUserAgentString(mPreferences.getString(
+//						PreferenceConstants.USER_AGENT_STRING, mDefaultUserAgent));
+//				break;
+//		}
+//
+//		if (mPreferences.getBoolean(PreferenceConstants.SAVE_PASSWORDS, false)) {
+//			if (API < 18) {
+//				mSettings.setSavePassword(true);
+//			}
+//			mSettings.setSaveFormData(true);
+//		}
+//
+//		if (mPreferences.getBoolean(PreferenceConstants.JAVASCRIPT, true)) {
+//			mSettings.setJavaScriptEnabled(true);
+//			mSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+//		}
+//
+//		if (mPreferences.getBoolean(PreferenceConstants.TEXT_REFLOW, false)) {
+//			mSettings.setLayoutAlgorithm(LayoutAlgorithm.NARROW_COLUMNS);
+//		} else if (API >= android.os.Build.VERSION_CODES.KITKAT) {
+//			mSettings.setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
+//		} else {
+//			mSettings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+//		}
+//
+//		mSettings.setBlockNetworkImage(mPreferences.getBoolean(PreferenceConstants.BLOCK_IMAGES,
+//				false));
+//		mSettings.setSupportMultipleWindows(mPreferences.getBoolean(PreferenceConstants.POPUPS,
+//				true));
+//		mSettings.setUseWideViewPort(mPreferences.getBoolean(PreferenceConstants.USE_WIDE_VIEWPORT,
+//				true));
+//		mSettings.setLoadWithOverviewMode(mPreferences.getBoolean(
+//				PreferenceConstants.OVERVIEW_MODE, true));
+//		switch (mPreferences.getInt(PreferenceConstants.TEXT_SIZE, 3)) {
+//			case 1:
+//				mSettings.setTextZoom(200);
+//				break;
+//			case 2:
+//				mSettings.setTextZoom(150);
+//				break;
+//			case 3:
+//				mSettings.setTextZoom(100);
+//				break;
+//			case 4:
+//				mSettings.setTextZoom(75);
+//				break;
+//			case 5:
+//				mSettings.setTextZoom(50);
+//				break;
+//		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -391,13 +427,15 @@ public class LightningView {
 
 	public synchronized void onPause() {
 		if (mWebView != null) {
-			mWebView.onPause();
+		    mWebView.pauseTimers();
+		    mWebView.onHide();
 		}
 	}
 
 	public synchronized void onResume() {
 		if (mWebView != null) {
-			mWebView.onResume();
+		    mWebView.resumeTimers();
+		    mWebView.onShow();
 		}
 	}
 
@@ -411,11 +449,13 @@ public class LightningView {
 	}
 
 	public int getProgress() {
-		if (mWebView != null) {
-			return mWebView.getProgress();
-		} else {
-			return 100;
-		}
+	    Log.e(TAG, "getProgress: " + mCurrentLoadProgress);
+	    return mCurrentLoadProgress;
+//		if (mWebView != null) {
+//			//return mWebView.getNavigationHistory().
+//		} else {
+//			return 100;
+//		}
 	}
 
 	public synchronized void stopLoading() {
@@ -502,20 +542,20 @@ public class LightningView {
 
 	public synchronized void reload() {
 		if (mWebView != null) {
-			mWebView.reload();
+			//mWebView.reload();
 		}
 	}
 
 	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	public synchronized void find(String text) {
-		if (mWebView != null) {
-			if (API > 16) {
-				mWebView.findAllAsync(text);
-			} else {
-				mWebView.findAll(text);
-			}
-		}
+//		if (mWebView != null) {
+//			if (API > 16) {
+//				mWebView.findAllAsync(text);
+//			} else {
+//				mWebView.findAll(text);
+//			}
+//		}
 	}
 
 	public Activity getActivity() {
@@ -525,45 +565,46 @@ public class LightningView {
 	public synchronized void onDestroy() {
 		if (mWebView != null) {
 			mWebView.stopLoading();
-			mWebView.onPause();
-			mWebView.clearHistory();
+//			mWebView.onPause();
+//			mWebView.clearHistory();
 			mWebView.setVisibility(View.GONE);
 			mWebView.removeAllViews();
 			mWebView.destroyDrawingCache();
-			// mWebView.destroy(); //this is causing the segfault
+			//mWebView.onDestroy();
 			mWebView = null;
 		}
 	}
 
 	public synchronized void goBack() {
 		if (mWebView != null) {
-			mWebView.goBack();
+		    mWebView.getNavigationHistory().navigate(XWalkNavigationHistory.Direction.BACKWARD, 1);
 		}
 	}
 
 	public String getUserAgent() {
-		if (mWebView != null) {
-			return mWebView.getSettings().getUserAgentString();
-		} else {
-			return "";
-		}
+	    return "";
+//		if (mWebView != null) {
+//			return mWebView.getSettings().getUserAgentString();
+//		} else {
+//			return "";
+//		}
 	}
 
 	public synchronized void goForward() {
 		if (mWebView != null) {
-			mWebView.goForward();
+		    mWebView.getNavigationHistory().navigate(XWalkNavigationHistory.Direction.FORWARD, 1);
 		}
 	}
 
 	public boolean canGoBack() {
-		return mWebView != null && mWebView.canGoBack();
+		return mWebView != null && mWebView.getNavigationHistory().canGoBack();
 	}
 
 	public boolean canGoForward() {
-		return mWebView != null && mWebView.canGoForward();
+		return mWebView != null && mWebView.getNavigationHistory().canGoForward();
 	}
 
-	public WebView getWebView() {
+	public XWalkView getWebView() {
 		return mWebView;
 	}
 
@@ -573,7 +614,7 @@ public class LightningView {
 
 	public synchronized void loadUrl(String url) {
 		if (mWebView != null) {
-			mWebView.loadUrl(url);
+			mWebView.load(url, null);
 		}
 	}
 
