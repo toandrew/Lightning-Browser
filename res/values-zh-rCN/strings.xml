@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Lightning</string>
+    <string name="app_name">Flint浏览器</string>
     <string name="drawer_open">打开导航抽屉</string>
     <string name="drawer_close">关闭导航抽屉</string>
     <string name="action_websearch">网页搜索</string>

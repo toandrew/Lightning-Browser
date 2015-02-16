@@ -3,9 +3,11 @@ package acr.browser.lightning;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.widget.Toast;
 
 public class MainActivity extends BrowserActivity {
 
@@ -66,8 +68,21 @@ public class MainActivity extends BrowserActivity {
 		return false;
 	}
 
+
+    long preQuitTime = 0;
+    
 	@Override
 	public void closeActivity() {
+        Log.e("MainActivity", "closeActivity!");
+        long currentTime = System.currentTimeMillis();
+        if (preQuitTime == 0 || Math.abs(currentTime - preQuitTime) > 1000) {
+            preQuitTime = System.currentTimeMillis();
+            Log.e("MainActivity", "confirm quit?");
+            Toast.makeText(MainActivity.this, "Press again to Quit!", Toast.LENGTH_SHORT).show();
+            
+            return;
+        }
+       
 		closeDrawers();
 		moveTaskToBack(true);
 	}

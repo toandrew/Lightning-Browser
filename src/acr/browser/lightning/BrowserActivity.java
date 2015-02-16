@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import tv.matchstick.flint.ApplicationMetadata;
@@ -764,6 +765,18 @@ public class BrowserActivity extends FragmentActivity implements
                 searchTheWeb(mSearch.getText().toString());
             }
         }
+        
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            if (mMediaPlayer != null && mMediaFlingBar != null && mMediaFlingBar.getVisibility() == View.VISIBLE) {
+                onVolumeChange(0.1);
+                return true;
+            }
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            if (mMediaPlayer != null && mMediaFlingBar != null && mMediaFlingBar.getVisibility() == View.VISIBLE) {
+                onVolumeChange(-0.1);
+                return true;
+            }
+        }
         return super.onKeyDown(keyCode, event);
     }
 
@@ -1390,6 +1403,7 @@ public class BrowserActivity extends FragmentActivity implements
 
     @Override
     public void onBackPressed() {
+        Log.e(TAG, "onBackPressed!");
         if (!mActionBar.isShowing()) {
             mActionBar.show();
         }
@@ -1399,14 +1413,16 @@ public class BrowserActivity extends FragmentActivity implements
             mDrawerLayout.closeDrawer(mDrawerRight);
         } else {
             if (mCurrentView != null) {
-                Log.i(Constants.TAG, "onBackPressed");
+                Log.e(TAG, "onBackPressed");
                 if (mCurrentView.canGoBack()) {
                     if (!mCurrentView.isShown()) {
                         onHideCustomView();
                     } else {
+                        Log.e(TAG, "goBack!");
                         mCurrentView.goBack();
                     }
                 } else {
+                    Log.e(TAG, "deleteTab!");
                     deleteTab(mDrawerListLeft.getCheckedItemPosition());
                 }
             } else {
@@ -2777,6 +2793,9 @@ public class BrowserActivity extends FragmentActivity implements
             public void run() {
                 Log.e(TAG, "show media cast control?![" + displays.size() + "]");
                 if (displays.size() > 0) {
+                    
+                    Toast.makeText(mContext, "Url: " + mCurrentVideoUrl , Toast.LENGTH_SHORT).show();
+                    
                     MediaMetadata metadata = new MediaMetadata(
                             MediaMetadata.MEDIA_TYPE_MOVIE);
                     mSelectedMedia = new MediaInfo.Builder(mCurrentVideoUrl)
