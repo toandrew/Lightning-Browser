@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 
 import org.apache.http.util.ByteArrayBuffer;
 import org.xwalk.core.XWalkResourceClient;
+import org.xwalk.core.XWalkUIClient;
 import org.xwalk.core.XWalkView;
 import org.xwalk.core.XWalkNavigationHistory;
 import org.xwalk.core.internal.XWalkSettings;
@@ -50,7 +51,7 @@ public class LightningView {
     private BrowserController mBrowserController;
     private GestureDetector mGestureDetector;
     private Activity mActivity;
-    //private WebSettings mSettings;
+    // private WebSettings mSettings;
     private static int API = android.os.Build.VERSION.SDK_INT;
     private static String mHomepage;
     private static String mDefaultUserAgent;
@@ -68,6 +69,12 @@ public class LightningView {
 
     private int mCurrentLoadProgress = 0;
 
+    class MyUIClient extends XWalkUIClient {
+        MyUIClient(XWalkView view) {
+            super(view);
+        }
+    }
+    
     @SuppressWarnings("deprecation")
     @SuppressLint("NewApi")
     public LightningView(Activity activity, String url) {
@@ -108,7 +115,7 @@ public class LightningView {
         mWebView.setAlwaysDrawnWithCacheEnabled(true);
         mWebView.setScrollbarFadingEnabled(true);
         mWebView.setSaveEnabled(true);
-
+        
         mWebView.setResourceClient(new XWalkResourceClient(mWebView) {
             @Override
             public void onLoadFinished(XWalkView view, String url) {
@@ -147,7 +154,46 @@ public class LightningView {
                     mBrowserController.updateProgress(mCurrentLoadProgress);
                 }
             }
+            
+            @Override
+            public boolean shouldOverrideUrlLoading(XWalkView view,
+                    java.lang.String url) {
+                Log.e("light", "haha URL:" + url);
+                if (mBrowserController.isIncognito()) {
+                    return super.shouldOverrideUrlLoading(view, url);
+                }
+                if (url.startsWith("about:")) {
+                    return super.shouldOverrideUrlLoading(view, url);
+                }
+                if (url.contains("mailto:")) {
+                    MailTo mailTo = MailTo.parse(url);
+                    Intent i = Utils.newEmailIntent(mActivity, mailTo.getTo(),
+                            mailTo.getSubject(), mailTo.getBody(),
+                            mailTo.getCc());
+                    mActivity.startActivity(i);
+                    view.reload(XWalkView.RELOAD_NORMAL);
+                    return true;
+                } else if (url.startsWith("intent://")) {
+                    Intent intent = null;
+                    try {
+                        intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                    } catch (URISyntaxException ex) {
+                        return false;
+                    }
+                    if (intent != null) {
+                        try {
+                            mActivity.startActivity(intent);
+                        } catch (ActivityNotFoundException e) {
+                            Log.e(Constants.TAG, "ActivityNotFoundException");
+                        }
+                        return true;
+                    }
+                }
+                return mIntentUtils.startActivityForUrl(mWebView, url);
+            }
         });
+        
+        mWebView.setUIClient(new MyUIClient(mWebView));
         
         /*
          * mWebView.setWebChromeClient(new LightningChromeClient(activity));
@@ -188,9 +234,9 @@ public class LightningView {
             }
 
         });
-        
+
         mDefaultUserAgent = getWebViewUserAgent(mWebView);
-        
+
         // mSettings = mWebView.getSettings();
         // initializeSettings(mWebView.getSettings(), activity);
         initializePreferences(activity);
@@ -318,43 +364,47 @@ public class LightningView {
     @SuppressWarnings("deprecation")
     @SuppressLint({ "NewApi", "SetJavaScriptEnabled" })
     public synchronized void initializePreferences(Context context) {
+        
+        setMultiWindowMode(mWebView, false);
+        
         mPreferences = context.getSharedPreferences(
                 PreferenceConstants.PREFERENCES, 0);
         mHomepage = mPreferences.getString(PreferenceConstants.HOMEPAGE,
                 Constants.HOMEPAGE);
         mAdBlock.updatePreference();
-//        if (mSettings == null && mWebView != null) {
-//            mSettings = mWebView.getSettings();
-//        } else if (mSettings == null) {
-//            return;
-//        }
-//
-//        setColorMode(mPreferences.getInt(PreferenceConstants.RENDERING_MODE, 0));
-//
-//        mSettings.setGeolocationEnabled(mPreferences.getBoolean(
-//                PreferenceConstants.LOCATION, false));
-//        if (API < 19) {
-//            switch (mPreferences.getInt(
-//                    PreferenceConstants.ADOBE_FLASH_SUPPORT, 0)) {
-//            case 0:
-//                mSettings.setPluginState(PluginState.OFF);
-//                break;
-//            case 1:
-//                mSettings.setPluginState(PluginState.ON_DEMAND);
-//                break;
-//            case 2:
-//                mSettings.setPluginState(PluginState.ON);
-//                break;
-//            default:
-//                break;
-//            }
-//        }
+        // if (mSettings == null && mWebView != null) {
+        // mSettings = mWebView.getSettings();
+        // } else if (mSettings == null) {
+        // return;
+        // }
+        //
+        // setColorMode(mPreferences.getInt(PreferenceConstants.RENDERING_MODE,
+        // 0));
+        //
+        // mSettings.setGeolocationEnabled(mPreferences.getBoolean(
+        // PreferenceConstants.LOCATION, false));
+        // if (API < 19) {
+        // switch (mPreferences.getInt(
+        // PreferenceConstants.ADOBE_FLASH_SUPPORT, 0)) {
+        // case 0:
+        // mSettings.setPluginState(PluginState.OFF);
+        // break;
+        // case 1:
+        // mSettings.setPluginState(PluginState.ON_DEMAND);
+        // break;
+        // case 2:
+        // mSettings.setPluginState(PluginState.ON);
+        // break;
+        // default:
+        // break;
+        // }
+        // }
 
         switch (mPreferences.getInt(PreferenceConstants.USER_AGENT, 1)) {
         case 1:
             if (API > 16) {
-                setWebViewUserAgent(mWebView, WebSettings
-                      .getDefaultUserAgent(context));
+                setWebViewUserAgent(mWebView,
+                        WebSettings.getDefaultUserAgent(context));
             } else {
                 setWebViewUserAgent(mWebView, mDefaultUserAgent);
             }
@@ -371,62 +421,64 @@ public class LightningView {
         case 5:
             setWebViewUserAgent(mWebView, Constants.IPHONE_USER_AGENT);
             break;
-            
+
         case 6:
             setWebViewUserAgent(mWebView, Constants.ANDROID_TABLET_USER_AGENT);
             break;
-            
+
         case 7:
             setWebViewUserAgent(mWebView, mPreferences.getString(
-                  PreferenceConstants.USER_AGENT_STRING, mDefaultUserAgent));
+                    PreferenceConstants.USER_AGENT_STRING, mDefaultUserAgent));
             break;
         }
 
-//        if (mPreferences.getBoolean(PreferenceConstants.SAVE_PASSWORDS, false)) {
-//            if (API < 18) {
-//                mSettings.setSavePassword(true);
-//            }
-//            mSettings.setSaveFormData(true);
-//        }
-//
-//        if (mPreferences.getBoolean(PreferenceConstants.JAVASCRIPT, true)) {
-//            mSettings.setJavaScriptEnabled(true);
-//            mSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-//        }
-//
-//        if (mPreferences.getBoolean(PreferenceConstants.TEXT_REFLOW, false)) {
-//            mSettings.setLayoutAlgorithm(LayoutAlgorithm.NARROW_COLUMNS);
-//        } else if (API >= android.os.Build.VERSION_CODES.KITKAT) {
-//            mSettings.setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
-//        } else {
-//            mSettings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
-//        }
-//
-//        mSettings.setBlockNetworkImage(mPreferences.getBoolean(
-//                PreferenceConstants.BLOCK_IMAGES, false));
-//        mSettings.setSupportMultipleWindows(mPreferences.getBoolean(
-//                PreferenceConstants.POPUPS, true));
-//        mSettings.setUseWideViewPort(mPreferences.getBoolean(
-//                PreferenceConstants.USE_WIDE_VIEWPORT, true));
-//        mSettings.setLoadWithOverviewMode(mPreferences.getBoolean(
-//                PreferenceConstants.OVERVIEW_MODE, true));
-//        switch (mPreferences.getInt(PreferenceConstants.TEXT_SIZE, 3)) {
-//        case 1:
-//            mSettings.setTextZoom(200);
-//            break;
-//        case 2:
-//            mSettings.setTextZoom(150);
-//            break;
-//        case 3:
-//            mSettings.setTextZoom(100);
-//            break;
-//        case 4:
-//            mSettings.setTextZoom(75);
-//            break;
-//        case 5:
-//            mSettings.setTextZoom(50);
-//            break;
-//        }
+        // if (mPreferences.getBoolean(PreferenceConstants.SAVE_PASSWORDS,
+        // false)) {
+        // if (API < 18) {
+        // mSettings.setSavePassword(true);
+        // }
+        // mSettings.setSaveFormData(true);
+        // }
+        //
+        // if (mPreferences.getBoolean(PreferenceConstants.JAVASCRIPT, true)) {
+        // mSettings.setJavaScriptEnabled(true);
+        // mSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        // }
+        //
+        // if (mPreferences.getBoolean(PreferenceConstants.TEXT_REFLOW, false))
+        // {
+        // mSettings.setLayoutAlgorithm(LayoutAlgorithm.NARROW_COLUMNS);
+        // } else if (API >= android.os.Build.VERSION_CODES.KITKAT) {
+        // mSettings.setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
+        // } else {
+        // mSettings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+        // }
+        //
+        // mSettings.setBlockNetworkImage(mPreferences.getBoolean(
+        // PreferenceConstants.BLOCK_IMAGES, false));
+        // mSettings.setSupportMultipleWindows(mPreferences.getBoolean(
+        // PreferenceConstants.POPUPS, true));
+        // mSettings.setUseWideViewPort(mPreferences.getBoolean(
+        // PreferenceConstants.USE_WIDE_VIEWPORT, true));
+        // mSettings.setLoadWithOverviewMode(mPreferences.getBoolean(
+        // PreferenceConstants.OVERVIEW_MODE, true));
+        // switch (mPreferences.getInt(PreferenceConstants.TEXT_SIZE, 3)) {
+        // case 1:
+        // mSettings.setTextZoom(200);
+        // break;
+        // case 2:
+        // mSettings.setTextZoom(150);
+        // break;
+        // case 3:
+        // mSettings.setTextZoom(100);
+        // break;
+        // case 4:
+        // mSettings.setTextZoom(75);
+        // break;
+        // case 5:
+        // mSettings.setTextZoom(50);
+        // break;
+        // }
     }
 
     @SuppressWarnings("deprecation")
@@ -680,8 +732,8 @@ public class LightningView {
     public String getUrl() {
         if (mWebView != null) {
             return mWebView.getUrl();
-        } 
-        
+        }
+
         return null;
     }
 
@@ -733,8 +785,8 @@ public class LightningView {
                 HttpURLConnection conn = (HttpURLConnection) uURl
                         .openConnection(proxy);
                 conn.setInstanceFollowRedirects(true);
-//                conn.setRequestProperty("User-Agent",
-//                        mSettings.getUserAgentString());
+                // conn.setRequestProperty("User-Agent",
+                // mSettings.getUserAgentString());
 
                 // conn.setRequestProperty("Transfer-Encoding", "chunked");
                 // conn.setUseCaches(false);
@@ -962,6 +1014,12 @@ public class LightningView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.e("light", "haha URL:" + url);
+            if (url.startsWith("file:")) {
+                return false;
+            }
+            return true;
+            
+            /*
             if (mBrowserController.isIncognito()) {
                 return super.shouldOverrideUrlLoading(view, url);
             }
@@ -992,6 +1050,7 @@ public class LightningView {
                 }
             }
             return mIntentUtils.startActivityForUrl(mWebView, url);
+            */
         }
     }
 
@@ -1255,7 +1314,7 @@ public class LightningView {
             e.printStackTrace();
         }
     }
-    
+
     private String getWebViewUserAgent(XWalkView webView) {
         try {
             Method ___getBridge = XWalkView.class
@@ -1269,7 +1328,23 @@ public class LightningView {
             // Could not set user agent
             e.printStackTrace();
         }
-        
+
         return null;
+    }
+    
+    private void setMultiWindowMode(XWalkView webView, boolean flag) {
+        Log.e(TAG, "setMultiWindowMode: " + flag);
+        try {
+            Method ___getBridge = XWalkView.class
+                    .getDeclaredMethod("getBridge");
+            ___getBridge.setAccessible(true);
+            XWalkViewBridge xWalkViewBridge = null;
+            xWalkViewBridge = (XWalkViewBridge) ___getBridge.invoke(webView);
+            XWalkSettings xWalkSettings = xWalkViewBridge.getSettings();
+            xWalkSettings.setSupportMultipleWindows(flag);
+        } catch (Exception e) {
+            // Could not set user agent
+            e.printStackTrace();
+        }
     }
 }
