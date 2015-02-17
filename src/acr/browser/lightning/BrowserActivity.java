@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import tv.matchstick.flint.ApplicationMetadata;
@@ -824,9 +823,9 @@ public class BrowserActivity extends FragmentActivity implements
         case R.id.action_new_tab:
             newTab(null, true);
             return true;
-        case R.id.action_incognito:
-            startActivity(new Intent(this, IncognitoActivity.class));
-            return true;
+//        case R.id.action_incognito:
+//            startActivity(new Intent(this, IncognitoActivity.class));
+//            return true;
         case R.id.action_share:
             if (!mCurrentView.getUrl().startsWith(Constants.FILE)) {
                 Intent shareIntent = new Intent(
@@ -1326,7 +1325,7 @@ public class BrowserActivity extends FragmentActivity implements
                 }
                 mCurrentView = null;
                 mTitleAdapter.notifyDataSetChanged();
-                finish();
+                closeActivity();
 
             }
         }
@@ -1470,6 +1469,17 @@ public class BrowserActivity extends FragmentActivity implements
                 mHistoryHandler.close();
             }
         }
+        
+        mQuit = true;
+        
+        if (mServerSocket != null) {
+            try {
+                mServerSocket.close();
+                mServerSocket = null;
+            } catch (Exception e) {
+            }
+        }
+        
         super.onDestroy();
     }
 

@@ -142,7 +142,16 @@ public class GeneralSettingsActivity extends Activity {
 			case 3:
 				mAgentTextView.setText(getResources().getString(R.string.agent_mobile));
 				break;
-			case 4:
+            case 4:
+                mAgentTextView.setText(getResources().getString(R.string.agent_ipad));
+                break;
+            case 5:
+                mAgentTextView.setText(getResources().getString(R.string.agent_iphone));
+                break;
+            case 6:
+                mAgentTextView.setText(getResources().getString(R.string.agent_android_tablet));
+                break;
+			case 7:
 				mAgentTextView.setText(getResources().getString(R.string.agent_custom));
 		}
 
@@ -291,7 +300,21 @@ public class GeneralSettingsActivity extends Activity {
 										mAgentTextView.setText(getResources().getString(
 												R.string.agent_mobile));
 										break;
-									case 4:
+	                                case 4:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_ipad));
+                                        break;
+                                    case 5:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_iphone));
+                                        break;
+                                        
+                                    case 6:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_android_tablet));
+                                        break;
+                                        
+									case 7:
 										mAgentTextView.setText(getResources().getString(
 												R.string.agent_custom));
 										agentPicker();

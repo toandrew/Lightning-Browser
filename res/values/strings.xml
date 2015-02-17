@@ -131,7 +131,7 @@
     <string name="action_manual">Manual</string>
     <string name="action_auto">Auto</string>
     <string name="action_follow_me">Contact Me</string>
-    <string name="url_twitter">twitter.com/ACRDevelopment</string>
+    <string name="url_twitter">twitter.com/ACRDevelopment, twitter.com/zember_infthink</string>
     <string name="clear_cache">Clear cache</string>
     <string name="message_cache_cleared">Cache Cleared</string>
     <string name="message_import">Bookmarks Were Imported</string>
@@ -240,4 +240,7 @@
     <string name="bufferingtext">Buffering...</string>
     
     <string name="flint">Fling</string>
+    <string name="agent_ipad">Ipad</string>
+    <string name="agent_iphone">Iphone</string>
+    <string name="agent_android_tablet">Android Tablet</string>
 </resources>

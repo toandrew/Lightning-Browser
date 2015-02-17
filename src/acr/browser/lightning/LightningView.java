@@ -146,12 +146,9 @@ public class LightningView {
                 if (isShown()) {
                     mBrowserController.updateProgress(mCurrentLoadProgress);
                 }
-
-                Log.e(TAG, "onProgressChanged:" + mCurrentLoadProgress + "["
-                        + isShown() + "]");
             }
         });
-
+        
         /*
          * mWebView.setWebChromeClient(new LightningChromeClient(activity));
          * mWebView.setWebViewClient(new LightningWebClient(activity));
@@ -358,27 +355,30 @@ public class LightningView {
             if (API > 16) {
                 setWebViewUserAgent(mWebView, WebSettings
                       .getDefaultUserAgent(context));
-//                mSettings.setUserAgentString(WebSettings
-//                        .getDefaultUserAgent(context));
             } else {
                 setWebViewUserAgent(mWebView, mDefaultUserAgent);
-//                mSettings.setUserAgentString(mDefaultUserAgent);
             }
             break;
         case 2:
             setWebViewUserAgent(mWebView, Constants.DESKTOP_USER_AGENT);
-//            mSettings.setUserAgentString(Constants.DESKTOP_USER_AGENT);
             break;
         case 3:
             setWebViewUserAgent(mWebView, Constants.MOBILE_USER_AGENT);
-//            mSettings.setUserAgentString(Constants.MOBILE_USER_AGENT);
             break;
         case 4:
+            setWebViewUserAgent(mWebView, Constants.IPAD_USER_AGENT);
+            break;
+        case 5:
+            setWebViewUserAgent(mWebView, Constants.IPHONE_USER_AGENT);
+            break;
+            
+        case 6:
+            setWebViewUserAgent(mWebView, Constants.ANDROID_TABLET_USER_AGENT);
+            break;
+            
+        case 7:
             setWebViewUserAgent(mWebView, mPreferences.getString(
                   PreferenceConstants.USER_AGENT_STRING, mDefaultUserAgent));
-            
-//            mSettings.setUserAgentString(mPreferences.getString(
-//                    PreferenceConstants.USER_AGENT_STRING, mDefaultUserAgent));
             break;
         }
 
@@ -680,9 +680,9 @@ public class LightningView {
     public String getUrl() {
         if (mWebView != null) {
             return mWebView.getUrl();
-        } else {
-            return "";
-        }
+        } 
+        
+        return null;
     }
 
     public class LightningWebClient extends WebViewClient {
@@ -1241,6 +1241,7 @@ public class LightningView {
     }
 
     private void setWebViewUserAgent(XWalkView webView, String userAgent) {
+        Log.e(TAG, "setWebViewUserAgent: " + userAgent);
         try {
             Method ___getBridge = XWalkView.class
                     .getDeclaredMethod("getBridge");

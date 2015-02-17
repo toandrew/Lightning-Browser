@@ -15,6 +15,8 @@ public class MainActivity extends BrowserActivity {
 
 	CookieManager mCookieManager;
 
+	Toast mToast;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -78,12 +80,18 @@ public class MainActivity extends BrowserActivity {
         if (preQuitTime == 0 || Math.abs(currentTime - preQuitTime) > 1000) {
             preQuitTime = System.currentTimeMillis();
             Log.e("MainActivity", "confirm quit?");
-            Toast.makeText(MainActivity.this, "Press again to Quit!", Toast.LENGTH_SHORT).show();
+            if (mToast == null) {
+                mToast = Toast.makeText(getApplicationContext(), "Press again to Quit!", Toast.LENGTH_SHORT);
+            }
+            mToast.show();
             
             return;
         }
        
 		closeDrawers();
-		moveTaskToBack(true);
+	    //moveTaskToBack(true);
+		
+		// finish it?
+		finish();
 	}
 }
