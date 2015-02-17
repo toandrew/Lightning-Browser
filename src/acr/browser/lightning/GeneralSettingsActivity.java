@@ -115,7 +115,7 @@ public class GeneralSettingsActivity extends Activity {
 		mAgentTextView = (TextView) findViewById(R.id.agentText);
 		mHomepageText = (TextView) findViewById(R.id.homepageText);
 		mDownloadTextView = (TextView) findViewById(R.id.downloadText);
-		mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
+		//mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
 		mHomepage = mPreferences.getString(PreferenceConstants.HOMEPAGE, Constants.HOMEPAGE);
 		mDownloadLocation = mPreferences.getString(PreferenceConstants.DOWNLOAD_DIRECTORY,
 				Environment.DIRECTORY_DOWNLOADS);
@@ -132,28 +132,28 @@ public class GeneralSettingsActivity extends Activity {
 			mHomepageText.setText(mHomepage);
 		}
 
-		switch (mAgentChoice) {
-			case 1:
-				mAgentTextView.setText(getResources().getString(R.string.agent_default));
-				break;
-			case 2:
-				mAgentTextView.setText(getResources().getString(R.string.agent_desktop));
-				break;
-			case 3:
-				mAgentTextView.setText(getResources().getString(R.string.agent_mobile));
-				break;
-            case 4:
-                mAgentTextView.setText(getResources().getString(R.string.agent_ipad));
-                break;
-            case 5:
-                mAgentTextView.setText(getResources().getString(R.string.agent_iphone));
-                break;
-            case 6:
-                mAgentTextView.setText(getResources().getString(R.string.agent_android_tablet));
-                break;
-			case 7:
-				mAgentTextView.setText(getResources().getString(R.string.agent_custom));
-		}
+//		switch (mAgentChoice) {
+//			case 1:
+//				mAgentTextView.setText(getResources().getString(R.string.agent_default));
+//				break;
+//			case 2:
+//				mAgentTextView.setText(getResources().getString(R.string.agent_desktop));
+//				break;
+//			case 3:
+//				mAgentTextView.setText(getResources().getString(R.string.agent_mobile));
+//				break;
+//            case 4:
+//                mAgentTextView.setText(getResources().getString(R.string.agent_ipad));
+//                break;
+//            case 5:
+//                mAgentTextView.setText(getResources().getString(R.string.agent_iphone));
+//                break;
+//            case 6:
+//                mAgentTextView.setText(getResources().getString(R.string.agent_android_tablet));
+//                break;
+//			case 7:
+//				mAgentTextView.setText(getResources().getString(R.string.agent_custom));
+//		}
 
 		RelativeLayout rSearchSuggestions;
 		rSearchSuggestions = (RelativeLayout) findViewById(R.id.rGoogleSuggestions);
@@ -163,11 +163,11 @@ public class GeneralSettingsActivity extends Activity {
 		cbSearchSuggestions.setChecked(mPreferences.getBoolean(
 				PreferenceConstants.GOOGLE_SEARCH_SUGGESTIONS, true));
 
-		RelativeLayout agent = (RelativeLayout) findViewById(R.id.layoutUserAgent);
+		//RelativeLayout agent = (RelativeLayout) findViewById(R.id.layoutUserAgent);
 		RelativeLayout download = (RelativeLayout) findViewById(R.id.layoutDownload);
 		RelativeLayout homepage = (RelativeLayout) findViewById(R.id.layoutHomepage);
 
-		agent(agent);
+		//agent(agent);
 		download(download);
 		homepage(homepage);
 		search();

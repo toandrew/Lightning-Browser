@@ -243,4 +243,5 @@
     <string name="agent_ipad">Ipad</string>
     <string name="agent_iphone">Iphone</string>
     <string name="agent_android_tablet">Android Tablet</string>
+    <string name="action_user_agent">User Agent</string>
 </resources>

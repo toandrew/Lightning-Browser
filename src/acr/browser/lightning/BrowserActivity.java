@@ -855,6 +855,7 @@ public class BrowserActivity extends FragmentActivity implements
                 }
             }
             return true;
+        case R.id.action_user_agent:
         case R.id.action_settings:
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
