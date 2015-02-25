@@ -4,10 +4,35 @@
 
 package acr.browser.lightning;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.apache.http.util.ByteArrayBuffer;
+import org.xwalk.core.XWalkNavigationHistory;
+import org.xwalk.core.XWalkResourceClient;
+import org.xwalk.core.XWalkUIClient;
+import org.xwalk.core.XWalkView;
+import org.xwalk.core.internal.XWalkSettings;
+import org.xwalk.core.internal.XWalkViewBridge;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ColorMatrix;
@@ -25,23 +50,17 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.webkit.*;
-import android.webkit.WebSettings.LayoutAlgorithm;
-import android.webkit.WebSettings.PluginState;
+import android.webkit.GeolocationPermissions;
+import android.webkit.HttpAuthHandler;
+import android.webkit.SslErrorHandler;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
-import org.apache.http.util.ByteArrayBuffer;
-import org.xwalk.core.XWalkResourceClient;
-import org.xwalk.core.XWalkUIClient;
-import org.xwalk.core.XWalkView;
-import org.xwalk.core.XWalkNavigationHistory;
-import org.xwalk.core.internal.XWalkSettings;
-import org.xwalk.core.internal.XWalkViewBridge;
-
-import java.io.*;
-import java.lang.reflect.Method;
-import java.net.*;
 
 public class LightningView {
     private static final String TAG = "LightningView";
@@ -74,7 +93,7 @@ public class LightningView {
             super(view);
         }
     }
-    
+
     @SuppressWarnings("deprecation")
     @SuppressLint("NewApi")
     public LightningView(Activity activity, String url) {
@@ -115,7 +134,7 @@ public class LightningView {
         mWebView.setAlwaysDrawnWithCacheEnabled(true);
         mWebView.setScrollbarFadingEnabled(true);
         mWebView.setSaveEnabled(true);
-        
+
         mWebView.setResourceClient(new XWalkResourceClient(mWebView) {
             @Override
             public void onLoadFinished(XWalkView view, String url) {
@@ -154,7 +173,7 @@ public class LightningView {
                     mBrowserController.updateProgress(mCurrentLoadProgress);
                 }
             }
-            
+
             @Override
             public boolean shouldOverrideUrlLoading(XWalkView view,
                     java.lang.String url) {
@@ -192,9 +211,9 @@ public class LightningView {
                 return mIntentUtils.startActivityForUrl(mWebView, url);
             }
         });
-        
+
         mWebView.setUIClient(new MyUIClient(mWebView));
-        
+
         /*
          * mWebView.setWebChromeClient(new LightningChromeClient(activity));
          * mWebView.setWebViewClient(new LightningWebClient(activity));
@@ -364,9 +383,9 @@ public class LightningView {
     @SuppressWarnings("deprecation")
     @SuppressLint({ "NewApi", "SetJavaScriptEnabled" })
     public synchronized void initializePreferences(Context context) {
-        
+
         setMultiWindowMode(mWebView, false);
-        
+
         mPreferences = context.getSharedPreferences(
                 PreferenceConstants.PREFERENCES, 0);
         mHomepage = mPreferences.getString(PreferenceConstants.HOMEPAGE,
@@ -1018,39 +1037,24 @@ public class LightningView {
                 return false;
             }
             return true;
-            
+
             /*
-            if (mBrowserController.isIncognito()) {
-                return super.shouldOverrideUrlLoading(view, url);
-            }
-            if (url.startsWith("about:")) {
-                return super.shouldOverrideUrlLoading(view, url);
-            }
-            if (url.contains("mailto:")) {
-                MailTo mailTo = MailTo.parse(url);
-                Intent i = Utils.newEmailIntent(mActivity, mailTo.getTo(),
-                        mailTo.getSubject(), mailTo.getBody(), mailTo.getCc());
-                mActivity.startActivity(i);
-                view.reload();
-                return true;
-            } else if (url.startsWith("intent://")) {
-                Intent intent = null;
-                try {
-                    intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
-                } catch (URISyntaxException ex) {
-                    return false;
-                }
-                if (intent != null) {
-                    try {
-                        mActivity.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.e(Constants.TAG, "ActivityNotFoundException");
-                    }
-                    return true;
-                }
-            }
-            return mIntentUtils.startActivityForUrl(mWebView, url);
-            */
+             * if (mBrowserController.isIncognito()) { return
+             * super.shouldOverrideUrlLoading(view, url); } if
+             * (url.startsWith("about:")) { return
+             * super.shouldOverrideUrlLoading(view, url); } if
+             * (url.contains("mailto:")) { MailTo mailTo = MailTo.parse(url);
+             * Intent i = Utils.newEmailIntent(mActivity, mailTo.getTo(),
+             * mailTo.getSubject(), mailTo.getBody(), mailTo.getCc());
+             * mActivity.startActivity(i); view.reload(); return true; } else if
+             * (url.startsWith("intent://")) { Intent intent = null; try {
+             * intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME); } catch
+             * (URISyntaxException ex) { return false; } if (intent != null) {
+             * try { mActivity.startActivity(intent); } catch
+             * (ActivityNotFoundException e) { Log.e(Constants.TAG,
+             * "ActivityNotFoundException"); } return true; } } return
+             * mIntentUtils.startActivityForUrl(mWebView, url);
+             */
         }
     }
 
@@ -1331,7 +1335,7 @@ public class LightningView {
 
         return null;
     }
-    
+
     private void setMultiWindowMode(XWalkView webView, boolean flag) {
         Log.e(TAG, "setMultiWindowMode: " + flag);
         try {
