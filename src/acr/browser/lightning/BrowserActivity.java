@@ -660,7 +660,7 @@ public class BrowserActivity extends FragmentActivity implements
             }
         }
         if (mPreferences
-                .getBoolean(PreferenceConstants.RESTORE_LOST_TABS, true)) {
+                .getBoolean(PreferenceConstants.RESTORE_LOST_TABS, false)) {
             String mem = mPreferences.getString(PreferenceConstants.URL_MEMORY,
                     "");
             mEditPrefs.putString(PreferenceConstants.URL_MEMORY, "");
