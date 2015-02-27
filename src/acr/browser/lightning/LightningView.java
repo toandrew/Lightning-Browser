@@ -64,7 +64,7 @@ import android.widget.LinearLayout;
 
 public class LightningView {
     private static final String TAG = "LightningView";
-
+    
     private Title mTitle;
     private XWalkView mWebView;
     private BrowserController mBrowserController;
