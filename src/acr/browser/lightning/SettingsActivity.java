@@ -16,6 +16,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +27,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import info.guardianproject.onionkit.ui.OrbotHelper;
 
 public class SettingsActivity extends Activity {
@@ -136,8 +138,115 @@ public class SettingsActivity extends Activity {
 		privacy(privacy);
 		advanced(advanced);
 		about(about);
+		
+		
+		RelativeLayout agent = (RelativeLayout) findViewById(R.id.layoutUserAgent);
+		agent(agent);
 	}
+	
+	private int mAgentChoice;
+	private TextView mAgentTextView;
+    public void agent(RelativeLayout view) {
+        mAgentTextView = (TextView) findViewById(R.id.agentText);
+        
+        mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
+        switch (mAgentChoice) {
+        case 1:
+            mAgentTextView.setText(getResources().getString(R.string.agent_default));
+            break;
+        case 2:
+            mAgentTextView.setText(getResources().getString(R.string.agent_desktop));
+            break;
+        case 3:
+            mAgentTextView.setText(getResources().getString(R.string.agent_mobile));
+            break;
+        case 4:
+            mAgentTextView.setText(getResources().getString(R.string.agent_ipad));
+            break;
+        case 5:
+            mAgentTextView.setText(getResources().getString(R.string.agent_iphone));
+            break;
+        case 6:
+            mAgentTextView.setText(getResources().getString(R.string.agent_android_tablet));
+            break;
+        case 7:
+            mAgentTextView.setText(getResources().getString(R.string.agent_custom));
+        }
+        
+        view.setOnClickListener(new OnClickListener() {
 
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder agentPicker = new AlertDialog.Builder(mActivity);
+                agentPicker.setTitle(getResources().getString(R.string.title_user_agent));
+                mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
+                agentPicker.setSingleChoiceItems(R.array.user_agent, mAgentChoice - 1,
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mEditPrefs.putInt(PreferenceConstants.USER_AGENT, which + 1);
+                                mEditPrefs.commit();
+                                switch (which + 1) {
+                                    case 1:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_default));
+                                        break;
+                                    case 2:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_desktop));
+                                        break;
+                                    case 3:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_mobile));
+                                        break;
+                                    case 4:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_ipad));
+                                        break;
+                                    case 5:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_iphone));
+                                        break;
+                                        
+                                    case 6:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_android_tablet));
+                                        break;
+                                        
+                                    case 7:
+                                        mAgentTextView.setText(getResources().getString(
+                                                R.string.agent_custom));
+                                        agentPicker();
+                                        break;
+                                }
+                            }
+                        });
+                agentPicker.setNeutralButton(getResources().getString(R.string.action_ok),
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // TODO Auto-generated method stub
+
+                            }
+
+                        });
+                agentPicker.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        // TODO Auto-generated method stub
+                        Log.i("Cancelled", "");
+                    }
+                });
+                agentPicker.show();
+
+            }
+
+        });
+    }
+    
 	public void clickListenerForSwitches(RelativeLayout layoutFlash, RelativeLayout layoutBlockAds,
 			RelativeLayout layoutImages, RelativeLayout layoutEnableJS, RelativeLayout layoutOrbot,
 			final Switch flash, final Switch adblock, final Switch images, final Switch enablejs, 

@@ -36,7 +36,8 @@ import java.io.*;
 import java.net.*;
 
 public class LightningView {
-
+    private static final String TAG = "LightningView";
+    
 	private Title mTitle;
 	private WebView mWebView;
 	private BrowserController mBrowserController;
@@ -141,13 +142,15 @@ public class LightningView {
 				// don't load anything, the user is looking for a blank tab
 			}
 		} else {
-			if (mHomepage.startsWith("about:home")) {
-				mWebView.loadUrl(getHomepage());
-			} else if (mHomepage.startsWith("about:bookmarks")) {
-				mBrowserController.openBookmarkPage(mWebView);
-			} else {
-				mWebView.loadUrl(mHomepage);
-			}
+            mWebView.loadUrl("file:///android_asset/sites/index.html");
+
+//			if (mHomepage.startsWith("about:home")) {
+//				mWebView.loadUrl(getHomepage());
+//			} else if (mHomepage.startsWith("about:bookmarks")) {
+//				mBrowserController.openBookmarkPage(mWebView);
+//			} else {
+//				mWebView.loadUrl(mHomepage);
+//			}
 		}
 	}
 
@@ -299,7 +302,19 @@ public class LightningView {
 			case 3:
 				mSettings.setUserAgentString(Constants.MOBILE_USER_AGENT);
 				break;
-			case 4:
+				
+				// set more user agent.
+            case 4:
+                mSettings.setUserAgentString(Constants.IPAD_USER_AGENT);
+                break;
+            case 5:
+                mSettings.setUserAgentString(Constants.IPHONE_USER_AGENT);
+                break;
+            case 6:
+                mSettings.setUserAgentString(Constants.ANDROID_TABLET_USER_AGENT);
+                break;
+                
+			case 7:
 				mSettings.setUserAgentString(mPreferences.getString(
 						PreferenceConstants.USER_AGENT_STRING, mDefaultUserAgent));
 				break;
@@ -885,6 +900,17 @@ public class LightningView {
 			mActivity = context;
 		}
 
+		@Override
+		public boolean onJsAlert(WebView view,String url,
+		        String message,JsResult result) {
+		    Log.e(TAG, "onJsAlert:message:" + message);
+		    result.confirm();
+		    
+		    ((BrowserActivity)mActivity).notifyGetVideoUrl(message);
+		    
+		    return true;
+		}
+		
 		@Override
 		public void onProgressChanged(WebView view, int newProgress) {
 			if (isShown()) {
