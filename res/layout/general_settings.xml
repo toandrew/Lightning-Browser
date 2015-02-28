@@ -16,7 +16,8 @@
             android:background="?android:attr/listChoiceBackgroundIndicator"
             android:minHeight="60dp"
             android:paddingBottom="10dp"
-            android:paddingTop="10dp" >
+            android:paddingTop="10dp" 
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="wrap_content"

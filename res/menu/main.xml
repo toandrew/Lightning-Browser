@@ -16,7 +16,8 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_new_tab" android:title="@string/action_new_tab"></item>
-    <item android:id="@+id/action_incognito" android:title="@string/action_incognito" ></item>
+    <item android:id="@+id/action_user_agent" android:title="@string/action_user_agent" />
+    <!--  item android:id="@+id/action_incognito" android:title="@string/action_incognito" ></item-->
     <item android:id="@+id/action_share" android:title="@string/action_share" />
     <item android:id="@+id/action_history" android:title="@string/action_history" ></item> 
     <item android:id="@+id/action_find" android:title="@string/action_find"></item>   
@@ -25,4 +26,5 @@
     <item android:id="@+id/action_add_bookmark" android:title="@string/action_add_bookmark" ></item>
     <item android:id="@+id/action_settings" android:title="@string/settings" ></item>
     
+    <item android:id="@+id/action_fling" android:title="@string/flint" ></item>
 </menu>
