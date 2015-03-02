@@ -1465,6 +1465,9 @@ public class BrowserActivity extends FragmentActivity implements
                 mHistoryHandler.close();
             }
         }
+        
+        mQuit = true;
+        
         super.onDestroy();
     }
 
@@ -2857,6 +2860,10 @@ public class BrowserActivity extends FragmentActivity implements
         mRefreshFlingRunnable = new Runnable() {
             @Override
             public void run() {
+                if (mQuit) {
+                    Log.e(TAG, "mRefreshFlingRunnable:quit!");
+                    return;
+                }
                 onRefreshEvent();
                 startRefreshTimer();
             }
@@ -3635,7 +3642,7 @@ public class BrowserActivity extends FragmentActivity implements
             Log.e(TAG, "Get valid video Url: " + url);
 
             mCurrentVideoUrl = url;
-            mHandler.postDelayed(mRefreshRunnable, 2000);
+            mHandler.postDelayed(mRefreshRunnable, 3000);
         }
     }
     
