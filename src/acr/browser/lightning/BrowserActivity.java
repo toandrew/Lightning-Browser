@@ -134,7 +134,7 @@ import android.widget.VideoView;
 public class BrowserActivity extends FragmentActivity implements
         BrowserController {
     private static final String TAG = "BrowserActivity";
-
+    
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListLeft;
     private RelativeLayout mDrawerLeft;
@@ -2638,6 +2638,8 @@ public class BrowserActivity extends FragmentActivity implements
     private static final String APPLICATION_ID = "~flintplayer";
     private static final String APPLICATION_URL = "http://openflint.github.io/flint-player/player.html";
 
+    private static final String VIDEO_URL_PREFIX = "xxx:";
+    
     private FlintDevice mSelectedDevice;
     private FlintManager mApiClient;
     private CastListener mCastListener;
@@ -2672,7 +2674,8 @@ public class BrowserActivity extends FragmentActivity implements
     protected static final int PLAYER_STATE_PLAYING = 1;
     protected static final int PLAYER_STATE_PAUSED = 2;
     protected static final int PLAYER_STATE_BUFFERING = 3;
-
+    protected static final int PLAYER_STATE_FINISHED = 3;
+    
     private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS
             .toMillis(1);
 
@@ -2762,7 +2765,9 @@ public class BrowserActivity extends FragmentActivity implements
         mPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPlayerState == PLAYER_STATE_PAUSED) {
+                if (mPlayerState == PLAYER_STATE_FINISHED) {
+                    mHandler.postDelayed(mRefreshRunnable, 50);
+                } else if (mPlayerState == PLAYER_STATE_PAUSED) {
                     onPlayClicked();
                 } else {
                     onPauseClicked();
@@ -2785,6 +2790,11 @@ public class BrowserActivity extends FragmentActivity implements
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         mIsUserSeeking = false;
+                        
+                        if (mMediaPlayer == null) {
+                            return;
+                        }
+                        
                         mMediaSeekBar.setSecondaryProgress(0);
                         onSeekBarMoved(TimeUnit.SECONDS.toMillis(seekBar
                                 .getProgress()));
@@ -2795,10 +2805,16 @@ public class BrowserActivity extends FragmentActivity implements
 
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
+                        mIsUserSeeking = true;
+                        
+                        if (mMediaPlayer == null) {
+                            return;
+                        }
+                        
                         refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
                                 .getProgress()), mMediaPlayer.getStreamDuration());
                                 
-                        mIsUserSeeking = true;
+
                         mMediaSeekBar.setSecondaryProgress(seekBar
                                 .getProgress());
                     }
@@ -2806,6 +2822,10 @@ public class BrowserActivity extends FragmentActivity implements
                     @Override
                     public void onProgressChanged(SeekBar seekBar,
                             int progress, boolean fromUser) {
+                        
+                        if (mMediaPlayer == null) {
+                            return;
+                        }
                         
                         refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
                                 .getProgress()), mMediaPlayer.getStreamDuration());
@@ -2833,8 +2853,8 @@ public class BrowserActivity extends FragmentActivity implements
             public void run() {
                 Log.e(TAG, "show media cast control?![" + displays.size() + "]");
                 if (displays.size() > 0) {
-
-                    Toast.makeText(mContext, "Url: " + mCurrentVideoUrl,
+                    
+                    Toast.makeText(mContext, mCurrentVideoUrl,
                             Toast.LENGTH_SHORT).show();
 
                     MediaMetadata metadata = new MediaMetadata(
@@ -3218,6 +3238,9 @@ public class BrowserActivity extends FragmentActivity implements
                     playerState = PLAYER_STATE_PLAYING;
                 } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_BUFFERING) {
                     playerState = PLAYER_STATE_BUFFERING;
+                } else if (mediaPlayerState == MediaStatus.IDLE_REASON_FINISHED || mediaPlayerState == MediaStatus.IDLE_REASON_CANCELED || mediaPlayerState == MediaStatus.IDLE_REASON_INTERRUPTED || mediaPlayerState == MediaStatus.IDLE_REASON_ERROR) {
+                    playerState = PLAYER_STATE_FINISHED;
+                    refreshPlaybackPosition(0, mMediaPlayer.getStreamDuration());
                 }
                 setPlayerState(playerState);
 
@@ -3542,7 +3565,7 @@ public class BrowserActivity extends FragmentActivity implements
             // VideoUrlHandler(),
             // "videoHandler");
             //
-            String GET_VIDEO_URL_SCRIPT = "(function () {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {alert(videos[0].src);}})();";
+            String GET_VIDEO_URL_SCRIPT = "(function () {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {alert('xxx:' + videos[0].src);}})();";
             mCurrentView.getWebView().loadUrl(
                     "javascript:" + GET_VIDEO_URL_SCRIPT);
         }
@@ -3559,7 +3582,8 @@ public class BrowserActivity extends FragmentActivity implements
         }
 
         mPlayPauseButton.setEnabled((mPlayerState == PLAYER_STATE_PAUSED)
-                || (mPlayerState == PLAYER_STATE_PLAYING));
+                || (mPlayerState == PLAYER_STATE_PLAYING) 
+                || mPlayerState == PLAYER_STATE_FINISHED);
     }
 
     protected final void setSeekBarEnabled(boolean enabled) {
@@ -3637,22 +3661,17 @@ public class BrowserActivity extends FragmentActivity implements
     // };
 
     public void notifyGetVideoUrl(String url) {
-        if ((url != null && url.startsWith("http"))
-                && (mCurrentVideoUrl == null || !mCurrentVideoUrl.equals(url))) {
+        if ((url != null && url.startsWith(VIDEO_URL_PREFIX))
+                && url.length() > 4 && (mCurrentVideoUrl == null || !mCurrentVideoUrl.equals(url.substring(4)))) { // 4 == lengthof("xxx:")
             Log.e(TAG, "Get valid video Url: " + url);
 
-            mCurrentVideoUrl = url;
-            mHandler.postDelayed(mRefreshRunnable, 3000);
+            mCurrentVideoUrl = url.substring(4);
+            mHandler.postDelayed(mRefreshRunnable, 1000);
         }
     }
     
     
     protected final void refreshSeekPosition(long position, long duration) {
-        if (mIsUserSeeking) {
-            String info = mSelectedDevice.getFriendlyName() + "(" + formatTime(position) + ")";
-            mFlingDeviceNameTextView.setText(info);;
-        } else {
-            mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());;
-        }
+        mFlingCurrentTimeTextView.setText(formatTime(position));
     }
 }
