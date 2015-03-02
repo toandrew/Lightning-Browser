@@ -847,6 +847,8 @@ public class SenderDemo extends ActionBarActivity {
 
                 // mBtnPlay.setClickable(true);
 
+                sendURL(mVideoId,
+                        mIntent.getStringExtra("vname"));
             } else {
             }
         }
