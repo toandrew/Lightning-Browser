@@ -2674,7 +2674,7 @@ public class BrowserActivity extends FragmentActivity implements
     protected static final int PLAYER_STATE_PLAYING = 1;
     protected static final int PLAYER_STATE_PAUSED = 2;
     protected static final int PLAYER_STATE_BUFFERING = 3;
-    protected static final int PLAYER_STATE_FINISHED = 3;
+    protected static final int PLAYER_STATE_FINISHED = 4;
     
     private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS
             .toMillis(1);
@@ -3010,7 +3010,7 @@ public class BrowserActivity extends FragmentActivity implements
             return;
         }
 
-        mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
+        //mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
 
         if (mSelectedMedia == null) {
             return;
@@ -3133,8 +3133,21 @@ public class BrowserActivity extends FragmentActivity implements
                         }
                         
                         if ((mediaStatus != null)
+                                && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_PLAYING)) {
+                            if (mSelectedDevice != null) {
+                                mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
+                            }
+                        }
+                        
+                        if ((mediaStatus != null)
                                 && (mediaStatus.getPlayerState() != MediaStatus.PLAYER_STATE_BUFFERING)) {
+                            
                             updatePlaybackPosition();
+                        } else if ((mediaStatus != null)
+                                && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_BUFFERING)) {
+                            if (mSelectedDevice != null) {
+                                mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName() + "(Loading...)");
+                            }
                         }
 
                         updateStreamVolume();
@@ -3348,6 +3361,10 @@ public class BrowserActivity extends FragmentActivity implements
             Log.e(TAG, "Trying to play a video with no active media session");
             return;
         }
+        
+        if (mSelectedDevice != null) {
+            mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName() + "(Loading...)");
+        }
 
         mMediaPlayer
                 .load(mApiClient, media, isAutoplayChecked())
@@ -3547,8 +3564,8 @@ public class BrowserActivity extends FragmentActivity implements
         return AFTER_SEEK_DO_NOTHING;
     }
 
-    ValueCallback<String> callback = null;
-
+    //ValueCallback<String> callback = null;
+    
     protected void onRefreshEvent() {
         if (!mSeeking) {
             updatePlaybackPosition();
