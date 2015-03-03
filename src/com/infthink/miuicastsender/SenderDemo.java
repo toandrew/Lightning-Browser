@@ -160,7 +160,8 @@ public class SenderDemo extends ActionBarActivity {
         mConnectionCallbacks = new ConnectionCallbacks();
 
         Intent intent = getIntent();
-        if (intent.getAction().equals(ACTION_DUOKAN_VIDEOPLAY) || intent.getAction().equals(Intent.ACTION_VIEW)) {
+        Log.e(TAG, "intent");
+        if (intent != null && intent.getAction() != null && (intent.getAction().equals(ACTION_DUOKAN_VIDEOPLAY) || intent.getAction().equals(Intent.ACTION_VIEW))) {
             Uri videoURI = intent.getData();
             mVideoId = processLocalVideoUrl(videoURI.toString());
             String curId = mApplication.getVideoId();
@@ -846,6 +847,8 @@ public class SenderDemo extends ActionBarActivity {
 
                 // mBtnPlay.setClickable(true);
 
+                sendURL(mVideoId,
+                        mIntent.getStringExtra("vname"));
             } else {
             }
         }

@@ -2652,7 +2652,8 @@ public class BrowserActivity extends FragmentActivity implements
     protected static final int PLAYER_STATE_PLAYING = 1;
     protected static final int PLAYER_STATE_PAUSED = 2;
     protected static final int PLAYER_STATE_BUFFERING = 3;
-
+    protected static final int PLAYER_STATE_FINISHED = 4;
+    
     private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS
             .toMillis(1);
 
@@ -2742,7 +2743,9 @@ public class BrowserActivity extends FragmentActivity implements
         mPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPlayerState == PLAYER_STATE_PAUSED) {
+                if (mPlayerState == PLAYER_STATE_FINISHED) {
+                    mHandler.postDelayed(mRefreshRunnable, 50);
+                } else if (mPlayerState == PLAYER_STATE_PAUSED) {
                     onPlayClicked();
                 } else {
                     onPauseClicked();
@@ -2765,14 +2768,31 @@ public class BrowserActivity extends FragmentActivity implements
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         mIsUserSeeking = false;
+                        
+                        if (mMediaPlayer == null) {
+                            return;
+                        }
+                        
                         mMediaSeekBar.setSecondaryProgress(0);
                         onSeekBarMoved(TimeUnit.SECONDS.toMillis(seekBar
                                 .getProgress()));
+                        
+                        refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
+                                .getProgress()), mMediaPlayer.getStreamDuration());
                     }
 
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
                         mIsUserSeeking = true;
+                        
+                        if (mMediaPlayer == null) {
+                            return;
+                        }
+                        
+                        refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
+                                .getProgress()), mMediaPlayer.getStreamDuration());
+                                
+
                         mMediaSeekBar.setSecondaryProgress(seekBar
                                 .getProgress());
                     }
@@ -2780,6 +2800,13 @@ public class BrowserActivity extends FragmentActivity implements
                     @Override
                     public void onProgressChanged(SeekBar seekBar,
                             int progress, boolean fromUser) {
+                        
+                        if (mMediaPlayer == null) {
+                            return;
+                        }
+                        
+                        refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
+                                .getProgress()), mMediaPlayer.getStreamDuration());
                     }
                 });
 
@@ -2805,8 +2832,9 @@ public class BrowserActivity extends FragmentActivity implements
                 Log.e(TAG, "show media cast control?![" + displays.size() + "]");
                 if (displays.size() > 0) {
                     
-                    Toast.makeText(mContext, "Url: " + mCurrentVideoUrl , Toast.LENGTH_SHORT).show();
-                    
+                    Toast.makeText(mContext, mCurrentVideoUrl,
+                            Toast.LENGTH_SHORT).show();
+
                     MediaMetadata metadata = new MediaMetadata(
                             MediaMetadata.MEDIA_TYPE_MOVIE);
                     mSelectedMedia = new MediaInfo.Builder(mCurrentVideoUrl)
@@ -2830,6 +2858,10 @@ public class BrowserActivity extends FragmentActivity implements
         mRefreshFlingRunnable = new Runnable() {
             @Override
             public void run() {
+                if (mQuit) {
+                    Log.e(TAG, "mRefreshFlingRunnable:quit!");
+                    return;
+                }
                 onRefreshEvent();
                 startRefreshTimer();
             }
@@ -2893,7 +2925,7 @@ public class BrowserActivity extends FragmentActivity implements
 
     protected void onRouteSelected(RouteInfo route) {
         Log.d(TAG, "onRouteSelected: " + route + " url:" + mCurrentVideoUrl);
-
+        
         if (mCurrentVideoUrl == null) {
             Log.d(TAG, "url is " + mCurrentVideoUrl + " ignore it!");
             Toast.makeText(this, "url is null!ignore it!", Toast.LENGTH_SHORT)
@@ -2923,6 +2955,11 @@ public class BrowserActivity extends FragmentActivity implements
 
     private void setSelectedDevice(FlintDevice device) {
         mSelectedDevice = device;
+        
+        if (mSelectedDevice != null) {
+            //mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
+        }
+        
         setCurrentDeviceName(mSelectedDevice != null ? mSelectedDevice
                 .getFriendlyName() : null);
 
@@ -3009,7 +3046,7 @@ public class BrowserActivity extends FragmentActivity implements
             return;
         }
 
-        mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
+        //mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
 
         if (mSelectedMedia == null) {
             return;
@@ -3124,14 +3161,32 @@ public class BrowserActivity extends FragmentActivity implements
                     @Override
                     public void onStatusUpdated() {
                         Log.d(TAG, "MediaControlChannel.onStatusUpdated");
+                        
                         // If item has ended, clear metadata.
                         MediaStatus mediaStatus = mMediaPlayer.getMediaStatus();
                         if ((mediaStatus != null)
                                 && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE)) {
                             clearMediaState();
                         }
+                        
+                        if ((mediaStatus != null)
+                                && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_PLAYING)) {
+                            if (mSelectedDevice != null) {
+                                mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
+                            }
+                        }
+                        
+                        if ((mediaStatus != null)
+                                && (mediaStatus.getPlayerState() != MediaStatus.PLAYER_STATE_BUFFERING)) {
+                            
+                            updatePlaybackPosition();
+                        } else if ((mediaStatus != null)
+                                && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_BUFFERING)) {
+                            if (mSelectedDevice != null) {
+                                mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName() + "(Loading...)");
+                            }
+                        }
 
-                        updatePlaybackPosition();
                         updateStreamVolume();
                         updateButtonStates();
                     }
@@ -3233,6 +3288,10 @@ public class BrowserActivity extends FragmentActivity implements
                     playerState = PLAYER_STATE_PLAYING;
                 } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_BUFFERING) {
                     playerState = PLAYER_STATE_BUFFERING;
+                } else if (mediaPlayerState == MediaStatus.IDLE_REASON_FINISHED || mediaPlayerState == MediaStatus.IDLE_REASON_CANCELED || mediaPlayerState == MediaStatus.IDLE_REASON_INTERRUPTED || mediaPlayerState == MediaStatus.IDLE_REASON_ERROR) {
+                    playerState = PLAYER_STATE_FINISHED;
+                    
+                    refreshPlaybackPosition(0, mMediaPlayer.getStreamDuration());
                 }
                 setPlayerState(playerState);
 
@@ -3339,6 +3398,10 @@ public class BrowserActivity extends FragmentActivity implements
         if (mMediaPlayer == null) {
             Log.e(TAG, "Trying to play a video with no active media session");
             return;
+        }
+        
+        if (mSelectedDevice != null) {
+            mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName() + "(Loading...)");
         }
 
         mMediaPlayer
@@ -3539,12 +3602,31 @@ public class BrowserActivity extends FragmentActivity implements
         return AFTER_SEEK_DO_NOTHING;
     }
 
+    //ValueCallback<String> callback = null;
+    
     protected void onRefreshEvent() {
         if (!mSeeking) {
             updatePlaybackPosition();
         }
         updateStreamVolume();
         updateButtonStates();
+        
+       /* 
+        if (mCurrentView != null) {
+            if (callback == null) {
+                callback =
+                    new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String result) {
+                            Log.e(TAG, "result:" + result);
+                        }
+                    };
+            }
+           Log.e(TAG, "evaluateJavascript!");
+           String GET_VIDEO_URL_SCRIPT = "function getVideoUrl() {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {return videos[0].src;} else {  return 'haha';}}; getVideoUrl()";
+           mCurrentView.getWebView().evaluateJavascript(GET_VIDEO_URL_SCRIPT, callback);
+        }
+*/
     }
 
     protected final void setPlayerState(int playerState) {
@@ -3558,7 +3640,8 @@ public class BrowserActivity extends FragmentActivity implements
         }
 
         mPlayPauseButton.setEnabled((mPlayerState == PLAYER_STATE_PAUSED)
-                || (mPlayerState == PLAYER_STATE_PLAYING));
+                || (mPlayerState == PLAYER_STATE_PLAYING) 
+                || mPlayerState == PLAYER_STATE_FINISHED);
     }
 
     protected final void setSeekBarEnabled(boolean enabled) {
@@ -3616,4 +3699,7 @@ public class BrowserActivity extends FragmentActivity implements
         }
     }
 
+    protected final void refreshSeekPosition(long position, long duration) {
+        mFlingCurrentTimeTextView.setText(formatTime(position));
+    }
 }
