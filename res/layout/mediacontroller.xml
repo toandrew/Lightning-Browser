@@ -4,99 +4,112 @@
     android:layout_height="wrap_content"
     android:background="@color/mediacontroller_bg"
     android:orientation="vertical" >
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/fling_info"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/mediacontroller_bg"
-            android:visibility="gone"
-    android:orientation="vertical" >
-    <TextView
+
+    <LinearLayout
+        android:id="@+id/fling_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/mediacontroller_bg"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <TextView
             android:id="@+id/fling_device_name"
             style="@style/MediaController_Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp"
-            android:singleLine="true"  
-            android:ellipsize="end" />
-    <ImageButton
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:singleLine="true" />
+
+        <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:background="@color/mediacontroller_bg"
-            android:src="@drawable/line"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp" />
-    <TextView
+            android:layout_marginRight="5dp"
+            android:background="@color/mediacontroller_bg"
+            android:src="@drawable/line" />
+
+        <CheckBox
+            android:id="@+id/device_hardware_decoder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Use Hardware Decoder" 
+            style="@style/MediaController_Text"/>
+
+        <TextView
             android:id="@+id/media_info"
             style="@style/MediaController_Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:singleLine="true"  
+            android:layout_marginLeft="5dp"
             android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_marginLeft="5dp" />
+            android:singleLine="true"
+            android:visibility="gone" />
     </LinearLayout>
-    <LinearLayout 
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@color/mediacontroller_bg"
         android:orientation="horizontal" >
 
-    <android.support.v7.app.MediaRouteButton
-                android:id="@+id/media_route_button"
-                android:layout_width="wrap_content"
-                android:background="@android:color/transparent"
-                android:layout_height="wrap_content"/>
-
-    <RelativeLayout
-        android:id="@+id/mediacontroller_control"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <ImageButton
-            android:id="@+id/mediacontroller_play_pause"
+        <android.support.v7.app.MediaRouteButton
+            android:id="@+id/media_route_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
-            android:background="@drawable/mediacontroller_button"
-            android:src="@drawable/mediacontroller_play" />
+            android:background="@android:color/transparent" />
 
-        <TextView
-            android:id="@+id/mediacontroller_time_current"
-            style="@style/MediaController_Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@id/mediacontroller_play_pause" />
-
-        <TextView
-            android:id="@+id/mediacontroller_time_total"
-            style="@style/MediaController_Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp" />
-
-        <SeekBar
-            android:id="@+id/mediacontroller_seekbar"
-            style="@style/MediaController_SeekBar"
+        <RelativeLayout
+            android:id="@+id/mediacontroller_control"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/mediacontroller_time_total"
-            android:layout_toRightOf="@id/mediacontroller_time_current"
-            android:focusable="true"
-            android:max="1000" />
-    </RelativeLayout>
+            android:orientation="horizontal" >
 
+            <ImageButton
+                android:id="@+id/mediacontroller_play_pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/mediacontroller_button"
+                android:src="@drawable/mediacontroller_play" />
+
+            <TextView
+                android:id="@+id/mediacontroller_time_current"
+                style="@style/MediaController_Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@id/mediacontroller_play_pause" />
+
+            <TextView
+                android:id="@+id/mediacontroller_time_total"
+                style="@style/MediaController_Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="5dp" />
+
+            <SeekBar
+                android:id="@+id/mediacontroller_seekbar"
+                style="@style/MediaController_SeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/mediacontroller_time_total"
+                android:layout_toRightOf="@id/mediacontroller_time_current"
+                android:focusable="true"
+                android:max="1000" />
+        </RelativeLayout>
     </LinearLayout>
+
 </LinearLayout>
