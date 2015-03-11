@@ -20,6 +20,14 @@
         android:textColor="#ffffffff"
         android:textSize="@dimen/detail_titletextsize" />
     
+    <CheckBox
+        android:id="@+id/device_hardware_decoder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvname"
+        android:checked="true"
+        android:text="Use Hardware Decoder" />
+        
     <LinearLayout 
         android:orientation="vertical" 
         android:id="@+id/bottom_bar" 
@@ -39,7 +47,8 @@
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:background="@drawable/nowplaying_prev_n"
-	            android:button="@null" />
+	            android:button="@null" 
+	            android:visibility="gone"/>
 	        <ImageButton
 	            android:id="@+id/btnplay"
 	            android:layout_width="wrap_content"
@@ -51,7 +60,8 @@
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:background="@drawable/nowplaying_next_n"
-	            android:button="@null" />
+	            android:button="@null" 
+	            android:visibility="gone"/>
         </LinearLayout>
         
 		<RelativeLayout 

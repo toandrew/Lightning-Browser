@@ -2651,8 +2651,6 @@ public class BrowserActivity extends FragmentActivity implements
     private View mFlingMediaControls;
     private View mFlingInfo;
 
-    private CheckBox mHardwareDecoderCheckbox;
-
     protected static final double VOLUME_INCREMENT = 0.05;
     protected static final double MAX_VOLUME_LEVEL = 20;
 
@@ -2676,7 +2674,9 @@ public class BrowserActivity extends FragmentActivity implements
     private final Map<String, String> displays = new HashMap<String, String>();
 
     private MediaFlingBar mMediaFlingBar;
-    
+
+    private CheckBox mHardwareDecoderCheckbox;
+
     private boolean mIsHardwareDecoder = true;
 
     private MediaRouteSelector buildMediaRouteSelector() {
