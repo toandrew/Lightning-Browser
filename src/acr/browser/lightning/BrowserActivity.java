@@ -33,6 +33,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.json.JSONObject;
+
 import tv.matchstick.flint.ApplicationMetadata;
 import tv.matchstick.flint.ConnectionResult;
 import tv.matchstick.flint.Flint;
@@ -118,11 +120,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewDatabase;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -2648,7 +2650,7 @@ public class BrowserActivity extends FragmentActivity implements
 
     private View mFlingMediaControls;
     private View mFlingInfo;
-    
+
     private CheckBox mHardwareDecoderCheckbox;
 
     protected static final double VOLUME_INCREMENT = 0.05;
@@ -2674,6 +2676,8 @@ public class BrowserActivity extends FragmentActivity implements
     private final Map<String, String> displays = new HashMap<String, String>();
 
     private MediaFlingBar mMediaFlingBar;
+    
+    private boolean mIsHardwareDecoder = true;
 
     private MediaRouteSelector buildMediaRouteSelector() {
         return new MediaRouteSelector.Builder().addControlCategory(
@@ -2937,29 +2941,50 @@ public class BrowserActivity extends FragmentActivity implements
         mFlintMsgChannel = new FlintMsgChannel() {
             @Override
             public void onMessageReceived(FlintDevice flingDevice,
-                    String namespace, String message) {
+                    String namespace, final String message) {
                 super.onMessageReceived(flingDevice, namespace, message);
-                
+
                 // show received custom messages.
                 Log.d(TAG, "onMessageReceived: " + message);
+
+                mHandler.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject obj = new JSONObject(message);
+                            mIsHardwareDecoder = obj
+                                    .getBoolean("isHardwareDecoder");
+
+                            mHardwareDecoderCheckbox.setChecked(mIsHardwareDecoder);
+                            
+                            mHardwareDecoderCheckbox.setVisibility(View.VISIBLE);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
             }
         };
-        
-        
+
         mHardwareDecoderCheckbox = (CheckBox) mMediaFlingBar
                 .findViewById(R.id.device_hardware_decoder);
-        mHardwareDecoderCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        mHardwareDecoderCheckbox.setVisibility(View.GONE);
+        mHardwareDecoderCheckbox
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView,
-                    boolean isChecked) {
-                // TODO Auto-generated method stub
-                if (mApiClient != null) {
-                    setHardwareDecoder(isChecked);
-                }
-            }
-            
-        });
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView,
+                            boolean isChecked) {
+                        // TODO Auto-generated method stub
+                        if (mApiClient != null) {
+                            Log.e(TAG, "setHardwareDecoder:" + isChecked);
+                            setHardwareDecoder(isChecked);
+                        }
+                    }
+
+                });
     }
 
     /**
@@ -2971,10 +2996,10 @@ public class BrowserActivity extends FragmentActivity implements
         if (mApiClient == null || !mApiClient.isConnected()) {
             return;
         }
-        
+
         mFlintMsgChannel.setHardwareDecoder(mApiClient, flag);
     }
-    
+
     protected void onRouteSelected(RouteInfo route) {
         Log.d(TAG, "onRouteSelected: " + route + " url:" + mCurrentVideoUrl);
 
@@ -3301,7 +3326,7 @@ public class BrowserActivity extends FragmentActivity implements
             try {
                 Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
                         mMediaPlayer.getNamespace(), mMediaPlayer);
-                
+
                 // use this channel to send message channel.
                 Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
                         mFlintMsgChannel.getNamespace(), mFlintMsgChannel);
@@ -3316,7 +3341,7 @@ public class BrowserActivity extends FragmentActivity implements
             try {
                 Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
                         mMediaPlayer.getNamespace());
-                
+
                 Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
                         mFlintMsgChannel.getNamespace());
             } catch (IOException e) {
@@ -3477,8 +3502,6 @@ public class BrowserActivity extends FragmentActivity implements
                     + "(Loading...)");
         }
 
-        mFlintMsgChannel.show(mApiClient, "cust message: load media!");
-        
         mMediaPlayer
                 .load(mApiClient, media, isAutoplayChecked())
                 .setResultCallback(
@@ -3570,8 +3593,6 @@ public class BrowserActivity extends FragmentActivity implements
             return;
         }
         try {
-            //mFlintMsgChannel.show(mApiClient, "cust message: play media!");
-            
             mMediaPlayer.play(mApiClient);
         } catch (Exception e) {
             Log.w(TAG, "Unable to play", e);
@@ -3584,8 +3605,6 @@ public class BrowserActivity extends FragmentActivity implements
             return;
         }
         try {
-            mFlintMsgChannel.show(mApiClient, "cust message: pause media!");
-            
             mMediaPlayer.pause(mApiClient);
         } catch (Exception e) {
             Log.w(TAG, "Unable to pause", e);
@@ -3598,8 +3617,6 @@ public class BrowserActivity extends FragmentActivity implements
             return;
         }
         try {
-            mFlintMsgChannel.show(mApiClient, "cust message: stop media!");
-            
             mMediaPlayer.stop(mApiClient);
         } catch (Exception e) {
             Log.w(TAG, "Unable to stop");
@@ -3637,9 +3654,7 @@ public class BrowserActivity extends FragmentActivity implements
         try {
             Log.e(TAG, "seek: position[" + position + "]state[" + resumeState
                     + "]");
-            
-            mFlintMsgChannel.show(mApiClient, "cust message: seek media!");
-            
+
             mMediaPlayer.seek(mApiClient, position, resumeState)
                     .setResultCallback(
                             new ResultCallback<MediaChannelResult>() {
@@ -3760,8 +3775,6 @@ public class BrowserActivity extends FragmentActivity implements
                 v = 0.0;
             }
 
-            mFlintMsgChannel.show(mApiClient, "cust message: set stream volume!");
-            
             mMediaPlayer.setStreamVolume(mApiClient, v).setResultCallback(
                     new ResultCallback<MediaChannelResult>() {
                         @Override
