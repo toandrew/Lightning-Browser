@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.json.JSONObject;
+
 import tv.matchstick.flint.ApplicationMetadata;
 import tv.matchstick.flint.ConnectionResult;
 import tv.matchstick.flint.Flint;
@@ -26,6 +28,7 @@ import tv.matchstick.flint.Status;
 import com.nanohttpd.webserver.src.main.java.fi.iki.elonen.SimpleWebServer;
 
 import acr.browser.lightning.BrowserApp;
+import acr.browser.lightning.FlintMsgChannel;
 import acr.browser.lightning.R;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -54,9 +57,12 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -116,9 +122,16 @@ public class SenderDemo extends ActionBarActivity {
     private ApplicationMetadata mAppMetadata;
     private Runnable mRefreshRunnable;
     private boolean mWaitingForReconnect;
-    
+
     private Uri mUri;
     private String mTitle;
+
+    // used to send cust messages.
+    private FlintMsgChannel mFlintMsgChannel;
+
+    private CheckBox mHardwareDecoderCheckbox;
+
+    private boolean mIsHardwareDecoder = true;
 
     private String processLocalVideoUrl(String url) {
         String real_url = url;
@@ -161,7 +174,10 @@ public class SenderDemo extends ActionBarActivity {
 
         Intent intent = getIntent();
         Log.e(TAG, "intent");
-        if (intent != null && intent.getAction() != null && (intent.getAction().equals(ACTION_DUOKAN_VIDEOPLAY) || intent.getAction().equals(Intent.ACTION_VIEW))) {
+        if (intent != null
+                && intent.getAction() != null
+                && (intent.getAction().equals(ACTION_DUOKAN_VIDEOPLAY) || intent
+                        .getAction().equals(Intent.ACTION_VIEW))) {
             Uri videoURI = intent.getData();
             mVideoId = processLocalVideoUrl(videoURI.toString());
             String curId = mApplication.getVideoId();
@@ -215,8 +231,7 @@ public class SenderDemo extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 if (mFirst) {
-                    sendURL(mVideoId,
-                            mIntent.getStringExtra("vname"));
+                    sendURL(mVideoId, mIntent.getStringExtra("vname"));
                 } else {
                     if (mMediaPlayer == null
                             || mMediaPlayer.getMediaStatus() == null
@@ -273,6 +288,68 @@ public class SenderDemo extends ActionBarActivity {
                 }
             }
         });
+
+        mFlintMsgChannel = new FlintMsgChannel() {
+            @Override
+            public void onMessageReceived(FlintDevice flingDevice,
+                    String namespace, final String message) {
+                super.onMessageReceived(flingDevice, namespace, message);
+
+                // show received custom messages.
+                Log.d(TAG, "onMessageReceived: " + message);
+
+                mHandler.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject obj = new JSONObject(message);
+                            mIsHardwareDecoder = obj
+                                    .getBoolean("isHardwareDecoder");
+
+                            mHardwareDecoderCheckbox
+                                    .setChecked(mIsHardwareDecoder);
+
+                            mHardwareDecoderCheckbox
+                                    .setVisibility(View.VISIBLE);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            }
+        };
+
+        mHardwareDecoderCheckbox = (CheckBox) findViewById(R.id.device_hardware_decoder);
+        mHardwareDecoderCheckbox.setVisibility(View.GONE);
+        mHardwareDecoderCheckbox
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView,
+                            boolean isChecked) {
+                        // TODO Auto-generated method stub
+                        if (mApiClient != null) {
+                            Log.e(TAG, "setHardwareDecoder:" + isChecked);
+                            setHardwareDecoder(isChecked);
+                        }
+                    }
+
+                });
+    }
+
+    /**
+     * Set custom message to device. let device use hardware decoder or not
+     * 
+     * @param flag
+     */
+    private void setHardwareDecoder(boolean flag) {
+        if (mApiClient == null || !mApiClient.isConnected()) {
+            return;
+        }
+
+        mFlintMsgChannel.setHardwareDecoder(mApiClient, flag);
     }
 
     private void onSeekBarMoved(long position) {
@@ -421,20 +498,24 @@ public class SenderDemo extends ActionBarActivity {
         Toast.makeText(SenderDemo.this, msg, Toast.LENGTH_SHORT).show();
     }
 
-//    private void showWarning(String msg) {
-//        if (mAlertDialog == null) {
-//            mAlertDialog = new AlertDialog.Builder(SenderDemo.this)
-//                    .setTitle("Warning").setMessage(msg)
-//                    .setPositiveButton("OK", null).create();
-//        }
-//        mAlertDialog.show();
-//    }
+    // private void showWarning(String msg) {
+    // if (mAlertDialog == null) {
+    // mAlertDialog = new AlertDialog.Builder(SenderDemo.this)
+    // .setTitle("Warning").setMessage(msg)
+    // .setPositiveButton("OK", null).create();
+    // }
+    // mAlertDialog.show();
+    // }
 
     private void sendURL(String url, String name) {
         android.util.Log.d(TAG, "url = " + url);
         android.util.Log.d(TAG, "videoname = " + name);
         if (mMediaPlayer == null)
             return;
+        
+        Toast.makeText(SenderDemo.this, url,
+                Toast.LENGTH_SHORT).show();
+        
         MediaMetadata metadata = new MediaMetadata(
                 MediaMetadata.MEDIA_TYPE_MOVIE);
         metadata.putString(MediaMetadata.KEY_TITLE, name);
@@ -620,6 +701,10 @@ public class SenderDemo extends ActionBarActivity {
         try {
             Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
                     mMediaPlayer.getNamespace(), mMediaPlayer);
+
+            // use this channel to send message channel.
+            Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
+                    mFlintMsgChannel.getNamespace(), mFlintMsgChannel);
         } catch (IOException e) {
             Log.w(TAG, "Exception while launching application", e);
         }
@@ -665,6 +750,9 @@ public class SenderDemo extends ActionBarActivity {
             try {
                 Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
                         mMediaPlayer.getNamespace());
+
+                Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
+                        mFlintMsgChannel.getNamespace());
             } catch (IOException e) {
                 Log.w(TAG, "Exception while detaching media player", e);
             }
@@ -676,6 +764,24 @@ public class SenderDemo extends ActionBarActivity {
         mSelectedDevice = device;
         if (mSelectedDevice == null) {
             detachMediaPlayer();
+            
+            if (mApiClient != null && mApiClient.isConnected()) {
+                Flint.FlintApi.stopApplication(mApiClient).setResultCallback(
+                        new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(Status result) {
+                                if (result.isSuccess()) {
+                                    mAppMetadata = null;
+                                    refreshPlaybackPosition(0, 0);
+                                    detachMediaPlayer();
+                                    updateButtonStates();
+                                } else {
+                                    // showErrorDialog(getString(R.string.error_app_stop_failed));
+                                }
+                            }
+                        });
+            }
+            
             if ((mApiClient != null) && mApiClient.isConnected()) {
                 mApiClient.disconnect();
             }
@@ -691,7 +797,6 @@ public class SenderDemo extends ActionBarActivity {
                 mApiClient.connect();
             } catch (IllegalStateException e) {
                 Log.w(TAG, "error while creating a device controller", e);
-                // showErrorDialog(getString(R.string.error_no_controller));
             }
         }
     }
@@ -847,8 +952,7 @@ public class SenderDemo extends ActionBarActivity {
 
                 // mBtnPlay.setClickable(true);
 
-                sendURL(mVideoId,
-                        mIntent.getStringExtra("vname"));
+                sendURL(mVideoId, mIntent.getStringExtra("vname"));
             } else {
             }
         }
