@@ -941,7 +941,7 @@ public class SenderDemo extends ActionBarActivity {
                         Flint.FlintApi
                                 .launchApplication(
                                         mApiClient,
-                                        "http://castapp.infthink.com/droidream/samples/flint-player/player.html",
+                                        "http://openflint.github.io/flint-player/player.html",
                                         false)
                                 .setResultCallback(
                                         new ApplicationConnectionResultCallback(
