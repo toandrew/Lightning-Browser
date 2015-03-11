@@ -7,14 +7,18 @@ package acr.browser.lightning;
 import info.guardianproject.onionkit.ui.OrbotHelper;
 import info.guardianproject.onionkit.web.WebkitProxy;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -28,6 +32,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.json.JSONObject;
 
 import tv.matchstick.flint.ApplicationMetadata;
 import tv.matchstick.flint.ConnectionResult;
@@ -117,6 +123,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -187,6 +196,9 @@ public class BrowserActivity extends FragmentActivity implements
     private static LayoutParams mMatchParent = new LayoutParams(
             LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     private BookmarkManager mBookmarkManager;
+
+    // used to send cust messages.
+    private FlintMsgChannel mFlintMsgChannel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -2663,6 +2675,8 @@ public class BrowserActivity extends FragmentActivity implements
     private View mFlingMediaControls;
     private View mFlingInfo;
 
+    private CheckBox mHardwareDecoderCheckbox;
+
     protected static final double VOLUME_INCREMENT = 0.05;
     protected static final double MAX_VOLUME_LEVEL = 20;
 
@@ -2686,6 +2700,8 @@ public class BrowserActivity extends FragmentActivity implements
     private final Map<String, String> displays = new HashMap<String, String>();
 
     private MediaFlingBar mMediaFlingBar;
+    
+    private boolean mIsHardwareDecoder = true;
 
     private MediaRouteSelector buildMediaRouteSelector() {
         return new MediaRouteSelector.Builder().addControlCategory(
@@ -2890,6 +2906,68 @@ public class BrowserActivity extends FragmentActivity implements
         };
 
         startRefreshTimer();
+
+
+        mFlintMsgChannel = new FlintMsgChannel() {
+            @Override
+            public void onMessageReceived(FlintDevice flingDevice,
+                    String namespace, final String message) {
+                super.onMessageReceived(flingDevice, namespace, message);
+
+                // show received custom messages.
+                Log.d(TAG, "onMessageReceived: " + message);
+
+                mHandler.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject obj = new JSONObject(message);
+                            mIsHardwareDecoder = obj
+                                    .getBoolean("isHardwareDecoder");
+
+                            mHardwareDecoderCheckbox.setChecked(mIsHardwareDecoder);
+                            
+                            mHardwareDecoderCheckbox.setVisibility(View.VISIBLE);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            }
+        };
+
+        mHardwareDecoderCheckbox = (CheckBox) mMediaFlingBar
+                .findViewById(R.id.device_hardware_decoder);
+        mHardwareDecoderCheckbox.setVisibility(View.GONE);
+        mHardwareDecoderCheckbox
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView,
+                            boolean isChecked) {
+                        // TODO Auto-generated method stub
+                        if (mApiClient != null) {
+                            Log.e(TAG, "setHardwareDecoder:" + isChecked);
+                            setHardwareDecoder(isChecked);
+                        }
+                    }
+
+                });
+    }
+
+    /**
+     * Set custom message to device. let device use hardware decoder or not
+     * 
+     * @param flag
+     */
+    private void setHardwareDecoder(boolean flag) {
+        if (mApiClient == null || !mApiClient.isConnected()) {
+            return;
+        }
+
+        mFlintMsgChannel.setHardwareDecoder(mApiClient, flag);
     }
 
     protected void onRouteSelected(RouteInfo route) {
@@ -3192,6 +3270,11 @@ public class BrowserActivity extends FragmentActivity implements
         try {
             Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
                     mMediaPlayer.getNamespace(), mMediaPlayer);
+
+            // use this channel to send message channel.
+            Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
+                    mFlintMsgChannel.getNamespace(), mFlintMsgChannel);
+
         } catch (IOException e) {
             Log.w(TAG, "Exception while launching application", e);
         }
@@ -3202,6 +3285,10 @@ public class BrowserActivity extends FragmentActivity implements
             try {
                 Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
                         mMediaPlayer.getNamespace(), mMediaPlayer);
+
+                // use this channel to send message channel.
+                Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
+                        mFlintMsgChannel.getNamespace(), mFlintMsgChannel);
             } catch (IOException e) {
                 Log.w(TAG, "Exception while launching application", e);
             }
@@ -3213,6 +3300,9 @@ public class BrowserActivity extends FragmentActivity implements
             try {
                 Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
                         mMediaPlayer.getNamespace());
+
+                Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
+                        mFlintMsgChannel.getNamespace());
             } catch (IOException e) {
                 Log.w(TAG, "Exception while launching application", e);
             }
