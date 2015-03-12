@@ -77,6 +77,8 @@ public class SenderDemo extends ActionBarActivity {
     private static final int PLAYER_STATE_PLAYING = 1;
     private static final int PLAYER_STATE_PAUSED = 2;
     private static final int PLAYER_STATE_BUFFERING = 3;
+    private static final int PLAYER_STATE_FINISHED = 4;
+    
     private int mPlayerState = PLAYER_STATE_NONE;
 
     private ImageButton mBtnPlay;
@@ -237,12 +239,17 @@ public class SenderDemo extends ActionBarActivity {
                             || mMediaPlayer.getMediaStatus() == null
                             || mApiClient == null || !mApiClient.isConnected())
                         return;
-                    if (mPlayerState == PLAYER_STATE_PAUSED) {
+                    
+                    if (mPlayerState == PLAYER_STATE_PAUSED || mPlayerState == PLAYER_STATE_BUFFERING) {
                         mMediaPlayer.play(mApiClient).setResultCallback(
                                 new MediaResultCallback("play"));
-                    } else {
+                    } else if (mPlayerState == PLAYER_STATE_FINISHED) {
+                        sendURL(mVideoId, mIntent.getStringExtra("vname"));
+                    } else if (mPlayerState == PLAYER_STATE_PLAYING) {
                         mMediaPlayer.pause(mApiClient).setResultCallback(
                                 new MediaResultCallback("pause"));
+                    } else {
+                        Toast.makeText(SenderDemo.this, "ignore!unknown state![" + mPlayerState + "]", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -822,6 +829,8 @@ public class SenderDemo extends ActionBarActivity {
                 } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_BUFFERING) {
                     playerState = PLAYER_STATE_BUFFERING;
                 } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_IDLE) {
+                    playerState = PLAYER_STATE_FINISHED;
+                    
                     mFirst = true;
                     mBtnPlay.setBackgroundResource(R.drawable.btn_play);
                 }
@@ -835,14 +844,14 @@ public class SenderDemo extends ActionBarActivity {
 
     private void setPlayerState(int playerState) {
         mPlayerState = playerState;
-        if (mPlayerState == PLAYER_STATE_PAUSED) {
+        if (mPlayerState == PLAYER_STATE_PAUSED || mPlayerState == PLAYER_STATE_NONE || mPlayerState == PLAYER_STATE_FINISHED) {
             mBtnPlay.setBackgroundResource(R.drawable.btn_play);
         } else if (mPlayerState == PLAYER_STATE_PLAYING) {
             mBtnPlay.setBackgroundResource(R.drawable.btn_pause);
         }
 
-        // mBtnPlay.setEnabled((mPlayerState == PLAYER_STATE_PAUSED)
-        // || (mPlayerState == PLAYER_STATE_PLAYING));
+         mBtnPlay.setEnabled((mPlayerState == PLAYER_STATE_PAUSED)
+         || (mPlayerState == PLAYER_STATE_PLAYING) || (mPlayerState == PLAYER_STATE_FINISHED) );
     }
 
     class MyMediaRouterCallback extends MediaRouter.Callback {

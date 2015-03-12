@@ -225,6 +225,7 @@
         <activity
             android:name="com.infthink.miuicastsender.SenderDemo"
             android:label="@string/cast_application_name" 
+            android:launchMode="singleTask"
             android:configChanges="orientation|screenSize">
             <!--  intent-filter>
                 <action android:name="android.intent.action.MAIN" />
