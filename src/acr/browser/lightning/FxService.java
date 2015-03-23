@@ -135,7 +135,6 @@ public class FxService extends Service {
             }
         });
 
-
         mFloatView.setOnClickListener(new OnClickListener() {
 
             @Override

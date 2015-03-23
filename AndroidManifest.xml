@@ -38,7 +38,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="20" />
+        android:targetSdkVersion="21" />
 
     <application
         android:name="acr.browser.lightning.BrowserApp"

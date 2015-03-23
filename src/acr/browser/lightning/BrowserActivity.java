@@ -8,21 +8,30 @@ import info.guardianproject.onionkit.ui.OrbotHelper;
 import info.guardianproject.onionkit.web.WebkitProxy;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,8 +40,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import tv.matchstick.flint.ApplicationMetadata;
@@ -2648,6 +2671,8 @@ public class BrowserActivity extends FragmentActivity implements
     private TextView mFlingDeviceNameTextView;
     private TextView mFlingMediaInfoTextView;
 
+    private TextView mVideoResolutionTextView;
+
     private View mFlingMediaControls;
     private View mFlingInfo;
 
@@ -2759,7 +2784,8 @@ public class BrowserActivity extends FragmentActivity implements
             public void onClick(View v) {
                 if (mPlayerState == PLAYER_STATE_FINISHED) {
                     mHandler.postDelayed(mRefreshRunnable, 50);
-                } else if (mPlayerState == PLAYER_STATE_PAUSED || mPlayerState == PLAYER_STATE_BUFFERING) {
+                } else if (mPlayerState == PLAYER_STATE_PAUSED
+                        || mPlayerState == PLAYER_STATE_BUFFERING) {
                     onPlayClicked();
                 } else if (mPlayerState == PLAYER_STATE_PLAYING) {
                     onPauseClicked();
@@ -2842,13 +2868,71 @@ public class BrowserActivity extends FragmentActivity implements
         mFlingMediaInfoTextView = (TextView) mMediaFlingBar
                 .findViewById(R.id.media_info);
 
+        mVideoResolutionTextView = (TextView) mMediaFlingBar
+                .findViewById(R.id.resolution);
+
+        mVideoResolutionTextView.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                if (listDialog != null) {
+                    listDialog.dismiss();
+                }
+                Log.e(TAG, "onClick!");
+                initListDialog();
+
+            }
+
+        });
+
+        mVideoResolutionTextView.setVisibility(View.INVISIBLE);
+
         setPlayerState(PLAYER_STATE_NONE);
 
         mRefreshRunnable = new Runnable() {
             @Override
-            public void run() {                
+            public void run() {
                 Log.e(TAG, "show media cast control?![" + displays.size() + "]");
                 if (displays.size() > 0) {
+
+                    final String url = mCurrentView.getUrl();
+
+                    new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            if (mCurrentView == null) {
+                                return;
+                            }
+
+                            // TODO Auto-generated method stub
+                            List<NameValuePair> param = new ArrayList<NameValuePair>();
+
+                            param.add(new BasicNameValuePair("apptoken",
+                                    "3e52201f5037ad9bd8e389348916bd3a"));
+                            param.add(new BasicNameValuePair("method",
+                                    "core.video.realurl"));
+                            param.add(new BasicNameValuePair("packageName",
+                                    "com.infthink.test"));
+                            param.add(new BasicNameValuePair("url", url));
+
+                            Log.e(TAG, "get real video url:" + url);
+
+                            SendHttpsPOST("https://play.aituzi.com", param,
+                                    null);
+
+                        }
+
+                    }).start();
+
+                    if (mVideoResolutionTextView != null
+                            && mVideoResolutionTextView.getVisibility() == View.VISIBLE) {
+                        Log.e(TAG,
+                                "Ignore this video url for real video url is present!");
+                        return;
+                    }
 
                     Toast.makeText(mContext, mCurrentVideoUrl,
                             Toast.LENGTH_SHORT).show();
@@ -2958,9 +3042,11 @@ public class BrowserActivity extends FragmentActivity implements
                             mIsHardwareDecoder = obj
                                     .getBoolean("isHardwareDecoder");
 
-                            mHardwareDecoderCheckbox.setChecked(mIsHardwareDecoder);
-                            
-                            mHardwareDecoderCheckbox.setVisibility(View.VISIBLE);
+                            mHardwareDecoderCheckbox
+                                    .setChecked(mIsHardwareDecoder);
+
+                            mHardwareDecoderCheckbox
+                                    .setVisibility(View.VISIBLE);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -3222,7 +3308,7 @@ public class BrowserActivity extends FragmentActivity implements
 
     private void clearMediaState() {
         mSeeking = false;
-        
+
         setCurrentMediaMetadata(null, null, null);
         refreshPlaybackPosition(0, 0);
     }
@@ -3241,11 +3327,12 @@ public class BrowserActivity extends FragmentActivity implements
 
                         MediaStatus mediaStatus = mMediaPlayer.getMediaStatus();
                         if (mediaStatus != null) {
-                            Log.d(TAG, "MediaControlChannel.onStatusUpdated[" + mediaStatus.getPlayerState() + "]");
+                            Log.d(TAG, "MediaControlChannel.onStatusUpdated["
+                                    + mediaStatus.getPlayerState() + "]");
                         } else {
                             Log.d(TAG, "MediaControlChannel.onStatusUpdated");
                         }
-                        
+
                         // If item has ended, clear metadata.
                         if ((mediaStatus != null)
                                 && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE)) {
@@ -3356,7 +3443,7 @@ public class BrowserActivity extends FragmentActivity implements
         }
         mMediaPlayer = null;
     }
-    
+
     private void updateFlingDispInfo(boolean show) {
         if (show) {
             mFlingInfo.setVisibility(View.VISIBLE);
@@ -3389,7 +3476,7 @@ public class BrowserActivity extends FragmentActivity implements
                     playerState = PLAYER_STATE_FINISHED;
 
                     mSeeking = false;
-                    
+
                     refreshPlaybackPosition(0, mMediaPlayer.getStreamDuration());
                 }
                 setPlayerState(playerState);
@@ -3398,15 +3485,16 @@ public class BrowserActivity extends FragmentActivity implements
                 // mStopButton.setEnabled(hasMedia);
 
                 updateFlingDispInfo(true);
-                
-                setSeekBarEnabled(playerState != PLAYER_STATE_FINISHED && playerState != PLAYER_STATE_NONE);
+
+                setSeekBarEnabled(playerState != PLAYER_STATE_FINISHED
+                        && playerState != PLAYER_STATE_NONE);
             }
         } else {
             setPlayerState(PLAYER_STATE_NONE);
 
             updateFlingDispInfo(false);
             // mStopButton.setEnabled(false);
-            
+
             setSeekBarEnabled(false);
         }
 
@@ -3419,8 +3507,8 @@ public class BrowserActivity extends FragmentActivity implements
          * && hasAppConnection);
          */
 
-        //mPlayPauseButton.setEnabled(hasMediaConnection);
-        
+        // mPlayPauseButton.setEnabled(hasMediaConnection);
+
         /*
          * setDeviceVolumeControlsEnabled(hasDeviceConnection);
          * setStreamVolumeControlsEnabled(hasMediaConnection);
@@ -3432,8 +3520,8 @@ public class BrowserActivity extends FragmentActivity implements
     }
 
     protected final void refreshPlaybackPosition(long position, long duration) {
-//         Log.e(TAG, "refreshPlaybackPosition:position[" + position +
-//         "]duration[" + duration + "]mIsUserSeeking[" + mIsUserSeeking + "]");
+        // Log.e(TAG, "refreshPlaybackPosition:position[" + position +
+        // "]duration[" + duration + "]mIsUserSeeking[" + mIsUserSeeking + "]");
         if (!mIsUserSeeking) {
             if (position == 0) {
                 mFlingTotalTimeTextView.setText("N/A");
@@ -3546,7 +3634,7 @@ public class BrowserActivity extends FragmentActivity implements
     protected final void cancelRefreshTimer() {
         RuntimeException ex = new RuntimeException();
         ex.printStackTrace();
-        
+
         mHandler.removeCallbacks(mRefreshFlingRunnable);
     }
 
@@ -3808,5 +3896,338 @@ public class BrowserActivity extends FragmentActivity implements
 
     protected final void refreshSeekPosition(long position, long duration) {
         mFlingCurrentTimeTextView.setText(formatTime(position));
+    }
+
+    private class MyHostnameVerifier implements HostnameVerifier {
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            // TODO Auto-generated method stub
+            return true;
+        }
+    }
+
+    private class MyTrustManager implements X509TrustManager {
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType)
+
+        throws CertificateException {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+    }
+
+    public String SendHttpsPOST(String url, List<NameValuePair> param,
+            String data) {
+        String result = null;
+
+        Log.e(TAG, "SendHttpsPOST!");
+
+        // 使用此工具可以将键值对编码成"Key=Value&amp;Key2=Value2&amp;Key3=Value3&rdquo;形式的请求参数
+        String requestParam = URLEncodedUtils.format(param, "UTF-8");
+
+        try {
+            // 设置SSLContext
+            SSLContext sslcontext = SSLContext.getInstance("TLS");
+            sslcontext.init(null, new TrustManager[] { new MyTrustManager() },
+                    null);
+
+            Log.e(TAG, "SendHttpsPOST! 1");
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext
+                    .getSocketFactory());
+            HttpsURLConnection
+                    .setDefaultHostnameVerifier(new MyHostnameVerifier());
+
+            Log.e(TAG, "SendHttpsPOST! 2");
+            // 打开连接
+            // 要发送的POST请求url?Key=Value&amp;Key2=Value2&amp;Key3=Value3的形式
+            // URL requestUrl = new URL(url + "?" + requestParam);
+            URL requestUrl = new URL(url);
+            HttpsURLConnection httpsConn = (HttpsURLConnection) requestUrl
+                    .openConnection();
+
+            Log.e(TAG, "SendHttpsPOST! 3");
+
+            // 设置套接工厂
+            // httpsConn.setSSLSocketFactory(sslcontext.getSocketFactory());
+
+            // 加入数据
+            httpsConn.setRequestMethod("POST");
+            Log.e(TAG, "SendHttpsPOST! 4");
+
+            httpsConn.setDoOutput(true);
+            httpsConn.setDoInput(true);
+            httpsConn.setUseCaches(false);
+            httpsConn.setRequestProperty("Content-Type",
+                    "application/x-www-form-urlencoded");
+
+            // Form the POST parameters
+            // StringBuilder content = new StringBuilder();
+            // boolean first = true;
+            // Iterator iterator = param.iterator();
+            // Entry parameter = (Entry) iterator.next();
+            // try {
+            // while (parameter != null) {
+            // if (!first) {
+            // content.append("&");
+            // }
+            // content.append(
+            // URLEncoder.encode((String) parameter.getKey(),
+            // "UTF-8")).append("=");
+            // content.append(URLEncoder.encode(
+            // (String) parameter.getValue(), "UTF-8"));
+            // first = false;
+            // parameter = (Entry) iterator.next();
+            // }
+            // } catch (NoSuchElementException e) {
+            // e.printStackTrace();
+            // }
+
+            // send the POST request to server
+            OutputStream outputStream = null;
+            try {
+                outputStream = httpsConn.getOutputStream();
+                outputStream.write(requestParam.toString().getBytes("utf-8"));
+                outputStream.flush();
+            } finally {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+
+            Log.e(TAG, "SendHttpsPOST! 5");
+            // DataOutputStream out = new DataOutputStream(
+            // httpsConn.getOutputStream());
+            // Log.e(TAG, "SendHttpsPOST! 6");
+            // if (data != null)
+            // out.writeBytes(data);
+            //
+            // out.flush();
+            // out.close();
+
+            Log.e(TAG, "SendHttpsPOST! 6.1");
+
+            // 获取输入流
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    httpsConn.getInputStream()));
+            Log.e(TAG, "SendHttpsPOST! 7");
+            int code = httpsConn.getResponseCode();
+            Log.e(TAG, "SendHttpsPOST! 8");
+            if (HttpsURLConnection.HTTP_OK == code) {
+                String temp = in.readLine();
+                /* 连接成一个字符串 */
+                while (temp != null) {
+                    if (result != null)
+                        result += temp;
+                    else
+                        result = temp;
+                    temp = in.readLine();
+                }
+
+                Log.e(TAG, "SendHttpsPOST:response[" + result + "]");
+
+                // ready to processs video urls!
+                processVideoUrls(result);
+            }
+
+            Log.e(TAG, "SendHttpsPOST![" + code + "]");
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    /**
+     * Get video url list
+     * 
+     * @param result
+     */
+    void processVideoUrls(String result) {
+        videoUrls.clear();
+
+        // {"status":200,"data":[{"url":"http:\/\/v.youku.com\/v_show\/id_XODUwMDM0NDUy.html?from=y1.3-tv-grid-1007-9910.86804.1-1","id":"","num":"","vid":"","source":"youku","sourceName":"\u4f18\u9177\u89c6\u9891","playUrl":{"HD":["http:\/\/pl.youku.com\/playlist\/m3u8?ts=1427076444&keyframe=1&vid=XODUwMDM0NDUy&type=hd2&sid=442707644496121c78ca6&token=5158&oip=1008521675&ep=v4TS4z2PnxtMZfqTd5f%2FdgrHMEbE4Lhvk9YdQoGTJsv7lbbElD2WtWp9mT7DI5SF&did=3f2189e6a744e68de6761a20ceaf379aa8acfad4&ctype=21&ev=1"],"SD":["http:\/\/pl.youku.com\/playlist\/m3u8?ts=1427076444&keyframe=1&vid=XODUwMDM0NDUy&type=mp4&sid=442707644496121c78ca6&token=5158&oip=1008521675&ep=v4TS4z2PnxtMZfqTd5f%2FdgrHMEbE4Lhvk9YdQoGTJsv7lbbElD2WtWp9mT7DI5SF&did=3f2189e6a744e68de6761a20ceaf379aa8acfad4&ctype=21&ev=1"]}}]}
+        try {
+            JSONObject obj = new JSONObject(result);
+            String status = obj.getString("status");
+
+            if ("200".equals(status)) {
+                JSONArray data = obj.getJSONArray("data");
+
+                JSONObject r = data.getJSONObject(0);
+                final String url = r.getString("url");
+                JSONObject playUrl = r.getJSONObject("playUrl");
+
+                try {
+                    JSONArray Smooth = playUrl.getJSONArray("Smooth");
+                    videoUrls.put(getString(R.string.resolution_Smooth),
+                            Smooth.getString(0));
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                }
+
+                try {
+                    JSONArray SD = playUrl.getJSONArray("SD");
+                    videoUrls.put(getString(R.string.resolution_SD),
+                            SD.getString(0));
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                }
+
+                try {
+                    JSONArray HD = playUrl.getJSONArray("HD");
+                    videoUrls.put(getString(R.string.resolution_HD),
+                            HD.getString(0));
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                }
+
+                try {
+                    JSONArray Ultraclear = playUrl.getJSONArray("Ultraclear");
+                    videoUrls.put(getString(R.string.resolution_Ultraclear),
+                            Ultraclear.getString(0));
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                }
+
+                try {
+                    JSONArray Bluray = playUrl.getJSONArray("Bluray");
+                    videoUrls.put(getString(R.string.resolution_Bluray),
+                            Bluray.getString(0));
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                }
+
+                Log.e(TAG,
+                        "playUrl:" + playUrl.toString() + "["
+                                + videoUrls.toString() + "]");
+
+                if (videoUrls.size() > 0) {
+                    mHandler.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            // TODO Auto-generated method stub
+
+                            mSiteUrl = url;
+
+                            if (listDialog != null) {
+                                listDialog.setDialogTitile(url);
+                            }
+
+                            Toast.makeText(mContext,
+                                    "Get real video url OK!!!",
+                                    Toast.LENGTH_SHORT).show();
+
+                            mVideoResolutionTextView
+                                    .setVisibility(View.VISIBLE);
+                        }
+
+                    });
+                } else {
+                    mHandler.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            // TODO Auto-generated method stub
+
+                            mVideoResolutionTextView
+                                    .setVisibility(View.INVISIBLE);
+                        }
+
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            mHandler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    // TODO Auto-generated method stub
+
+                    mVideoResolutionTextView.setVisibility(View.INVISIBLE);
+                }
+
+            });
+        }
+    }
+
+    private CustomDialog listDialog;
+    Map<String, String> videoUrls = new HashMap<String, String>();
+    ArrayList<String> videoList = new ArrayList<String>();
+
+    private String mSiteUrl;
+
+    /**
+     * 初始化列表框
+     */
+    private void initListDialog() {
+        listDialog = CustomDialog.createListDialog(this,
+                new OnItemClickListener() {
+
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0, View arg1,
+                            int arg2, long arg3) {
+                        listDialog.dismiss();
+
+                        mVideoResolutionTextView.setText(videoList.get(arg2));
+
+                        mCurrentVideoUrl = videoUrls.get(videoList.get(arg2));
+
+                        MediaMetadata metadata = new MediaMetadata(
+                                MediaMetadata.MEDIA_TYPE_MOVIE);
+                        mSelectedMedia = new MediaInfo.Builder(mCurrentVideoUrl)
+                                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                                .setContentType("video/mp4")
+                                .setMetadata(metadata).build();
+
+                        Log.e(TAG, "should show!");
+                        if (mApiClient != null && mApiClient.isConnected()) {
+                            if (mMediaPlayer != null) {
+                                playMedia(mSelectedMedia);
+                            }
+
+                        }
+                    }
+                });
+        if (mSiteUrl != null) {
+            final String title = mCurrentView.getTitle();
+            listDialog.setDialogTitile(title + "[" + mSiteUrl + "]");
+        } else {
+            listDialog.setDialogTitile(getResources().getString(
+                    R.string.custom_dialog_list_title_str));
+        }
+
+        videoList.clear();
+
+        videoList.addAll(videoUrls.keySet());
+
+        listDialog.setListData(videoList);
+        listDialog.show();
+    }
+
+    public String getCurrentResolution() {
+        return mVideoResolutionTextView.getText().toString();
     }
 }

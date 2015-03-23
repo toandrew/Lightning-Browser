@@ -95,5 +95,23 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+        <style name="CustomDialogBase" parent="@android:style/Theme.Dialog">  
+    	<item name="android:windowFrame">@null</item>  
+        <item name="android:windowIsFloating">true</item>  
+        <item name="android:windowContentOverlay">@null</item>  
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>  
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>  
+    </style>  
+      
+    <style name="CustomDialogStyle" parent="@style/CustomDialogBase">  
+        <item name="android:windowBackground">@android:color/black</item>  
+        <item name="android:windowNoTitle">true</item>  
+    </style>
+    
+    <style name="CustomWhiteDialogStyle" parent="@style/CustomDialogStyle">  
+        <item name="android:windowBackground">@android:color/white</item>  
+        <item name="android:windowNoTitle">true</item>  
+    </style>
+    
 
 </resources>
