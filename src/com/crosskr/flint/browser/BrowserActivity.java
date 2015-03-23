@@ -58,6 +58,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.umeng.analytics.MobclickAgent;
+import com.umeng.update.UmengUpdateAgent;
+
 import tv.matchstick.flint.ApplicationMetadata;
 import tv.matchstick.flint.ConnectionResult;
 import tv.matchstick.flint.Flint;
@@ -1468,6 +1471,9 @@ public class BrowserActivity extends FragmentActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+
+        MobclickAgent.onPause(this);
+
         Log.i(Constants.TAG, "onPause");
         if (mCurrentView != null) {
             mCurrentView.pauseTimers();
@@ -1520,6 +1526,9 @@ public class BrowserActivity extends FragmentActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        MobclickAgent.onResume(this);
+
         Log.i(Constants.TAG, "onResume");
         if (mSearchAdapter != null) {
             mSearchAdapter.refreshPreferences();
@@ -2759,6 +2768,11 @@ public class BrowserActivity extends FragmentActivity implements
     }
 
     private void initFlingServerSocket() {
+        
+        MobclickAgent.updateOnlineConfig( mContext );
+        
+        UmengUpdateAgent.update(this);
+        
         Log.e(TAG, "initFlingServerSocket!");
         mConnectionCallbacks = new ConnectionCallbacks();
 
