@@ -25,11 +25,11 @@ import tv.matchstick.flint.RemoteMediaPlayer.MediaChannelResult;
 import tv.matchstick.flint.ResultCallback;
 import tv.matchstick.flint.Status;
 
+import com.crosskr.flint.browser.BrowserApp;
+import com.crosskr.flint.browser.FlintMsgChannel;
+import com.crosskr.flint.browser.R;
 import com.nanohttpd.webserver.src.main.java.fi.iki.elonen.SimpleWebServer;
 
-import acr.browser.lightning.BrowserApp;
-import acr.browser.lightning.FlintMsgChannel;
-import acr.browser.lightning.R;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;

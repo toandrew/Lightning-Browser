@@ -43,7 +43,7 @@
 
             <include layout="@layout/search_interface" />
             
-            <acr.browser.lightning.MediaFlingBar android:id="@+id/media_fling"
+            <com.crosskr.flint.browser.MediaFlingBar android:id="@+id/media_fling"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 			  	android:visibility="gone"/>
