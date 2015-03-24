@@ -132,6 +132,7 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
@@ -250,9 +251,38 @@ public class BrowserActivity extends FragmentActivity implements
         mMediaRouter.removeCallback(mMediaRouterCallback);
     }
 
+    
+    boolean isOpened = false;
+    public void setListenerToRootView(){
+        final View activityRootView = getWindow().getDecorView().findViewById(R.id.content_frame); 
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+
+                int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
+                if (heightDiff > 300 ) { // 99% of the time the height diff will be due to a keyboard.
+                    //Toast.makeText(getApplicationContext(), "Gotcha!!! softKeyboardup", 0).show();
+                    Log.e(TAG, "keyboard show?![" + heightDiff + "]");
+                    if(isOpened == false){
+                        //Do two things, make the view top visible and the editText smaller
+                    }
+                    isOpened = true;
+                }else if(isOpened == true){
+                    Log.e(TAG, "keyboard hide?![" + heightDiff + "]");
+                    
+                    //Toast.makeText(getApplicationContext(), "softkeyborad Down!!!", 0).show();                  
+                    isOpened = false;
+                }
+             }
+        });
+    }
+    
     @SuppressWarnings("deprecation")
     private synchronized void initialize() {
         setContentView(R.layout.activity_main);
+
+        setListenerToRootView();
+        
         TypedValue typedValue = new TypedValue();
         Theme theme = getTheme();
         theme.resolveAttribute(R.attr.numberColor, typedValue, true);
@@ -3798,7 +3828,7 @@ public class BrowserActivity extends FragmentActivity implements
         updateButtonStates();
 
         // Get Video's url.
-        if (mCurrentView != null) {
+        if (mCurrentView != null && !isOpened) {
             Log.e(TAG, "evaluateJavascript!!");
 
             // add this for get video url.
@@ -4187,20 +4217,20 @@ public class BrowserActivity extends FragmentActivity implements
 
                         mVideoResolutionTextView.setText(videoList.get(arg2));
 
-                        mCurrentVideoUrl = videoUrls.get(videoList.get(arg2));
+                        //mCurrentVideoUrl = videoUrls.get(videoList.get(arg2));
 
                         MediaMetadata metadata = new MediaMetadata(
                                 MediaMetadata.MEDIA_TYPE_MOVIE);
-                        mSelectedMedia = new MediaInfo.Builder(mCurrentVideoUrl)
+                        mSelectedMedia = new MediaInfo.Builder(videoUrls.get(videoList.get(arg2)))
                                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                                 .setContentType("video/mp4")
                                 .setMetadata(metadata).build();
 
+                        mShouldAutoPlayMedia = false;
+                        
                         Log.e(TAG, "should show!");
                         if (mApiClient != null && mApiClient.isConnected()) {
                             if (mMediaPlayer != null) {
-                                mShouldAutoPlayMedia = false;
-                                
                                 playMedia(mSelectedMedia);
                             }
 
