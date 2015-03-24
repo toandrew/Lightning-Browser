@@ -2712,6 +2712,8 @@ public class BrowserActivity extends FragmentActivity implements
     private CheckBox mHardwareDecoderCheckbox;
 
     private boolean mIsHardwareDecoder = true;
+    
+    private boolean mShouldAutoPlayMedia = true;
 
     private MediaRouteSelector buildMediaRouteSelector() {
         return new MediaRouteSelector.Builder().addControlCategory(
@@ -2723,7 +2725,11 @@ public class BrowserActivity extends FragmentActivity implements
         @Override
         public void onRouteSelected(MediaRouter router, RouteInfo route) {
             Log.d(TAG, "onRouteSelected: route=" + route);
+            
             mShouldPlayMedia = true;
+            
+            mShouldAutoPlayMedia = true;
+            
             try {
                 BrowserActivity.this.onRouteSelected(route);
             } catch (Exception e) {
@@ -2734,6 +2740,9 @@ public class BrowserActivity extends FragmentActivity implements
         @Override
         public void onRouteUnselected(MediaRouter router, RouteInfo route) {
             Log.d(TAG, "onRouteUnselected: route=" + route);
+            
+            mShouldAutoPlayMedia = true;
+            
             mShouldPlayMedia = false;
             try {
                 BrowserActivity.this.onRouteUnselected(route);
@@ -2900,6 +2909,7 @@ public class BrowserActivity extends FragmentActivity implements
 
         });
 
+        mVideoResolutionTextView.setText("");
         mVideoResolutionTextView.setVisibility(View.INVISIBLE);
 
         setPlayerState(PLAYER_STATE_NONE);
@@ -2948,8 +2958,10 @@ public class BrowserActivity extends FragmentActivity implements
                         mVideoResolutionTextView
                                 .setText(getString(R.string.resolution));
 
-                        return;
-                    }
+                        if (!mShouldAutoPlayMedia) {
+                            return;
+                        }
+                    } 
 
                     Toast.makeText(mContext, mCurrentVideoUrl,
                             Toast.LENGTH_SHORT).show();
@@ -3130,7 +3142,7 @@ public class BrowserActivity extends FragmentActivity implements
     protected void onRouteUnselected(RouteInfo route) {
         Log.d(TAG, "onRouteUnselected: " + route);
 
-        if (mVideoResolutionTextView != null) {
+        if (mVideoResolutionTextView != null && mVideoResolutionTextView.getVisibility() == View.VISIBLE) {
             mVideoResolutionTextView.setText(getString(R.string.resolution));
         }
 
@@ -3497,6 +3509,8 @@ public class BrowserActivity extends FragmentActivity implements
                 } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_IDLE) {
                     playerState = PLAYER_STATE_FINISHED;
 
+                    mShouldAutoPlayMedia = true;
+                    
                     mSeeking = false;
 
                     refreshPlaybackPosition(0, mMediaPlayer.getStreamDuration());
@@ -4129,6 +4143,7 @@ public class BrowserActivity extends FragmentActivity implements
                             Toast.makeText(mContext, videoUrls.toString(),
                                     Toast.LENGTH_SHORT).show();
 
+                            mVideoResolutionTextView.setText(getString(R.string.resolution));
                             mVideoResolutionTextView
                                     .setVisibility(View.VISIBLE);
                         }
@@ -4141,6 +4156,8 @@ public class BrowserActivity extends FragmentActivity implements
                         public void run() {
                             // TODO Auto-generated method stub
 
+                            mVideoResolutionTextView.setText("");
+                            
                             mVideoResolutionTextView
                                     .setVisibility(View.INVISIBLE);
                         }
@@ -4157,6 +4174,8 @@ public class BrowserActivity extends FragmentActivity implements
                 public void run() {
                     // TODO Auto-generated method stub
 
+                    mVideoResolutionTextView.setText("");
+                    
                     mVideoResolutionTextView.setVisibility(View.INVISIBLE);
                 }
 
@@ -4196,6 +4215,8 @@ public class BrowserActivity extends FragmentActivity implements
                         Log.e(TAG, "should show!");
                         if (mApiClient != null && mApiClient.isConnected()) {
                             if (mMediaPlayer != null) {
+                                mShouldAutoPlayMedia = false;
+                                
                                 playMedia(mSelectedMedia);
                             }
 
