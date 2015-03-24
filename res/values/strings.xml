@@ -17,7 +17,7 @@
 
 <resources>
 
-    <string name="app_name">FlintBrowser</string>
+    <string name="app_name">Crosskr Browser</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="action_websearch">Web search</string>
@@ -122,10 +122,10 @@
     <string name="action_find">Find in Page</string>
     <string name="download_pending">Starting download\u2026</string>
     <string name="cannot_download">Can only download \"http\" or \"https\" URLs.</string>
-    <string name="download_no_sdcard_dlg_title" >No SD card</string>
-    <string name="download_no_sdcard_dlg_msg" >USB storage is required to download the file.</string>
+    <string name="download_no_sdcard_dlg_title">No SD card</string>
+    <string name="download_no_sdcard_dlg_msg">USB storage is required to download the file.</string>
     <string name="download_sdcard_busy_dlg_title">USB storage unavailable</string>
-    <string name="download_sdcard_busy_dlg_msg" >The storage is busy. To allow downloads, touch Turn Off USB Storage in the notification.</string>
+    <string name="download_sdcard_busy_dlg_msg">The storage is busy. To allow downloads, touch Turn Off USB Storage in the notification.</string>
     <string name="incognito_cookies">Enable Cookies in Incognito Mode</string>
     <string name="title_flash">Adobe Flash</string>
     <string name="action_manual">Manual</string>
@@ -193,14 +193,11 @@
     <string name="settings_privacy">Privacy Settings</string>
     <string name="settings_about">About</string>
     <string name="settings_about_explain">Details about version, author and license.</string>
-
     <string name="do_fling">您是否需要投射此文件？</string>
     <string name="action_fling">投射</string>
-    
     <string name="castappname">NETCAST</string>
     <string name="imguri">www.infthink.com</string>
     <string name="title">NETCAST</string>
-
     <string name="cast_app_name">"Cast"</string>
     <string name="btnplay">play</string>
     <string name="btnpause">pause</string>
@@ -208,18 +205,13 @@
     <string name="btnnext">fastforward</string>
     <string name="btnstop">stop</string>
     <string name="tvshowtext">Ready to Cast</string>
-    
     <string name="tvdeviceslist">Cast devices list</string>
-
     <string name="cast_application_name">超级棒播放器</string>
     <string name="cast_server_name">CastServer</string>
     <string name="sender_app_name">Sender</string>
     <string name="action_cast">Cast</string>
-    
     <string name="start_service">Start Service</string>
     <string name="stop_service">Stop Service</string>
-
-
     <string name="start_local">local</string>
     <string name="start_net">network</string>
     <string name="config_setting">settings</string>
@@ -228,20 +220,23 @@
     <string name="ip_addr">ip_addr</string>
     <string name="port">port</string>
     <string name="appname">AppName</string>
-
-    
     <string name="radio_sender">"Sender"</string>
     <string name="radio_cast">"Cast"</string>
-    
     <string name="cmd_start_session">"Start Session"</string>
     <string name="cmd_end_session">"End Session"</string>
-    
     <string name="cmd_send_message">"Send Message"</string>
     <string name="bufferingtext">Buffering...</string>
-    
     <string name="flint">Fling</string>
     <string name="agent_ipad">Ipad</string>
     <string name="agent_iphone">Iphone</string>
     <string name="agent_android_tablet">Android Tablet</string>
     <string name="action_user_agent">User Agent</string>
+    <string name="custom_dialog_list_title_str">Choose a Resolution</string>
+    <string name="resolution">Resolution</string>
+    <string name="resolution_Smooth">Smooth</string>
+    <string name="resolution_SD">SD</string>
+    <string name="resolution_HD">HD</string>
+    <string name="resolution_Ultraclear">Ultraclear</string>
+    <string name="resolution_Bluray">Bluray</string>
+
 </resources>

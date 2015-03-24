@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:background="@color/mediacontroller_bg"
     android:orientation="vertical" >
-
+    
     <LinearLayout
         android:id="@+id/fling_info"
         android:layout_width="match_parent"
@@ -35,11 +35,12 @@
 
         <CheckBox
             android:id="@+id/device_hardware_decoder"
+            style="@style/MediaController_Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Use Hardware Decoder" 
-            style="@style/MediaController_Text"/>
+            android:text="Use Hardware Decoder"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/media_info"
@@ -77,7 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="1dp"
                 android:background="@drawable/mediacontroller_button"
                 android:src="@drawable/mediacontroller_play" />
 
@@ -87,17 +88,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="1dp"
                 android:layout_toRightOf="@id/mediacontroller_play_pause" />
+
+            <TextView
+                android:id="@+id/resolution"
+                style="@style/MediaController_Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/resolution" />
 
             <TextView
                 android:id="@+id/mediacontroller_time_total"
                 style="@style/MediaController_Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="5dp" />
+                android:layout_toLeftOf="@id/resolution" 
+                android:layout_marginRight="5dp"/>
 
             <SeekBar
                 android:id="@+id/mediacontroller_seekbar"

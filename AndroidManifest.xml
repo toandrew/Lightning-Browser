@@ -4,9 +4,9 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="acr.browser.lightning"
-    android:versionCode="66"
-    android:versionName="3.2.0.1a" >
+    package="com.crosskr.flint.webview.browser"
+    android:versionCode="3"
+    android:versionName="1.0" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
@@ -41,17 +41,17 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="20" />
-    
+        android:targetSdkVersion="21" />
+
     <application
-        android:name="acr.browser.lightning.BrowserApp"
+        android:name="com.crosskr.flint.webview.browser.BrowserApp"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" 
         android:theme="@style/Theme.AppCompat">
         <activity
-            android:name="acr.browser.lightning.MainActivity"
+            android:name="com.crosskr.flint.webview.browser.MainActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
@@ -118,7 +118,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.SettingsActivity"
+            android:name="com.crosskr.flint.webview.browser.SettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/settings"
             android:theme="@style/DefaultTheme" >
@@ -129,7 +129,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.GeneralSettingsActivity"
+            android:name="com.crosskr.flint.webview.browser.GeneralSettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/settings_general"
             android:theme="@style/DefaultTheme" >
@@ -140,7 +140,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.DisplaySettingsActivity"
+            android:name="com.crosskr.flint.webview.browser.DisplaySettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/settings_display"
             android:theme="@style/DefaultTheme" >
@@ -151,7 +151,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.PrivacySettingsActivity"
+            android:name="com.crosskr.flint.webview.browser.PrivacySettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/settings_privacy"
             android:theme="@style/DefaultTheme" >
@@ -162,7 +162,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.AdvancedSettingsActivity"
+            android:name="com.crosskr.flint.webview.browser.AdvancedSettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/settings_advanced"
             android:theme="@style/DefaultTheme" >
@@ -173,7 +173,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.AboutSettingsActivity"
+            android:name="com.crosskr.flint.webview.browser.AboutSettingsActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/settings_about"
             android:theme="@style/DefaultTheme" >
@@ -184,7 +184,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.IncognitoActivity"
+            android:name="com.crosskr.flint.webview.browser.IncognitoActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/app_name"
@@ -198,7 +198,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="acr.browser.lightning.LicenseActivity"
+            android:name="com.crosskr.flint.webview.browser.LicenseActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/licenses"
             android:theme="@style/DefaultTheme" >
@@ -210,7 +210,7 @@
         </activity>
         
         <activity
-            android:name="acr.browser.lightning.BookmarkActivity"
+            android:name="com.crosskr.flint.webview.browser.BookmarkActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/bookmark_settings"
             android:theme="@style/DefaultTheme" >
@@ -224,9 +224,12 @@
 
         <activity
             android:name="com.infthink.miuicastsender.SenderDemo"
-            android:label="@string/cast_application_name" 
-            android:configChanges="orientation|screenSize">
-            <!--  intent-filter>
+            android:configChanges="orientation|screenSize"
+            android:label="@string/cast_application_name"
+            android:launchMode="singleTask" >
+
+            <!--
+            intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -305,8 +308,35 @@
                 <action android:name="android.media.MediaRouteProviderService" />
             </intent-filter>
         </service>
+        <service android:name="com.crosskr.flint.webview.browser.FxService" >
+            <intent-filter>
+                <action android:name="action.flint.start.floating.srv" />
+            </intent-filter>
+        </service>
 
+        <receiver android:name="com.crosskr.flint.webview.browser.MyFloatingReceiver" >
+            <intent-filter>
+                <action android:name="action.flint.notify" />
+            </intent-filter>
+        </receiver>
 
+        <service
+            android:name="com.umeng.update.net.DownloadingService"
+            android:process=":DownloadingService" >
+        </service>
+
+        <activity
+            android:name="com.umeng.update.UpdateDialogActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
+
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="5510ee42fd98c5d5f50004fd" >
+        </meta-data>
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="INFTHINK" />
     </application>
 
 </manifest>
