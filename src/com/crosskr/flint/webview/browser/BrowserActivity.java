@@ -1545,6 +1545,9 @@ public class BrowserActivity extends FragmentActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        
+        MobclickAgent.onResume(this);
+        
         Log.i(Constants.TAG, "onResume");
         if (mSearchAdapter != null) {
             mSearchAdapter.refreshPreferences();
