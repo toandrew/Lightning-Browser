@@ -3272,6 +3272,11 @@ public class BrowserActivity extends FragmentActivity implements
             detachMediaPlayer();
             clearMediaState();
             updateButtonStates();
+            
+            if (mMediaRouter != null) {
+                mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
+            }
+            
             // if (statusCode != FlintStatusCodes.SUCCESS) {
             // This is an unexpected disconnect.
             // setApplicationStatus(getString(R.string.status_app_disconnected));
