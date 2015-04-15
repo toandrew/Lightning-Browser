@@ -3657,10 +3657,10 @@ public class BrowserActivity extends FragmentActivity implements
                         mShouldAutoPlayMedia = false;
 
                         mCurrentVideoUrl = videoUrls.get(videoList.get(arg2));
-                        
+                        mVideoResolutionTextView.setText(videoList
+                                .get(arg2));
+
                         if (mFlintVideoManager.isMediaConnected()) {
-                            mVideoResolutionTextView.setText(videoList
-                                    .get(arg2));
 
                             mFlintVideoManager.playVideo(
                                     videoUrls.get(videoList.get(arg2)),
