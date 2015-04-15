@@ -2948,7 +2948,7 @@ public class BrowserActivity extends FragmentActivity implements
                 }
 
                 updateGetVideoRealBtnStatus(false);
-                
+
                 final String url = mCurrentView.getUrl();
                 getVideoPlayUrl(url);
             }
@@ -3656,6 +3656,8 @@ public class BrowserActivity extends FragmentActivity implements
                         mAutoplayCheckbox.setChecked(false);
                         mShouldAutoPlayMedia = false;
 
+                        mCurrentVideoUrl = videoUrls.get(videoList.get(arg2));
+                        
                         if (mFlintVideoManager.isMediaConnected()) {
                             mVideoResolutionTextView.setText(videoList
                                     .get(arg2));
@@ -3663,10 +3665,6 @@ public class BrowserActivity extends FragmentActivity implements
                             mFlintVideoManager.playVideo(
                                     videoUrls.get(videoList.get(arg2)),
                                     getCurrentVideoTitle());
-                        } else {
-                            Toast.makeText(mContext,
-                                    "Not connected!cannot play media!",
-                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
