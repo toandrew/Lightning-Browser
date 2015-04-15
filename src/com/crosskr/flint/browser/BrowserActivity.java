@@ -2678,8 +2678,12 @@ public class BrowserActivity extends FragmentActivity implements
     private FlintVideoManager mFlintVideoManager;
     private ImageButton mMediaRouteButton;
 
+    private ImageButton mVideoRefreshBtn;
+
+    private ProgressBar mVideoRefreshProgressBar;
+
     /**
-     * Init all Flint related 
+     * Init all Flint related
      */
     private void initFlint() {
 
@@ -2802,42 +2806,11 @@ public class BrowserActivity extends FragmentActivity implements
                     if (mCurrentView == null) {
                         return;
                     }
-                    
+
                     final String url = mCurrentView.getUrl();
 
                     if (!url.equals(mSiteUrl)) {
-
-                        // hide
-                        hideVideoResolutionView();
-
-                        new Thread(new Runnable() {
-
-                            @Override
-                            public void run() {
-
-                                if (mCurrentView == null) {
-                                    return;
-                                }
-
-                                // TODO Auto-generated method stub
-                                List<NameValuePair> param = new ArrayList<NameValuePair>();
-
-                                param.add(new BasicNameValuePair("apptoken",
-                                        "3e52201f5037ad9bd8e389348916bd3a"));
-                                param.add(new BasicNameValuePair("method",
-                                        "core.video.realurl"));
-                                param.add(new BasicNameValuePair("packageName",
-                                        "com.infthink.test"));
-                                param.add(new BasicNameValuePair("url", url));
-
-                                Log.e(TAG, "get real video url[" + url + "]site[" + mSiteUrl + "]");
-
-                                SendHttpsPOST("https://play.aituzi.com", param,
-                                        null);
-
-                            }
-
-                        }).start();
+                        getVideoPlayUrl(url);
                     } else {
                         // hide
                         hideVideoResolutionView();
@@ -2860,6 +2833,7 @@ public class BrowserActivity extends FragmentActivity implements
                     }
                 }
             }
+
         };
 
         mRefreshFlingRunnable = new Runnable() {
@@ -2961,6 +2935,28 @@ public class BrowserActivity extends FragmentActivity implements
                         mShouldAutoPlayMedia = isChecked;
                     }
                 });
+
+        mVideoRefreshBtn = (ImageButton) mMediaFlingBar
+                .findViewById(R.id.media_get_video_url_btn);
+        mVideoRefreshBtn.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                if (mCurrentView == null) {
+                    return;
+                }
+
+                updateGetVideoRealBtnStatus(false);
+                
+                final String url = mCurrentView.getUrl();
+                getVideoPlayUrl(url);
+            }
+
+        });
+
+        mVideoRefreshProgressBar = (ProgressBar) mMediaFlingBar
+                .findViewById(R.id.media_get_video_url_progressbar);
     }
 
     /**
@@ -2988,11 +2984,9 @@ public class BrowserActivity extends FragmentActivity implements
      */
     private void updateFlingDispInfo(boolean show) {
         if (show) {
-            mFlingInfo.setVisibility(View.VISIBLE);
-            mAutoplayCheckbox.setVisibility(View.VISIBLE);
+            mFlingDeviceNameTextView.setVisibility(View.VISIBLE);
         } else {
-            mFlingInfo.setVisibility(View.GONE);
-            mAutoplayCheckbox.setVisibility(View.GONE);
+            mFlingDeviceNameTextView.setVisibility(View.GONE);
             mFlingDeviceNameTextView.setText("");
             mFlingMediaInfoTextView.setText("");
         }
@@ -3203,7 +3197,8 @@ public class BrowserActivity extends FragmentActivity implements
         try {
             double v = mFlintVideoManager.getMediaVolume();
 
-            Log.e("DLNA", "volumeIncrement:" + volumeIncrement + " v[" + v + "]");
+            Log.e("DLNA", "volumeIncrement:" + volumeIncrement + " v[" + v
+                    + "]");
             v += volumeIncrement;
             if (v > 1.0) {
                 v = 1.0;
@@ -3594,13 +3589,15 @@ public class BrowserActivity extends FragmentActivity implements
                                 listDialog.setDialogTitile(url);
                             }
 
-//                            Toast.makeText(mContext, videoUrls.toString(),
-//                                    Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(mContext, videoUrls.toString(),
+                            // Toast.LENGTH_SHORT).show();
 
                             mVideoResolutionTextView
                                     .setText(getString(R.string.resolution));
                             mVideoResolutionTextView
                                     .setVisibility(View.VISIBLE);
+                            
+                            updateGetVideoRealBtnStatus(true);
                         }
 
                     });
@@ -3612,6 +3609,8 @@ public class BrowserActivity extends FragmentActivity implements
                             // TODO Auto-generated method stub
 
                             hideVideoResolutionView();
+                            
+                            updateGetVideoRealBtnStatus(true);
                         }
 
                     });
@@ -3627,6 +3626,8 @@ public class BrowserActivity extends FragmentActivity implements
                     // TODO Auto-generated method stub
 
                     hideVideoResolutionView();
+                    
+                    updateGetVideoRealBtnStatus(true);
                 }
 
             });
@@ -3691,5 +3692,54 @@ public class BrowserActivity extends FragmentActivity implements
     private void hideVideoResolutionView() {
         mVideoResolutionTextView.setText("");
         mVideoResolutionTextView.setVisibility(View.INVISIBLE);
+    }
+
+    private void getVideoPlayUrl(final String url) {
+        // hide
+        hideVideoResolutionView();
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                if (mCurrentView == null) {
+                    return;
+                }
+
+                // TODO Auto-generated method stub
+                List<NameValuePair> param = new ArrayList<NameValuePair>();
+
+                param.add(new BasicNameValuePair("apptoken",
+                        "3e52201f5037ad9bd8e389348916bd3a"));
+                param.add(new BasicNameValuePair("method", "core.video.realurl"));
+                param.add(new BasicNameValuePair("packageName",
+                        "com.infthink.test"));
+                param.add(new BasicNameValuePair("url", url));
+
+                Log.e(TAG, "get real video url[" + url + "]site[" + mSiteUrl
+                        + "]");
+
+                SendHttpsPOST("https://play.aituzi.com", param, null);
+
+            }
+
+        }).start();
+    }
+
+    /**
+     * show or hide views related with get video's real play url.
+     * 
+     * @param show
+     */
+    void updateGetVideoRealBtnStatus(boolean show) {
+        if (!show) {
+            mVideoRefreshBtn.setVisibility(View.GONE);
+            mVideoRefreshProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            mVideoRefreshBtn.setVisibility(View.VISIBLE);
+            mVideoRefreshProgressBar.setVisibility(View.GONE);
+        }
+
     }
 }

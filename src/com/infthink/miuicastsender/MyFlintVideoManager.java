@@ -88,6 +88,8 @@ public class MyFlintVideoManager {
     private double mCurrentStreamVolume = 0;
 
     private boolean mIsStreamMuted;
+    
+    private boolean mQuit = false;
 
     public MyFlintVideoManager(Context context, String applicationId,
             FlintStatusChangeListener listener) {
@@ -131,7 +133,7 @@ public class MyFlintVideoManager {
      * process device list menu item clicked event
      */
     public void doDevlistMenuClicked() {
-        if (mTV == null) {
+        if (mTV == null || (getMediaPlayer() != null && mLaunchSession == null)) {
             mDeviceDialog.show();
         } else {
             onDeviceUnselected((ConnectableDevice) null);
@@ -555,6 +557,8 @@ public class MyFlintVideoManager {
     private void onDeviceSelected(ConnectableDevice device) {
         mCurrentDeviceName = device.getFriendlyName();
 
+        mQuit = false;
+        
         setTv(device);
 
         if (mStatusChangeListener != null) {
@@ -570,6 +574,8 @@ public class MyFlintVideoManager {
     private void onDeviceUnselected(ConnectableDevice device) {
         mCurrentDeviceName = "";
 
+        mQuit = true;
+        
         setTv(null);
 
         if (mStatusChangeListener != null)
@@ -601,6 +607,12 @@ public class MyFlintVideoManager {
                         Log.e(TAG, "type:" + mLaunchSession.getSessionType());
 
                         mMediaControl = object.mediaControl;
+                        
+                        if (mQuit) {
+                            Log.e(TAG, "playMedia!quit?!");
+                            setTv(null);
+                            return;
+                        }
 
                         stopUpdating();
 
@@ -629,18 +641,8 @@ public class MyFlintVideoManager {
     }
 
     public void setTv(ConnectableDevice tv) {
-
         if (tv == null) {
             stopTvApplication();
-            if (mTV != null) {
-                mTV.disconnect();
-
-                mTV = null;
-            }
-
-            mMediaPlayer = null;
-            mMediaControl = null;
-            mVolumeControl = null;
         } else {
             mTV = tv;
 
@@ -664,18 +666,62 @@ public class MyFlintVideoManager {
                 Log.e(TAG,
                         "launchSession: type:"
                                 + mLaunchSession.getSessionType());
-                mLaunchSession.close(null);
+                mLaunchSession.close(new ResponseListener<Object>() {
+
+                    @Override
+                    public void onError(ServiceCommandError error) {
+                        // TODO Auto-generated method stub
+                        if (mTV != null) {
+                            mTV.disconnect();
+
+                            mTV = null;
+                        }
+
+                        mQuit = false;
+                        
+                        mMediaPlayer = null;
+                        mMediaControl = null;
+                        mVolumeControl = null;
+
+                        mLaunchSession = null;
+                        
+                        disableMedia();
+
+                        stopUpdating();
+
+                        mStatusChangeListener.onStopApplication();
+
+                        mStatusChangeListener.onApplicationDisconnected();
+                    }
+
+                    @Override
+                    public void onSuccess(Object object) {
+                        // TODO Auto-generated method stub
+                        if (mTV != null) {
+                            mTV.disconnect();
+
+                            mTV = null;
+                        }
+
+                        mQuit = false;
+                        
+                        mMediaPlayer = null;
+                        mMediaControl = null;
+                        mVolumeControl = null;
+                        
+                        mLaunchSession = null;
+                        
+                        disableMedia();
+
+                        stopUpdating();
+
+                        mStatusChangeListener.onStopApplication();
+
+                        mStatusChangeListener.onApplicationDisconnected();
+                    }
+                    
+                });
             }
-
-            mLaunchSession = null;
-
-            disableMedia();
-
-            stopUpdating();
-
-            mStatusChangeListener.onStopApplication();
-
-            mStatusChangeListener.onApplicationDisconnected();
         }
     }
 

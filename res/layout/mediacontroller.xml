@@ -10,8 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/mediacontroller_bg"
-        android:orientation="vertical"
-        android:visibility="gone" >
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/fling_device_name"
@@ -41,16 +40,7 @@
             android:checked="true"
             android:text="Use Hardware Decoder"
             android:visibility="gone" />
-
-        <CheckBox
-            android:id="@+id/media_auto_play"
-            style="@style/MediaController_Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/media_autoplay"
-            android:visibility="gone" />
-        
+                
         <TextView
             android:id="@+id/media_info"
             style="@style/MediaController_Text"
@@ -62,6 +52,40 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:visibility="gone" />
+        
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <CheckBox
+            android:id="@+id/media_auto_play"
+            style="@style/MediaController_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/media_autoplay"
+            android:layout_alignParentLeft="true"/>
+
+      	<ImageButton
+      	    android:id="@+id/media_get_video_url_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+           	android:background="@android:color/transparent"
+            android:src="@drawable/ic_children_video_quality" 
+           	android:layout_alignTop="@id/media_auto_play"
+           	android:layout_alignBottom="@id/media_auto_play"
+           	android:layout_marginRight="5dp"/>
+      	
+      	<ProgressBar
+      	    android:id="@+id/media_get_video_url_progressbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+          	android:layout_gravity="center_vertical"
+          	android:layout_alignTop="@id/media_auto_play"
+           	android:layout_alignBottom="@id/media_auto_play"
+          	android:visibility="gone"/>
+      	</RelativeLayout>
     </LinearLayout>
 
     <RelativeLayout
