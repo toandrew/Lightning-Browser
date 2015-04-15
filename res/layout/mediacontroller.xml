@@ -42,6 +42,15 @@
             android:text="Use Hardware Decoder"
             android:visibility="gone" />
 
+        <CheckBox
+            android:id="@+id/media_auto_play"
+            style="@style/MediaController_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/media_autoplay"
+            android:visibility="gone" />
+        
         <TextView
             android:id="@+id/media_info"
             style="@style/MediaController_Text"
@@ -55,75 +64,73 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/mediacontroller_control"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@color/mediacontroller_bg"
-        android:orientation="horizontal" >
+        android:background="@color/mediacontroller_bg" >
 
-        <android.support.v7.app.MediaRouteButton
+        <ImageButton
             android:id="@+id/media_route_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent" />
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/mr_ic_media_route_off_holo_dark" />
 
-        <RelativeLayout
-            android:id="@+id/mediacontroller_control"
+        <ImageButton
+            android:id="@+id/mediacontroller_play_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="1dp"
+            android:layout_toRightOf="@id/media_route_button"
+            android:background="@drawable/mediacontroller_button"
+            android:src="@drawable/mediacontroller_play" />
+
+        <TextView
+            android:id="@+id/mediacontroller_time_current"
+            style="@style/MediaController_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="1dp"
+            android:layout_toRightOf="@id/mediacontroller_play_pause" />
+
+        <TextView
+            android:id="@+id/resolution"
+            style="@style/MediaController_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@string/resolution"
+            android:textColor="@color/custom_dialog_text_orange_color" />
+
+        <TextView
+            android:id="@+id/mediacontroller_time_total"
+            style="@style/MediaController_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="5dp"
+            android:layout_toLeftOf="@id/resolution" />
+
+        <SeekBar
+            android:id="@+id/mediacontroller_seekbar"
+            style="@style/MediaController_SeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <ImageButton
-                android:id="@+id/mediacontroller_play_pause"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="1dp"
-                android:background="@drawable/mediacontroller_button"
-                android:src="@drawable/mediacontroller_play" />
-
-            <TextView
-                android:id="@+id/mediacontroller_time_current"
-                style="@style/MediaController_Text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="1dp"
-                android:layout_toRightOf="@id/mediacontroller_play_pause" />
-
-            <TextView
-                android:id="@+id/resolution"
-                style="@style/MediaController_Text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:text="@string/resolution" />
-
-            <TextView
-                android:id="@+id/mediacontroller_time_total"
-                style="@style/MediaController_Text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/resolution" 
-                android:layout_marginRight="5dp"/>
-
-            <SeekBar
-                android:id="@+id/mediacontroller_seekbar"
-                style="@style/MediaController_SeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/mediacontroller_time_total"
-                android:layout_toRightOf="@id/mediacontroller_time_current"
-                android:focusable="true"
-                android:max="1000" />
-        </RelativeLayout>
-    </LinearLayout>
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/mediacontroller_time_total"
+            android:layout_toRightOf="@id/mediacontroller_time_current"
+            android:focusable="true"
+            android:max="1000" />
+    </RelativeLayout>
 
 </LinearLayout>

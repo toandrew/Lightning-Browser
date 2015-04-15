@@ -186,4 +186,5 @@
     <string name="resolution_HD">高清</string>
     <string name="resolution_Ultraclear">超清</string>
     <string name="resolution_Bluray">蓝光</string>
+    <string name="media_autoplay">自动播放</string>
 </resources>
