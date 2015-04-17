@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 package com.crosskr.flint.browser;
 
 import java.util.List;
@@ -24,11 +23,9 @@ import android.content.DialogInterface;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.device.ConnectableDeviceListener;
@@ -50,17 +47,16 @@ import com.connectsdk.service.capability.VolumeControl.VolumeListener;
 import com.connectsdk.service.capability.listeners.ResponseListener;
 import com.connectsdk.service.command.ServiceCommandError;
 import com.connectsdk.service.sessions.LaunchSession;
+import com.connectsdk.service.sessions.LaunchSession.LaunchSessionType;
 
 public class FlintVideoManager {
     private static final String TAG = FlintVideoManager.class.getSimpleName();
 
     public static final double MAX_VOLUME_LEVEL = 100;
 
-    private Context mContext;
+    private FlintBaseActivity mFlintBaseActivity;
 
     private FlintStatusChangeListener mStatusChangeListener;
-
-    ImageButton mMediaRouteButton;
 
     private String mCurrentDeviceName;
 
@@ -91,17 +87,15 @@ public class FlintVideoManager {
     private double mCurrentStreamVolume = 0;
 
     private boolean mIsStreamMuted;
-    
+
     private boolean mQuit = false;
 
-    public FlintVideoManager(Context context, String applicationId,
-            FlintStatusChangeListener listener, ImageButton mediaRouteButton) {
+    public FlintVideoManager(FlintBaseActivity activity, String applicationId,
+            FlintStatusChangeListener listener) {
 
-        mContext = context;
+        mFlintBaseActivity = activity;
 
         mStatusChangeListener = listener;
-
-        mMediaRouteButton = mediaRouteButton;
 
         // connectsdk
         setupPicker();
@@ -223,9 +217,6 @@ public class FlintVideoManager {
                             // TODO Auto-generated method stub
 
                             mCurrentStreamVolume = volume;
-
-                            mStatusChangeListener
-                                    .onVolumeChanged(volume, false);
                         }
 
                     });
@@ -401,6 +392,28 @@ public class FlintVideoManager {
         // mFlintMsgChannel.setHardwareDecoder(mApiClient, flag);
     }
 
+    /**
+     * process media route button clicked event
+     */
+    public void doMediaRouteButtonClicked() {
+        if (mTV == null) {
+            mDeviceDialog.show();
+        } else {
+            onDeviceUnselected((ConnectableDevice) null);
+        }
+    }
+
+    /**
+     * Get found device size.
+     * 
+     * @return
+     */
+    public int getDeviceSize() {
+        return (DiscoveryManager.getInstance().getCompatibleDevices() != null ? DiscoveryManager
+                .getInstance().getCompatibleDevices().size()
+                : 0);
+    }
+
     private ConnectableDeviceListener mDeviceListener = new ConnectableDeviceListener() {
 
         @Override
@@ -449,7 +462,7 @@ public class FlintVideoManager {
     private void setupPicker() {
         DiscoveryManager.getInstance().registerDefaultDeviceTypes();
 
-        mDevicePicker = new DevicePicker((BrowserActivity) mContext);
+        mDevicePicker = new DevicePicker(mFlintBaseActivity);
         mDeviceDialog = mDevicePicker.getPickerDialog("Device List",
                 new AdapterView.OnItemClickListener() {
 
@@ -463,15 +476,11 @@ public class FlintVideoManager {
 
                         Log.e(TAG, "mTV:" + mTV.toString());
 
-                        mMediaRouteButton
-                                .setImageResource(R.drawable.mr_ic_media_route_on_holo_dark);
-
                         mDevicePicker.pickDevice(mTV);
                     }
                 });
 
-        mPairingAlertDialog = new AlertDialog.Builder(
-                (BrowserActivity) mContext)
+        mPairingAlertDialog = new AlertDialog.Builder(mFlintBaseActivity)
                 .setTitle("Pairing with TV")
                 .setMessage("Please confirm the connection on your TV")
                 .setPositiveButton("Okay", null)
@@ -487,13 +496,13 @@ public class FlintVideoManager {
                             }
                         }).create();
 
-        final EditText input = new EditText((BrowserActivity) mContext);
+        final EditText input = new EditText(mFlintBaseActivity);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
 
-        final InputMethodManager imm = (InputMethodManager) mContext
+        final InputMethodManager imm = (InputMethodManager) mFlintBaseActivity
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        mPairingCodeDialog = new AlertDialog.Builder((BrowserActivity) mContext)
+        mPairingCodeDialog = new AlertDialog.Builder(mFlintBaseActivity)
                 .setTitle("Enter Pairing Code on TV")
                 .setView(input)
                 .setPositiveButton(android.R.string.ok,
@@ -523,22 +532,6 @@ public class FlintVideoManager {
                                         input.getWindowToken(), 0);
                             }
                         }).create();
-
-        mMediaRouteButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                if (mTV == null || (getMediaPlayer() != null && mLaunchSession == null)) {
-                    mDeviceDialog.show();
-                } else {
-                    mMediaRouteButton
-                            .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
-                    onDeviceUnselected((ConnectableDevice) null);
-                }
-            }
-
-        });
     }
 
     public boolean isConnected() {
@@ -562,7 +555,7 @@ public class FlintVideoManager {
         mCurrentDeviceName = device.getFriendlyName();
 
         mQuit = false;
-        
+
         setTv(device);
 
         if (mStatusChangeListener != null) {
@@ -577,31 +570,32 @@ public class FlintVideoManager {
      */
     private void onDeviceUnselected(ConnectableDevice device) {
         mCurrentDeviceName = "";
-
-        mQuit = true;
+        mCurrentTime = 0;
         
+        mQuit = true;
+
         setTv(null);
 
         if (mStatusChangeListener != null)
             mStatusChangeListener.onDeviceUnselected();
     }
 
+    /**
+     * play video
+     * 
+     * @param url
+     * @param title
+     */
     public void playVideo(String url, String title) {
         String mimeType = "video/mp4";
         String description = "";
         String icon = "http://ec2-54-201-108-205.us-west-2.compute.amazonaws.com/samples/media/videoIcon.jpg";// must
-                                                                                                              // for
-        String convertTitle = title;
-        Log.e(TAG, "title:" + title);
-        try {
-            convertTitle = new String(new String(title.getBytes("gbk")));
-        } catch (Exception e) {
 
-        }
         if (getMediaPlayer() == null) {
             Log.e(TAG, "playVideo failed for mediaplayer is null!");
             return;
         }
+
         getMediaPlayer().playMedia(url, mimeType, title, description, icon,
                 false, new MediaPlayer.LaunchListener() {
 
@@ -609,15 +603,18 @@ public class FlintVideoManager {
                         mLaunchSession = object.launchSession;
                         Log.e(TAG, "type:" + mLaunchSession.getSessionType());
 
-                        mMediaControl = object.mediaControl;
-                        
                         if (mQuit) {
                             Log.e(TAG, "playMedia!quit?!");
                             setTv(null);
                             return;
                         }
 
-                        stopUpdating();
+                        if (!mLaunchSession.getSessionType().equals(
+                                LaunchSessionType.Media)) {
+                            return;
+                        }
+
+                        mMediaControl = object.mediaControl;
 
                         enableMedia();
                     }
@@ -627,22 +624,21 @@ public class FlintVideoManager {
                         if (mLaunchSession != null) {
                             mLaunchSession.close(null);
                             mLaunchSession = null;
-                            stopUpdating();
                         }
 
                         onDeviceUnselected(null);
-                        
+
                         mStatusChangeListener.onConnectionFailed();
-
-                        mStatusChangeListener.onMediaStatusUpdated();
-
-                        mStatusChangeListener.onMediaMetadataUpdated("", "",
-                                null);
                     }
                 });
     }
 
-    public void setTv(ConnectableDevice tv) {
+    /**
+     * start or stop application
+     * 
+     * @param tv
+     */
+    private void setTv(ConnectableDevice tv) {
         if (tv == null) {
             stopTvApplication();
         } else {
@@ -652,8 +648,8 @@ public class FlintVideoManager {
             mMediaControl = mTV.getCapability(MediaControl.class);
             mVolumeControl = mTV.getCapability(VolumeControl.class);
 
-            playVideo(((BrowserActivity) mContext).getCurentVideoUrl(),
-                    ((BrowserActivity) mContext).getCurrentVideoTitle());
+            playVideo(mFlintBaseActivity.getCurrentVideoUrl(),
+                    mFlintBaseActivity.getCurrentVideoTitle());
         }
     }
 
@@ -673,106 +669,113 @@ public class FlintVideoManager {
                     @Override
                     public void onError(ServiceCommandError error) {
                         // TODO Auto-generated method stub
-                        if (mTV != null) {
-                            mTV.disconnect();
 
-                            mTV = null;
-                        }
-                        
-                        mQuit = false;
-                        
-                        mMediaPlayer = null;
-                        mMediaControl = null;
-                        mVolumeControl = null;
-
-                        mLaunchSession = null;
-                        
-                        disableMedia();
-
-                        stopUpdating();
-
-                        mStatusChangeListener.onStopApplication();
-
-                        mStatusChangeListener.onApplicationDisconnected();
+                        doStop();
                     }
 
                     @Override
                     public void onSuccess(Object object) {
                         // TODO Auto-generated method stub
-                        if (mTV != null) {
-                            mTV.disconnect();
 
-                            mTV = null;
-                        }
-
-                        mQuit = false;
-                        
-                        mMediaPlayer = null;
-                        mMediaControl = null;
-                        mVolumeControl = null;
-                        
-                        mLaunchSession = null;
-                        
-                        disableMedia();
-
-                        stopUpdating();
-
-                        mStatusChangeListener.onStopApplication();
-
-                        mStatusChangeListener.onApplicationDisconnected();
+                        doStop();
                     }
-                    
+
                 });
             }
         }
     }
 
+    /**
+     * get media player
+     * 
+     * @return
+     */
     public MediaPlayer getMediaPlayer() {
         Log.e(TAG, "getMediaPlayer: " + mMediaPlayer);
         return mMediaPlayer;
     }
 
+    /**
+     * get device
+     * 
+     * @return
+     */
     public ConnectableDevice getTv() {
         return mTV;
     }
 
+    /**
+     * get volume control
+     * 
+     * @return
+     */
     public VolumeControl getVolumeControl() {
         return mVolumeControl;
     }
 
-    public void disableMedia() {
-        // stopMedia();
-    }
-
-    private void stopUpdating() {
-    }
-
+    /**
+     * do something when media ok
+     */
     private void enableMedia() {
         // refresh current volume
         getMediaVolume();
 
-        mStatusChangeListener.onConnected();
-
-        mStatusChangeListener.onMediaStatusUpdated();
-
-        mStatusChangeListener.onMediaMetadataUpdated("", "", null);
-
-        mStatusChangeListener.onApplicationConnectionResult("enabled");
+        mStatusChangeListener
+                .onApplicationConnectionResult("Application running!");
 
         if (getTv().hasCapability(MediaControl.PlayState_Subscribe)) {
             mMediaControl.subscribePlayState(mPlayStateListener);
         }
     }
 
+    /**
+     * do something when begin playing
+     */
     private void startUpdating() {
-
+        if (mMediaControl != null
+                && getTv().hasCapability(MediaControl.Duration)) {
+            mMediaControl.getDuration(mDurationListener);
+        }
     }
 
+    /**
+     * get current device name
+     * 
+     * @return
+     */
     public String getCurrentSelectDeviceName() {
         return mCurrentDeviceName;
     }
 
-    public PlayStateListener mPlayStateListener = new PlayStateListener() {
+    /**
+     * do something when application stopped.
+     */
+    private void doStop() {
+        mCurrentDeviceName = "";
+        mCurrentTime = 0;
+
+        if (mTV != null) {
+            mTV.disconnect();
+
+            mTV = null;
+        }
+
+        mMediaPlayer = null;
+        mMediaControl = null;
+        mVolumeControl = null;
+
+        mLaunchSession = null;
+
+        if (mStatusChangeListener != null) {
+            mStatusChangeListener.onApplicationDisconnected();
+            mStatusChangeListener.onDeviceUnselected();
+        }
+    }
+
+    /**
+     * play state listener
+     */
+    private PlayStateListener mPlayStateListener = new PlayStateListener() {
 
         @Override
         public void onError(ServiceCommandError error) {
@@ -787,25 +790,23 @@ public class FlintVideoManager {
             case Playing:
                 startUpdating();
 
-                if (mMediaControl != null
-                        && getTv().hasCapability(MediaControl.Duration)) {
-                    mMediaControl.getDuration(mDurationListener);
-                }
                 break;
+
             case Finished:
                 break;
             case Idle:
-                mMediaRouteButton
-                        .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
-                onDeviceUnselected((ConnectableDevice) null);
+                doStop();
+
                 break;
             default:
-                stopUpdating();
                 break;
             }
         }
     };
 
+    /**
+     * duration listener
+     */
     private DurationListener mDurationListener = new DurationListener() {
 
         @Override
@@ -820,6 +821,9 @@ public class FlintVideoManager {
         }
     };
 
+    /**
+     * current position listener
+     */
     private PositionListener mPositionListener = new PositionListener() {
 
         @Override

@@ -22,7 +22,6 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -44,12 +43,14 @@ import android.widget.Toast;
 
 import com.connectsdk.service.capability.MediaControl.PlayStateStatus;
 import com.crosskr.flint.browser.BrowserApp;
+import com.crosskr.flint.browser.FlintBaseActivity;
 import com.crosskr.flint.browser.FlintStatusChangeListener;
+import com.crosskr.flint.browser.FlintVideoManager;
 import com.crosskr.flint.browser.FxService;
 import com.crosskr.flint.browser.R;
 import com.nanohttpd.webserver.src.main.java.fi.iki.elonen.SimpleWebServer;
 
-public class SenderDemo extends FragmentActivity implements
+public class SenderDemo extends FlintBaseActivity implements
         FlintStatusChangeListener {
     private final String TAG = "SenderDemo";
 
@@ -117,9 +118,9 @@ public class SenderDemo extends FragmentActivity implements
 
     private boolean mIsHardwareDecoder = true;
 
-    private MyFlintVideoManager mFlintVideoManager;
+    private FlintVideoManager mFlintVideoManager;
 
-    private String mCurrentVideoUrl;
+    //private String mCurrentVideoUrl;
 
     private MenuItem mMediaRouteMenuItem;
 
@@ -153,7 +154,7 @@ public class SenderDemo extends FragmentActivity implements
 
         mApplication = (BrowserApp) this.getApplicationContext();
 
-        mFlintVideoManager = new MyFlintVideoManager(this, APPLICATION_ID, this);
+        mFlintVideoManager = new FlintVideoManager(this, APPLICATION_ID, this);
 
         mHandler = new Handler() {
             @Override
@@ -198,7 +199,8 @@ public class SenderDemo extends FragmentActivity implements
             intent.putExtra("type", "net");
             intent.putExtra("url", mVideoId);
 
-            mCurrentVideoUrl = mVideoId;
+            setCurrentVideoUrl(mVideoId);
+            setCurrentVideoTitle(mTitle);
         } else {
             mResumePlay = true;
         }
@@ -223,7 +225,7 @@ public class SenderDemo extends FragmentActivity implements
             @Override
             public void onClick(View v) {
                 if (mPlayerState == PLAYER_STATE_FINISHED) {
-                    mFlintVideoManager.playVideo(mCurrentVideoUrl, "");
+                    mFlintVideoManager.playVideo(getCurrentVideoUrl(), "");
                 } else if (mPlayerState == PLAYER_STATE_PAUSED
                         || mPlayerState == PLAYER_STATE_BUFFERING) {
                     onPlayClicked();
@@ -386,7 +388,7 @@ public class SenderDemo extends FragmentActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.flint_devices:
-            mFlintVideoManager.doDevlistMenuClicked();
+            mFlintVideoManager.doMediaRouteButtonClicked();
             break;
         }
         return super.onOptionsItemSelected(item);
@@ -402,7 +404,7 @@ public class SenderDemo extends FragmentActivity implements
         String videoName = "";
 
         if (mFlintVideoManager != null && mFlintVideoManager.isMediaConnected()) {
-            videoName = mTitle;
+            videoName = getCurrentVideoTitle();
         }
         if (videoName.length() > 0) {
             NotificationManager notificationManager = (NotificationManager) this
@@ -550,20 +552,12 @@ public class SenderDemo extends FragmentActivity implements
         mHandler.postDelayed(mRefreshRunnable, REFRESH_INTERVAL_MS);
     }
 
-    public String getCurentVideoUrl() {
-        return mCurrentVideoUrl;
-    }
-
-    public String getCurrentVideoTitle() {
-        return "";
-    }
-
     @Override
     public void onDeviceSelected(String name) {
         // TODO Auto-generated method stub
 
-        if (mCurrentVideoUrl == null) {
-            Log.d(TAG, "url is " + mCurrentVideoUrl + " ignore it!");
+        if (getCurrentVideoUrl() == null) {
+            Log.d(TAG, "url is " + getCurrentVideoUrl() + " ignore it!");
             Toast.makeText(this, "url is null!ignore it!", Toast.LENGTH_SHORT)
                     .show();
             return;
@@ -592,19 +586,6 @@ public class SenderDemo extends FragmentActivity implements
     }
 
     @Override
-    public void onVolumeChanged(double percent, boolean muted) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onApplicationStatusChanged(String status) {
-        // TODO Auto-generated method stub
-
-        setApplicationStatus(status);
-    }
-
-    @Override
     public void onApplicationDisconnected() {
         // TODO Auto-generated method stub
 
@@ -625,75 +606,19 @@ public class SenderDemo extends FragmentActivity implements
             }
         });
     }
-
-    @Override
-    public void onConnected() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onNoLongerRunning(boolean isRunning) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onConnectionSuspended() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onMediaStatusUpdated() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onMediaMetadataUpdated(String title, String artist, Uri imageUrl) {
-        // TODO Auto-generated method stub
-
-    }
-
+    
     @Override
     public void onApplicationConnectionResult(String applicationStatus) {
         // TODO Auto-generated method stub
 
         startRefreshTimer();
     }
-
-    @Override
-    public void onLeaveApplication() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onStopApplication() {
-        // TODO Auto-generated method stub
-
-    }
-
+    
     @Override
     public void onMediaSeekEnd() {
         // TODO Auto-generated method stub
 
         mSeeking = false;
-    }
-
-    @Override
-    public void onMediaVolumeEnd() {
-        // TODO Auto-generated method stub
-
-    }
-
-    /**
-     * set views when application status changed.
-     * 
-     * @param statusText
-     */
-    private final void setApplicationStatus(String statusText) {
     }
 
     /**
