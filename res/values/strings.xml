@@ -239,4 +239,5 @@
     <string name="resolution_Ultraclear">Ultraclear</string>
     <string name="resolution_Bluray">Bluray</string>
 
+    <string name="media_autoplay">Auto fling</string>
 </resources>

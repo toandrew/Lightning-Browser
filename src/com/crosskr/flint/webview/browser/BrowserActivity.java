@@ -61,21 +61,6 @@ import org.json.JSONObject;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.update.UmengUpdateAgent;
 
-import tv.matchstick.flint.ApplicationMetadata;
-import tv.matchstick.flint.ConnectionResult;
-import tv.matchstick.flint.Flint;
-import tv.matchstick.flint.Flint.ApplicationConnectionResult;
-import tv.matchstick.flint.FlintDevice;
-import tv.matchstick.flint.FlintManager;
-import tv.matchstick.flint.FlintMediaControlIntent;
-import tv.matchstick.flint.MediaInfo;
-import tv.matchstick.flint.MediaMetadata;
-import tv.matchstick.flint.MediaStatus;
-import tv.matchstick.flint.RemoteMediaPlayer;
-import tv.matchstick.flint.RemoteMediaPlayer.MediaChannelResult;
-import tv.matchstick.flint.ResultCallback;
-import tv.matchstick.flint.Status;
-import tv.matchstick.flint.images.WebImage;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -167,10 +152,16 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-public class BrowserActivity extends FragmentActivity implements
-        BrowserController {
+import com.connectsdk.device.ConnectableDevice;
+import com.connectsdk.discovery.DiscoveryManager;
+import com.connectsdk.service.capability.MediaControl.PlayStateStatus;
+//import com.umeng.analytics.MobclickAgent;
+//import com.umeng.update.UmengUpdateAgent;
+
+public class BrowserActivity extends FlintBaseActivity implements
+        BrowserController, FlintStatusChangeListener {
     private static final String TAG = "BrowserActivity";
-    
+
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListLeft;
     private RelativeLayout mDrawerLeft;
@@ -224,9 +215,6 @@ public class BrowserActivity extends FragmentActivity implements
             LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     private BookmarkManager mBookmarkManager;
 
-    // used to send cust messages.
-    private FlintMsgChannel mFlintMsgChannel;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -238,8 +226,8 @@ public class BrowserActivity extends FragmentActivity implements
         super.onStart();
 
         Log.e(TAG, "onStart");
-        mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
+
+        mFlintVideoManager.onStart();
     }
 
     @Override
@@ -248,41 +236,54 @@ public class BrowserActivity extends FragmentActivity implements
 
         Log.e(TAG, "onStop");
 
-        mMediaRouter.removeCallback(mMediaRouterCallback);
+        mFlintVideoManager.onStart();
     }
 
-    
-    boolean isOpened = false;
-    public void setListenerToRootView(){
-        final View activityRootView = getWindow().getDecorView().findViewById(R.id.content_frame); 
-        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
+    /**
+     * Use the followings to chech whether input method is active!
+     */
+    boolean isKeyBoardOpened = false;
 
-                int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
-                if (heightDiff > 300 ) { // 99% of the time the height diff will be due to a keyboard.
-                    //Toast.makeText(getApplicationContext(), "Gotcha!!! softKeyboardup", 0).show();
-                    Log.e(TAG, "keyboard show?![" + heightDiff + "]");
-                    if(isOpened == false){
-                        //Do two things, make the view top visible and the editText smaller
+    public void setListenerToRootView() {
+        final View activityRootView = getWindow().getDecorView().findViewById(
+                R.id.content_frame);
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+
+                        int heightDiff = activityRootView.getRootView()
+                                .getHeight() - activityRootView.getHeight();
+                        if (heightDiff > 400) { // 99% of the time the height
+                                                // diff will be due to a
+                                                // keyboard.
+                            // Toast.makeText(getApplicationContext(),
+                            // "Gotcha!!! softKeyboardup", 0).show();
+                            Log.e(TAG, "keyboard is shown?![" + heightDiff
+                                    + "]");
+                            if (isKeyBoardOpened == false) {
+                                // Do two things, make the view top visible and
+                                // the editText smaller
+                            }
+                            isKeyBoardOpened = true;
+                        } else if (isKeyBoardOpened == true) {
+                            Log.e(TAG, "keyboard is hidden?![" + heightDiff
+                                    + "]");
+
+                            // Toast.makeText(getApplicationContext(),
+                            // "softkeyborad Down!!!", 0).show();
+                            isKeyBoardOpened = false;
+                        }
                     }
-                    isOpened = true;
-                }else if(isOpened == true){
-                    Log.e(TAG, "keyboard hide?![" + heightDiff + "]");
-                    
-                    //Toast.makeText(getApplicationContext(), "softkeyborad Down!!!", 0).show();                  
-                    isOpened = false;
-                }
-             }
-        });
+                });
     }
-    
+
     @SuppressWarnings("deprecation")
     private synchronized void initialize() {
         setContentView(R.layout.activity_main);
 
         setListenerToRootView();
-        
+
         TypedValue typedValue = new TypedValue();
         Theme theme = getTheme();
         theme.resolveAttribute(R.attr.numberColor, typedValue, true);
@@ -598,7 +599,7 @@ public class BrowserActivity extends FragmentActivity implements
 
         checkForTor();
 
-        initFlingServerSocket();
+        initFlint();
 
     }
 
@@ -669,7 +670,8 @@ public class BrowserActivity extends FragmentActivity implements
                     PreferenceConstants.USE_PROXY_HOST, "localhost");
             int port = mPreferences.getInt(PreferenceConstants.USE_PROXY_PORT,
                     8118);
-            WebkitProxy.setProxy("com.crosskr.flint.webview.browser.BrowserApp",
+            WebkitProxy.setProxy(
+                    "com.crosskr.flint.webview.browser.BrowserApp",
                     getApplicationContext(), host, port);
         } catch (Exception e) {
             Log.d(Constants.TAG, "error enabling web proxying", e);
@@ -807,7 +809,8 @@ public class BrowserActivity extends FragmentActivity implements
             initializeTor();
         } else {
             try {
-                WebkitProxy.resetProxy("com.crosskr.flint.webview.browser.BrowserApp",
+                WebkitProxy.resetProxy(
+                        "com.crosskr.flint.webview.browser.BrowserApp",
                         getApplicationContext());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -831,13 +834,13 @@ public class BrowserActivity extends FragmentActivity implements
         }
 
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            if (mMediaPlayer != null && mMediaFlingBar != null
+            if (mMediaFlingBar != null
                     && mMediaFlingBar.getVisibility() == View.VISIBLE) {
                 onVolumeChange(0.1);
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            if (mMediaPlayer != null && mMediaFlingBar != null
+            if (mMediaFlingBar != null
                     && mMediaFlingBar.getVisibility() == View.VISIBLE) {
                 onVolumeChange(-0.1);
                 return true;
@@ -1536,18 +1539,18 @@ public class BrowserActivity extends FragmentActivity implements
                 mHistoryHandler.close();
             }
         }
-        
+
         mQuit = true;
-        
+
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         MobclickAgent.onResume(this);
-        
+
         Log.i(Constants.TAG, "onResume");
         if (mSearchAdapter != null) {
             mSearchAdapter.refreshPreferences();
@@ -2695,164 +2698,94 @@ public class BrowserActivity extends FragmentActivity implements
     }
 
     // add for flint
-
-    private boolean mQuit = false;
-    private ServerSocket mServerSocket = null;
-    private String mCurrentVideoUrl = null;
-
-    protected Handler mHandler = new Handler();
-
-    private Runnable mRefreshRunnable;
-    private Runnable mRefreshFlingRunnable;
-    private MediaRouter mMediaRouter;
-    private MediaRouteSelector mMediaRouteSelector;
-    private MediaRouter.Callback mMediaRouterCallback;
-
-    private MediaRouteButton mMediaRouteButton;
     private static final String APPLICATION_ID = "~flintplayer";
-    private static final String APPLICATION_URL = "http://openflint.github.io/flint-player/player.html";
-
-    private static final String VIDEO_URL_PREFIX = "xxx:";
-    
-    private FlintDevice mSelectedDevice;
-    private FlintManager mApiClient;
-    private CastListener mCastListener;
-    private ConnectionCallbacks mConnectionCallbacks;
-    private RemoteMediaPlayer mMediaPlayer;
-    private boolean mShouldPlayMedia;
-    private MediaInfo mSelectedMedia;
-    private ApplicationMetadata mAppMetadata;
-    private boolean mSeeking;
-    private boolean mWaitingForReconnect;
-
-    private boolean mRelaunchApp;
-    private ImageButton mPlayPauseButton;
-    private ImageButton mStopFlingButton;
-    private SeekBar mMediaSeekBar;
-    private TextView mFlingCurrentTimeTextView;
-    private TextView mFlingTotalTimeTextView;
-    private TextView mFlingDeviceNameTextView;
-    private TextView mFlingMediaInfoTextView;
-
-    private TextView mVideoResolutionTextView;
-
-    private View mFlingMediaControls;
-    private View mFlingInfo;
-
-    protected static final double VOLUME_INCREMENT = 0.05;
-    protected static final double MAX_VOLUME_LEVEL = 20;
-
-    protected static final int AFTER_SEEK_DO_NOTHING = 0;
-    protected static final int AFTER_SEEK_PLAY = 1;
-    protected static final int AFTER_SEEK_PAUSE = 2;
 
     protected static final int PLAYER_STATE_NONE = 0;
     protected static final int PLAYER_STATE_PLAYING = 1;
     protected static final int PLAYER_STATE_PAUSED = 2;
     protected static final int PLAYER_STATE_BUFFERING = 3;
     protected static final int PLAYER_STATE_FINISHED = 4;
-    
+
     private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS
             .toMillis(1);
+
+    private boolean mQuit = false;
+
+    private ServerSocket mServerSocket = null;
+
+    // private String mCurrentVideoUrl = null;
+
+    protected Handler mHandler = new Handler();
+
+    private Runnable mRefreshRunnable;
+    private Runnable mRefreshFlingRunnable;
+
+    // used to get video url!
+    private Runnable mVideoUrlRunnable;
+
+    private static final String VIDEO_URL_PREFIX = "xxx:";
+
+    private boolean mSeeking;
+
+    private ImageButton mPlayPauseButton;
+    private SeekBar mMediaSeekBar;
+    private TextView mFlingCurrentTimeTextView;
+    private TextView mFlingTotalTimeTextView;
+    private TextView mFlingDeviceNameTextView;
+
+    private TextView mVideoResolutionTextView;
 
     private int mPlayerState;
 
     private boolean mIsUserSeeking;
 
-    private final Map<String, String> displays = new HashMap<String, String>();
-
     private MediaFlingBar mMediaFlingBar;
 
     private CheckBox mHardwareDecoderCheckbox;
 
-    private boolean mIsHardwareDecoder = true;
-    
+    private CheckBox mAutoplayCheckbox;
+
     private boolean mShouldAutoPlayMedia = true;
 
-    private MediaRouteSelector buildMediaRouteSelector() {
-        return new MediaRouteSelector.Builder().addControlCategory(
-                FlintMediaControlIntent.categoryForFlint(APPLICATION_ID))
-                .build();
-    }
+    private FlintVideoManager mFlintVideoManager;
+    private ImageButton mMediaRouteButton;
 
-    private class MyMediaRouterCallback extends MediaRouter.Callback {
-        @Override
-        public void onRouteSelected(MediaRouter router, RouteInfo route) {
-            Log.d(TAG, "onRouteSelected: route=" + route);
-            
-            mShouldPlayMedia = true;
-            
-            mShouldAutoPlayMedia = true;
-            
-            try {
-                BrowserActivity.this.onRouteSelected(route);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    private ImageButton mVideoRefreshBtn;
 
-        @Override
-        public void onRouteUnselected(MediaRouter router, RouteInfo route) {
-            Log.d(TAG, "onRouteUnselected: route=" + route);
-            
-            mShouldAutoPlayMedia = true;
-            
-            mShouldPlayMedia = false;
-            try {
-                BrowserActivity.this.onRouteUnselected(route);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    private ProgressBar mVideoRefreshProgressBar;
 
-        @Override
-        public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-            Log.d(TAG, "onRouteAdded: route=" + route);
-            String display = route.toString();
-            if (display != null) {
-                displays.put(route.getId(), display);
-            }
-        }
+    private String mSelectedVideoUrlByApi;
 
-        public void onRouteRemoved(MediaRouter router, RouteInfo route) {
-            Log.d(TAG, "onRouteRemoved: route=" + route);
-            displays.remove(route.getId());
-        }
+    /**
+     * Init all Flint related
+     */
+    private void initFlint() {
 
-        @Override
-        public void onRouteChanged(MediaRouter router,
-                MediaRouter.RouteInfo route) {
-            Log.d(TAG, "onRouteChanged: route=" + route);
-            String display = displays.get(route.getId());
-            if (display != null) {
-                displays.put(route.getId(), display);
-            }
-        }
-    }
+        MobclickAgent.updateOnlineConfig(mContext);
 
-    private void initFlingServerSocket() {
-        
-        MobclickAgent.updateOnlineConfig( mContext );
-        
         UmengUpdateAgent.update(this);
-        
-        Log.e(TAG, "initFlingServerSocket!");
-        mConnectionCallbacks = new ConnectionCallbacks();
 
-        mCastListener = new CastListener();
+        Log.e(TAG, "initFlingServerSocket!");
+
         mMediaFlingBar = (MediaFlingBar) findViewById(R.id.media_fling);
         mMediaFlingBar.show();
         mMediaFlingBar.hide();
 
-        Flint.FlintApi.setApplicationId(APPLICATION_ID);
-
-        mMediaRouter = MediaRouter.getInstance(getApplicationContext());
-        mMediaRouteSelector = buildMediaRouteSelector();
-        mMediaRouterCallback = new MyMediaRouterCallback();
-
-        mMediaRouteButton = (MediaRouteButton) mMediaFlingBar
+        mMediaRouteButton = (ImageButton) mMediaFlingBar
                 .findViewById(R.id.media_route_button);
-        mMediaRouteButton.setRouteSelector(mMediaRouteSelector);
+
+        mMediaRouteButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+
+                mFlintVideoManager.doMediaRouteButtonClicked();
+            }
+
+        });
+
+        mFlintVideoManager = new FlintVideoManager(this, APPLICATION_ID, this);
 
         mPlayPauseButton = (ImageButton) mMediaFlingBar
                 .findViewById(R.id.mediacontroller_play_pause);
@@ -2872,14 +2805,6 @@ public class BrowserActivity extends FragmentActivity implements
             }
         });
 
-        /*
-         * mStopFlingButton =
-         * (ImageButton)mMediaFlingBar.findViewById(R.id.media_stop);
-         * mStopFlingButton.setOnClickListener(new OnClickListener() {
-         * 
-         * @Override public void onClick(View v) { onStopClicked(); } });
-         */
-
         mMediaSeekBar = (SeekBar) mMediaFlingBar
                 .findViewById(R.id.mediacontroller_seekbar);
         mMediaSeekBar
@@ -2887,30 +2812,23 @@ public class BrowserActivity extends FragmentActivity implements
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         mIsUserSeeking = false;
-                        
-                        if (mMediaPlayer == null) {
-                            return;
-                        }
-                        
+
                         mMediaSeekBar.setSecondaryProgress(0);
                         onSeekBarMoved(TimeUnit.SECONDS.toMillis(seekBar
                                 .getProgress()));
-                        
+
                         refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
-                                .getProgress()), mMediaPlayer.getStreamDuration());
+                                .getProgress()), mFlintVideoManager
+                                .getMediaDuration());
                     }
 
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
                         mIsUserSeeking = true;
-                        
-                        if (mMediaPlayer == null) {
-                            return;
-                        }
-                        
+
                         refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
-                                .getProgress()), mMediaPlayer.getStreamDuration());
-                                
+                                .getProgress()), mFlintVideoManager
+                                .getMediaDuration());
 
                         mMediaSeekBar.setSecondaryProgress(seekBar
                                 .getProgress());
@@ -2919,13 +2837,10 @@ public class BrowserActivity extends FragmentActivity implements
                     @Override
                     public void onProgressChanged(SeekBar seekBar,
                             int progress, boolean fromUser) {
-                        
-                        if (mMediaPlayer == null) {
-                            return;
-                        }
-                        
+
                         refreshSeekPosition(TimeUnit.SECONDS.toMillis(seekBar
-                                .getProgress()), mMediaPlayer.getStreamDuration());
+                                .getProgress()), mFlintVideoManager
+                                .getMediaDuration());
                     }
                 });
 
@@ -2934,14 +2849,8 @@ public class BrowserActivity extends FragmentActivity implements
         mFlingTotalTimeTextView = (TextView) mMediaFlingBar
                 .findViewById(R.id.mediacontroller_time_total);
 
-        mFlingMediaControls = mMediaFlingBar
-                .findViewById(R.id.mediacontroller_control);
-        mFlingInfo = mMediaFlingBar.findViewById(R.id.fling_info);
-
         mFlingDeviceNameTextView = (TextView) mMediaFlingBar
                 .findViewById(R.id.fling_device_name);
-        mFlingMediaInfoTextView = (TextView) mMediaFlingBar
-                .findViewById(R.id.media_info);
 
         mVideoResolutionTextView = (TextView) mMediaFlingBar
                 .findViewById(R.id.resolution);
@@ -2955,87 +2864,54 @@ public class BrowserActivity extends FragmentActivity implements
                     listDialog.dismiss();
                 }
                 Log.e(TAG, "onClick!");
-                initListDialog();
 
+                initListDialog();
             }
 
         });
 
-        mVideoResolutionTextView.setText("");
-        mVideoResolutionTextView.setVisibility(View.INVISIBLE);
+        hideVideoResolutionView();
 
         setPlayerState(PLAYER_STATE_NONE);
 
         mRefreshRunnable = new Runnable() {
             @Override
             public void run() {
-                Log.e(TAG, "show media cast control?![" + displays.size() + "]");
-                if (displays.size() > 0) {
+                if (mQuit) {
+                    Log.e(TAG, "mRefreshRunnable:quit!");
+                    return;
+                }
+                
+                Log.e(TAG, "show media cast control?!["
+                        + DiscoveryManager.getInstance().getCompatibleDevices()
+                                .size() + "]");
 
-                    final String url = mCurrentView.getUrl();
+                if (DiscoveryManager.getInstance().getCompatibleDevices()
+                        .size() > 0) {
 
-                    new Thread(new Runnable() {
+                    if (mCurrentView == null) {
+                        return;
+                    }
 
-                        @Override
-                        public void run() {
+                    setCurrentVideoTitle(mCurrentView.getTitle());
 
-                            if (mCurrentView == null) {
-                                return;
-                            }
-
-                            // TODO Auto-generated method stub
-                            List<NameValuePair> param = new ArrayList<NameValuePair>();
-
-                            param.add(new BasicNameValuePair("apptoken",
-                                    "3e52201f5037ad9bd8e389348916bd3a"));
-                            param.add(new BasicNameValuePair("method",
-                                    "core.video.realurl"));
-                            param.add(new BasicNameValuePair("packageName",
-                                    "com.infthink.test"));
-                            param.add(new BasicNameValuePair("url", url));
-
-                            Log.e(TAG, "get real video url:" + url);
-
-                            SendHttpsPOST("https://play.aituzi.com", param,
-                                    null);
-
-                        }
-
-                    }).start();
-
-                    if (mVideoResolutionTextView != null
-                            && mVideoResolutionTextView.getVisibility() == View.VISIBLE) {
-                        Log.e(TAG,
-                                "Ignore this video url for real video url is present!");
-                        mVideoResolutionTextView
-                                .setText(getString(R.string.resolution));
-
-                        if (!mShouldAutoPlayMedia) {
-                            return;
-                        }
-                    } 
-
-                    Toast.makeText(mContext, mCurrentVideoUrl,
+                    Toast.makeText(mContext, getCurrentVideoUrl(),
                             Toast.LENGTH_SHORT).show();
-
-                    MediaMetadata metadata = new MediaMetadata(
-                            MediaMetadata.MEDIA_TYPE_MOVIE);
-                    mSelectedMedia = new MediaInfo.Builder(mCurrentVideoUrl)
-                            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                            .setContentType("video/mp4").setMetadata(metadata)
-                            .build();
 
                     mMediaFlingBar.show();
 
-                    Log.e(TAG, "should show!");
-                    if (mApiClient != null && mApiClient.isConnected()) {
-                        if (mMediaPlayer != null) {
-                            playMedia(mSelectedMedia);
-                        }
+                    final String url = mCurrentView.getUrl();
+                    if (!url.equals(mSiteUrl)) {
+                        getVideoPlayUrlByApi(url);
+                    } else {
+                        // hide
+                        hideVideoResolutionView();
 
+                        autoPlayIfIsNecessary(getCurrentVideoUrl());
                     }
                 }
             }
+
         };
 
         mRefreshFlingRunnable = new Runnable() {
@@ -3045,47 +2921,39 @@ public class BrowserActivity extends FragmentActivity implements
                     Log.e(TAG, "mRefreshFlingRunnable:quit!");
                     return;
                 }
+
                 onRefreshEvent();
+
                 startRefreshTimer();
             }
         };
 
-        startRefreshTimer();
-
-
-        mFlintMsgChannel = new FlintMsgChannel() {
+        // use this thread to get video url!
+        mVideoUrlRunnable = new Runnable() {
             @Override
-            public void onMessageReceived(FlintDevice flingDevice,
-                    String namespace, final String message) {
-                super.onMessageReceived(flingDevice, namespace, message);
+            public void run() {
+                if (mQuit) {
+                    Log.e(TAG, "mVideoUrlRunnable:quit!");
+                    return;
+                }
 
-                // show received custom messages.
-                Log.d(TAG, "onMessageReceived: " + message);
+                // Get Video's url.
+                if (mCurrentView != null && !isKeyBoardOpened) {
+                    Log.e(TAG, "try to extract real video url!");
+                    String GET_VIDEO_URL_SCRIPT = "(function () {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {alert('xxx:' + videos[0].src);}})();";
+                    mCurrentView.getWebView().loadUrl(
+                            "javascript:" + GET_VIDEO_URL_SCRIPT);
+                }
+                
+                mHandler.removeCallbacks(mVideoUrlRunnable);
 
-                mHandler.post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            JSONObject obj = new JSONObject(message);
-                            mIsHardwareDecoder = obj
-                                    .getBoolean("isHardwareDecoder");
-
-                            mHardwareDecoderCheckbox.setChecked(mIsHardwareDecoder);
-                            
-                            mHardwareDecoderCheckbox.setVisibility(View.VISIBLE);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
+                mHandler.postDelayed(mVideoUrlRunnable, REFRESH_INTERVAL_MS);
             }
         };
+        mHandler.postDelayed(mVideoUrlRunnable, REFRESH_INTERVAL_MS);
 
         mHardwareDecoderCheckbox = (CheckBox) mMediaFlingBar
                 .findViewById(R.id.device_hardware_decoder);
-        mHardwareDecoderCheckbox.setVisibility(View.GONE);
         mHardwareDecoderCheckbox
                 .setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -3093,425 +2961,110 @@ public class BrowserActivity extends FragmentActivity implements
                     public void onCheckedChanged(CompoundButton buttonView,
                             boolean isChecked) {
                         // TODO Auto-generated method stub
-                        if (mApiClient != null) {
-                            Log.e(TAG, "setHardwareDecoder:" + isChecked);
-                            setHardwareDecoder(isChecked);
-                        }
+
+                        Log.e(TAG, "setHardwareDecoder:" + isChecked);
                     }
 
                 });
+
+        mAutoplayCheckbox = (CheckBox) mMediaFlingBar
+                .findViewById(R.id.media_auto_play);
+        mAutoplayCheckbox
+                .setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView,
+                            boolean isChecked) {
+                        // TODO Auto-generated method stub
+
+                        Log.e(TAG, "auto play:" + isChecked);
+
+                        mShouldAutoPlayMedia = isChecked;
+
+                        if (mShouldAutoPlayMedia) {
+                            mHandler.postDelayed(mRefreshRunnable, 50);
+                        }
+                    }
+                });
+
+        mVideoRefreshBtn = (ImageButton) mMediaFlingBar
+                .findViewById(R.id.media_get_video_url_btn);
+        mVideoRefreshBtn.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                if (mCurrentView == null) {
+                    return;
+                }
+
+                updateGetVideoRealBtnStatus(false);
+
+                final String url = mCurrentView.getUrl();
+                getVideoPlayUrlByApi(url);
+            }
+
+        });
+
+        mVideoRefreshProgressBar = (ProgressBar) mMediaFlingBar
+                .findViewById(R.id.media_get_video_url_progressbar);
     }
 
     /**
-     * Set custom message to device. let device use hardware decoder or not
-     * 
-     * @param flag
+     * clear media status when application disconnected.
      */
-    private void setHardwareDecoder(boolean flag) {
-        if (mApiClient == null || !mApiClient.isConnected()) {
-            return;
-        }
-
-        mFlintMsgChannel.setHardwareDecoder(mApiClient, flag);
-    }
-
-    protected void onRouteSelected(RouteInfo route) {
-        Log.d(TAG, "onRouteSelected: " + route + " url:" + mCurrentVideoUrl);
-
-        if (mCurrentVideoUrl == null) {
-            Log.d(TAG, "url is " + mCurrentVideoUrl + " ignore it!");
-            Toast.makeText(this, "url is null!ignore it!", Toast.LENGTH_SHORT)
-                    .show();
-            mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
-            return;
-        }
-
-        MediaMetadata metadata = new MediaMetadata(
-                MediaMetadata.MEDIA_TYPE_MOVIE);
-        mSelectedMedia = new MediaInfo.Builder(mCurrentVideoUrl)
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setContentType("video/mp4").setMetadata(metadata).build();
-
-        FlintDevice device = FlintDevice.getFromBundle(route.getExtras());
-        setSelectedDevice(device);
-        updateButtonStates();
-    }
-
-    protected void onRouteUnselected(RouteInfo route) {
-        Log.d(TAG, "onRouteUnselected: " + route);
-
-        if (mVideoResolutionTextView != null && mVideoResolutionTextView.getVisibility() == View.VISIBLE) {
-            mVideoResolutionTextView.setText(getString(R.string.resolution));
-        }
-
-        setSelectedDevice(null);
-        mAppMetadata = null;
-        clearMediaState();
-        updateButtonStates();
-    }
-
-    private void setSelectedDevice(FlintDevice device) {
-        mSelectedDevice = device;
-
-        if (mSelectedDevice != null) {
-            // mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
-        }
-
-        if (mSelectedDevice == null) {
-            Log.d(TAG, "destroy controller");
-            onStopAppClicked();
-            detachMediaPlayer();
-            if ((mApiClient != null) && mApiClient.isConnected()) {
-                mApiClient.disconnect();
-            }
-            mApiClient = null;
-        } else {
-            Log.d(TAG, "acquiring controller for " + mSelectedDevice);
-            try {
-                Flint.FlintOptions.Builder apiOptionsBuilder = Flint.FlintOptions
-                        .builder(mSelectedDevice, mCastListener);
-                // apiOptionsBuilder.setVerboseLoggingEnabled(true);
-
-                mApiClient = new FlintManager.Builder(this)
-                        .addApi(Flint.API, apiOptionsBuilder.build())
-                        .addConnectionCallbacks(mConnectionCallbacks).build();
-                mApiClient.connect();
-            } catch (IllegalStateException e) {
-                Log.w(TAG, "error while creating a device controller", e);
-                // showErrorDialog(getString(R.string.error_no_controller));
-            }
-        }
-    }
-
-    private class ConnectionCallbacks implements
-            FlintManager.ConnectionCallbacks {
-        @Override
-        public void onConnectionSuspended(int cause) {
-            Log.d(TAG, "ConnectionCallbacks.onConnectionSuspended");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    // TODO: need to disable all controls, and possibly display
-                    // a
-                    // "reconnecting..." dialog or overlay
-                    detachMediaPlayer();
-                    updateButtonStates();
-                    mWaitingForReconnect = true;
-                }
-            });
-        }
-
-        @Override
-        public void onConnectionFailed(ConnectionResult result) {
-            Log.d(TAG, "onConnectionFailed");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateButtonStates();
-                    clearMediaState();
-                    cancelRefreshTimer();
-                    // showErrorDialog(getString(R.string.error_no_device_connection));
-                }
-            });
-        }
-
-        @Override
-        public void onConnected(final Bundle connectionHint) {
-            Log.d(TAG, "ConnectionCallbacks.onConnected");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mApiClient == null || !mApiClient.isConnected()) {
-                        // We got disconnected while this runnable was pending
-                        // execution.
-                        Log.d(TAG,
-                                "ConnectionCallbacks.onConnected. ignore it!");
-                        return;
-                    }
-
-                    onLaunchAppClicked();
-                }
-            });
-        }
-    }
-
-    protected final void setApplicationStatus(String statusText) {
-        if (mSelectedDevice == null) {
-            return;
-        }
-
-        //mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
-
-        if (mSelectedMedia == null) {
-            return;
-        }
-
-        mFlingMediaInfoTextView.setText(mSelectedMedia.getContentId());
-    }
-
-    private class CastListener extends Flint.Listener {
-        @Override
-        public void onVolumeChanged() {
-            refreshDeviceVolume(Flint.FlintApi.getVolume(mApiClient),
-                    Flint.FlintApi.isMute(mApiClient));
-        }
-
-        @Override
-        public void onApplicationStatusChanged() {
-            String status = Flint.FlintApi.getApplicationStatus(mApiClient);
-            Log.d(TAG, "onApplicationStatusChanged; status=" + status);
-            setApplicationStatus(status);
-        }
-
-        @Override
-        public void onApplicationDisconnected(int statusCode) {
-            Log.d(TAG, "onApplicationDisconnected: statusCode=" + statusCode);
-            mAppMetadata = null;
-            detachMediaPlayer();
-            clearMediaState();
-            updateButtonStates();
-            
-            if (mMediaRouter != null) {
-                mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
-            }
-            // if (statusCode != FlintStatusCodes.SUCCESS) {
-            // This is an unexpected disconnect.
-            // setApplicationStatus(getString(R.string.status_app_disconnected));
-            // }
-        }
-    }
-
-    private final class ApplicationConnectionResultCallback implements
-            ResultCallback<Flint.ApplicationConnectionResult> {
-        private final String mClassTag;
-
-        public ApplicationConnectionResultCallback(String suffix) {
-            mClassTag = TAG;
-        }
-
-        @Override
-        public void onResult(ApplicationConnectionResult result) {
-            Status status = result.getStatus();
-            Log.d(mClassTag,
-                    "ApplicationConnectionResultCallback.onResult: statusCode"
-                            + status.getStatusCode());
-            if (status.isSuccess()) {
-                ApplicationMetadata applicationMetadata = result
-                        .getApplicationMetadata();
-                // String sessionId = result.getSessionId();
-                String applicationStatus = result.getApplicationStatus();
-                boolean wasLaunched = result.getWasLaunched();
-                // Log.d(mClassTag, "application name: " +
-                // applicationMetadata.getName()
-                // + ", status: " + applicationStatus + ", sessionId: " +
-                // sessionId
-                // + ", wasLaunched: " + wasLaunched);
-                setApplicationStatus(applicationStatus);
-                attachMediaPlayer();
-                mAppMetadata = applicationMetadata;
-                startRefreshTimer();
-                updateButtonStates();
-                Log.d(mClassTag, "mShouldPlayMedia is " + mShouldPlayMedia);
-                if (mShouldPlayMedia) {
-                    mShouldPlayMedia = false;
-                    Log.d(mClassTag, "now loading media");
-                    playMedia(mSelectedMedia);
-                } else {
-                    // Synchronize with the receiver's state.
-                    Log.d(mClassTag, "requesting current media status");
-                    mMediaPlayer
-                            .requestStatus(mApiClient)
-                            .setResultCallback(
-                                    new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-                                        @Override
-                                        public void onResult(
-                                                MediaChannelResult result) {
-                                            Status status = result.getStatus();
-                                            if (!status.isSuccess()) {
-                                                Log.w(mClassTag,
-                                                        "Unable to request status: "
-                                                                + status.getStatusCode());
-                                            }
-                                        }
-                                    });
-                }
-            } else {
-                Log.d(mClassTag, "status is not success!");
-                // showErrorDialog(getString(R.string.error_app_launch_failed));
-            }
-        }
-    }
-
     private void clearMediaState() {
         mSeeking = false;
 
-        setCurrentMediaMetadata(null, null, null);
         refreshPlaybackPosition(0, 0);
     }
 
-    private void attachMediaPlayer() {
-        if (mMediaPlayer != null) {
-            return;
-        }
-
-        mMediaPlayer = new RemoteMediaPlayer();
-        mMediaPlayer
-                .setOnStatusUpdatedListener(new RemoteMediaPlayer.OnStatusUpdatedListener() {
-
-                    @Override
-                    public void onStatusUpdated() {
-                        Log.d(TAG, "MediaControlChannel.onStatusUpdated");
-                        // If item has ended, clear metadata.
-                        MediaStatus mediaStatus = mMediaPlayer.getMediaStatus();
-                        if ((mediaStatus != null)
-                                && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE)) {
-                            clearMediaState();
-                        }
-                        
-                        if ((mediaStatus != null)
-                                && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_PLAYING)) {
-                            if (mSelectedDevice != null) {
-                                mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName());
-                            }
-                        }
-                        
-                        if ((mediaStatus != null)
-                                && (mediaStatus.getPlayerState() != MediaStatus.PLAYER_STATE_BUFFERING)) {
-                            
-                            updatePlaybackPosition();
-                        } else if ((mediaStatus != null)
-                                && (mediaStatus.getPlayerState() == MediaStatus.PLAYER_STATE_BUFFERING)) {
-                            if (mSelectedDevice != null) {
-                                mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName() + "(Loading...)");
-                            }
-                        }
-
-                        updateStreamVolume();
-                        updateButtonStates();
-                    }
-                });
-
-        mMediaPlayer
-                .setOnMetadataUpdatedListener(new RemoteMediaPlayer.OnMetadataUpdatedListener() {
-                    @Override
-                    public void onMetadataUpdated() {
-                        Log.d(TAG, "MediaControlChannel.onMetadataUpdated");
-                        String title = null;
-                        String artist = null;
-                        Uri imageUrl = null;
-
-                        MediaInfo mediaInfo = mMediaPlayer.getMediaInfo();
-                        if (mediaInfo != null) {
-                            MediaMetadata metadata = mediaInfo.getMetadata();
-                            if (metadata != null) {
-                                title = metadata
-                                        .getString(MediaMetadata.KEY_TITLE);
-
-                                artist = metadata
-                                        .getString(MediaMetadata.KEY_ARTIST);
-                                if (artist == null) {
-                                    artist = metadata
-                                            .getString(MediaMetadata.KEY_STUDIO);
-                                }
-
-                                List<WebImage> images = metadata.getImages();
-                                if ((images != null) && !images.isEmpty()) {
-                                    WebImage image = images.get(0);
-                                    imageUrl = image.getUrl();
-                                }
-                            }
-                            setCurrentMediaMetadata(title, artist, imageUrl);
-                        }
-                    }
-                });
-
-        try {
-            Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
-                    mMediaPlayer.getNamespace(), mMediaPlayer);
-
-            // use this channel to send message channel.
-            Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
-                    mFlintMsgChannel.getNamespace(), mFlintMsgChannel);
-
-        } catch (IOException e) {
-            Log.w(TAG, "Exception while launching application", e);
-        }
-    }
-
-    private void reattachMediaPlayer() {
-        if ((mMediaPlayer != null) && (mApiClient != null)) {
-            try {
-                Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
-                        mMediaPlayer.getNamespace(), mMediaPlayer);
-
-                // use this channel to send message channel.
-                Flint.FlintApi.setMessageReceivedCallbacks(mApiClient,
-                        mFlintMsgChannel.getNamespace(), mFlintMsgChannel);
-            } catch (IOException e) {
-                Log.w(TAG, "Exception while launching application", e);
-            }
-        }
-    }
-
-    private void detachMediaPlayer() {
-        if ((mMediaPlayer != null) && (mApiClient != null)) {
-            try {
-                Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
-                        mMediaPlayer.getNamespace());
-
-                Flint.FlintApi.removeMessageReceivedCallbacks(mApiClient,
-                        mFlintMsgChannel.getNamespace());
-            } catch (IOException e) {
-                Log.w(TAG, "Exception while launching application", e);
-            }
-        }
-        mMediaPlayer = null;
-    }
-
-    protected final void setCurrentDeviceName(String name) {
-    }
-
+    /**
+     * show or hide device name or other views when device connected.
+     * 
+     * @param show
+     */
     private void updateFlingDispInfo(boolean show) {
         if (show) {
-            mFlingInfo.setVisibility(View.VISIBLE);
+            mFlingDeviceNameTextView.setVisibility(View.VISIBLE);
         } else {
-            mFlingInfo.setVisibility(View.GONE);
+            mFlingDeviceNameTextView.setVisibility(View.GONE);
             mFlingDeviceNameTextView.setText("");
-            mFlingMediaInfoTextView.setText("");
         }
     }
 
+    /**
+     * Update all views according to current application status.
+     */
     private void updateButtonStates() {
-        boolean hasDeviceConnection = (mApiClient != null)
-                && mApiClient.isConnected();
-        boolean hasAppConnection = (mAppMetadata != null);
-        boolean hasMediaConnection = (mMediaPlayer != null);
-        boolean hasMedia = false;
+        boolean hasMediaConnection = mFlintVideoManager.isMediaConnected();
 
         if (hasMediaConnection) {
-            MediaStatus mediaStatus = mMediaPlayer.getMediaStatus();
+            mFlingDeviceNameTextView.setText(mFlintVideoManager
+                    .getCurrentSelectDeviceName());
+
+            PlayStateStatus mediaStatus = mFlintVideoManager.getMediaStatus();
+            Log.e(TAG, "mediaStatus:" + mediaStatus);
             if (mediaStatus != null) {
-                int mediaPlayerState = mediaStatus.getPlayerState();
                 int playerState = PLAYER_STATE_NONE;
-                if (mediaPlayerState == MediaStatus.PLAYER_STATE_PAUSED) {
+                if (mediaStatus == PlayStateStatus.Paused) {
                     playerState = PLAYER_STATE_PAUSED;
-                } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_PLAYING) {
+                } else if (mediaStatus == PlayStateStatus.Playing) {
                     playerState = PLAYER_STATE_PLAYING;
-                } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_BUFFERING) {
+                } else if (mediaStatus == PlayStateStatus.Buffering) {
+                    mFlingDeviceNameTextView.setText(mFlintVideoManager
+                            .getCurrentSelectDeviceName() + "(Buffering...)");
                     playerState = PLAYER_STATE_BUFFERING;
-                } else if (mediaPlayerState == MediaStatus.PLAYER_STATE_IDLE) {
+                } else if (mediaStatus == PlayStateStatus.Finished) {
+                    Log.e(TAG, "PlayStateStatus.Finished");
                     playerState = PLAYER_STATE_FINISHED;
 
-                    mShouldAutoPlayMedia = true;
-                    
                     mSeeking = false;
 
-                    refreshPlaybackPosition(0, mMediaPlayer.getStreamDuration());
+                    refreshPlaybackPosition(0,
+                            mFlintVideoManager.getMediaDuration());
                 }
                 setPlayerState(playerState);
-
-                hasMedia = mediaStatus.getPlayerState() != MediaStatus.PLAYER_STATE_IDLE;
-                // mStopButton.setEnabled(hasMedia);
 
                 updateFlingDispInfo(true);
 
@@ -3522,35 +3075,20 @@ public class BrowserActivity extends FragmentActivity implements
             setPlayerState(PLAYER_STATE_NONE);
 
             updateFlingDispInfo(false);
-            // mStopButton.setEnabled(false);
 
             setSeekBarEnabled(false);
+
+            clearMediaState();
         }
-
-        /*
-         * mLaunchAppButton.setEnabled(hasDeviceConnection &&
-         * !hasAppConnection); mJoinAppButton.setEnabled(hasDeviceConnection &&
-         * !hasAppConnection); mLeaveAppButton.setEnabled(hasDeviceConnection &&
-         * hasAppConnection); mStopAppButton.setEnabled(hasDeviceConnection &&
-         * hasAppConnection); mAutoplayCheckbox.setEnabled(hasDeviceConnection
-         * && hasAppConnection);
-         */
-
-        // mPlayPauseButton.setEnabled(hasMediaConnection);
-
-        /*
-         * setDeviceVolumeControlsEnabled(hasDeviceConnection);
-         * setStreamVolumeControlsEnabled(hasMediaConnection);
-         */
     }
 
-    protected final void setCurrentMediaMetadata(String title, String subtitle,
-            Uri imageUrl) {
-    }
-
+    /**
+     * Set current playback's position
+     * 
+     * @param position
+     * @param duration
+     */
     protected final void refreshPlaybackPosition(long position, long duration) {
-        // Log.e(TAG, "refreshPlaybackPosition:position[" + position +
-        // " duration:" + duration);
         if (!mIsUserSeeking) {
             if (position == 0) {
                 mFlingTotalTimeTextView.setText("N/A");
@@ -3575,280 +3113,73 @@ public class BrowserActivity extends FragmentActivity implements
         }
     }
 
-    protected final String getReceiverApplicationId() {
-        return APPLICATION_ID;
-    }
-
-    protected final boolean getRelaunchApp() {
-        return mRelaunchApp;
-    }
-
-    /*
-     * Connects to the device (if necessary), and then casts the currently
-     * selected video.
+    /**
+     * update current playback's position
      */
-    protected void onPlayMedia(final MediaInfo media) {
-        mSelectedMedia = media;
-
-        if (mAppMetadata == null) {
-            return;
-        }
-
-        playMedia(mSelectedMedia);
-    }
-
-    protected void onLaunchAppClicked() {
-
-        if (mApiClient == null) {
-            return;
-        }
-        Log.e(TAG, "onLaunchAppClicked!");
-        Flint.FlintApi.launchApplication(mApiClient, APPLICATION_URL)
-                .setResultCallback(
-                        new ApplicationConnectionResultCallback("LaunchApp"));
-    }
-
-    /*
-     * Begins playback of the currently selected video.
-     */
-    private void playMedia(MediaInfo media) {
-        Log.d(TAG, "playMedia: " + media);
-        if (media == null) {
-            return;
-        }
-        if (mMediaPlayer == null) {
-            Log.e(TAG, "Trying to play a video with no active media session");
-            return;
-        }
-        
-        if (mSelectedDevice != null) {
-            mFlingDeviceNameTextView.setText(mSelectedDevice.getFriendlyName() + "(Loading...)");
-        }
-
-        mMediaPlayer
-                .load(mApiClient, media, isAutoplayChecked())
-                .setResultCallback(
-                        new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-                            @Override
-                            public void onResult(MediaChannelResult result) {
-                                if (!result.getStatus().isSuccess()) {
-                                    Log.e(TAG, "Failed to load media.");
-                                }
-                            }
-                        });
-    }
-
     private void updatePlaybackPosition() {
-        if (mMediaPlayer == null) {
-            return;
-        }
-
-        refreshPlaybackPosition(mMediaPlayer.getApproximateStreamPosition(),
-                mMediaPlayer.getStreamDuration());
+        refreshPlaybackPosition(mFlintVideoManager.getMediaCurrentTime(),
+                mFlintVideoManager.getMediaDuration());
     }
 
-    private void updateStreamVolume() {
-        if (mMediaPlayer == null) {
-            return;
-        }
-        MediaStatus mediaStatus = mMediaPlayer.getMediaStatus();
-        if (mediaStatus != null) {
-            double streamVolume = mediaStatus.getStreamVolume();
-            boolean muteState = mediaStatus.isMute();
-            refreshStreamVolume(streamVolume, muteState);
-        }
-    }
-
-    protected final void cancelRefreshTimer() {
+    /**
+     * stop timer to stop refresh current playback's UI.
+     */
+    private final void cancelRefreshTimer() {
         mHandler.removeCallbacks(mRefreshFlingRunnable);
     }
 
-    protected final void refreshDeviceVolume(double percent, boolean muted) {
-        /*
-         * if (!mIsUserAdjustingVolume) { mDeviceVolumeBar.setProgress((int)
-         * (percent * MAX_VOLUME_LEVEL)); }
-         * mDeviceMuteCheckBox.setChecked(muted);
-         */
-    }
+    /**
+     * start timer to update current playback's UI.
+     */
+    private final void startRefreshTimer() {
+        mHandler.removeCallbacks(mRefreshFlingRunnable);
 
-    protected final void startRefreshTimer() {
         mHandler.postDelayed(mRefreshFlingRunnable, REFRESH_INTERVAL_MS);
     }
 
-    protected final void refreshStreamVolume(double percent, boolean muted) {
-        /*
-         * if (!mIsUserAdjustingVolume) { mStreamVolumeBar.setProgress((int)
-         * (percent * MAX_VOLUME_LEVEL)); }
-         * mStreamMuteCheckBox.setChecked(muted);
-         */
+    /**
+     * PLAY
+     */
+    private void onPlayClicked() {
+        mFlintVideoManager.playMedia();
     }
 
-    protected final boolean isAutoplayChecked() {
-        return true;
-    }
-
-    protected void onStopAppClicked() {
-        if (mApiClient == null) {
-            return;
-        }
-
-        try {
-            Flint.FlintApi.stopApplication(mApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status result) {
-                            if (result.isSuccess()) {
-                                mAppMetadata = null;
-                                detachMediaPlayer();
-                                updateButtonStates();
-                            } else {
-                                // showErrorDialog(getString(R.string.error_app_stop_failed));
-                            }
-                        }
-                    });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void onPlayClicked() {
-        if (mMediaPlayer == null) {
-            return;
-        }
-        try {
-            mMediaPlayer.play(mApiClient);
-        } catch (Exception e) {
-            Log.w(TAG, "Unable to play", e);
-            // showErrorDialog(e.getMessage());
-        }
-    }
-
+    /**
+     * PAUSE
+     */
     protected void onPauseClicked() {
-        if (mMediaPlayer == null) {
-            return;
-        }
-        try {
-            mMediaPlayer.pause(mApiClient);
-        } catch (Exception e) {
-            Log.w(TAG, "Unable to pause", e);
-            // showErrorDialog(e.getMessage());
-        }
+        mFlintVideoManager.pauseMedia();
     }
 
-    protected void onStopClicked() {
-        if (mMediaPlayer == null) {
-            return;
-        }
-        try {
-            mMediaPlayer.stop(mApiClient);
-        } catch (Exception e) {
-            Log.w(TAG, "Unable to stop");
-            // showErrorDialog(e.getMessage());
-        }
-
-        mShouldPlayMedia = false;
-        onRouteUnselected(null);
-
-        mMediaFlingBar.hide();
-    }
-
+    /**
+     * SEEK
+     * 
+     * @param position
+     */
     protected void onSeekBarMoved(long position) {
-        if (mMediaPlayer == null) {
-            return;
-        }
-
         refreshPlaybackPosition(position, -1);
 
-        int behavior = getSeekBehavior();
-
-        int resumeState;
-        switch (behavior) {
-        case AFTER_SEEK_PLAY:
-            resumeState = RemoteMediaPlayer.RESUME_STATE_PLAY;
-            break;
-        case AFTER_SEEK_PAUSE:
-            resumeState = RemoteMediaPlayer.RESUME_STATE_PAUSE;
-            break;
-        case AFTER_SEEK_DO_NOTHING:
-        default:
-            resumeState = RemoteMediaPlayer.RESUME_STATE_UNCHANGED;
-        }
         mSeeking = true;
-        try {
-            Log.e(TAG, "seek: position[" + position + "]state[" + resumeState
-                    + "]");
-            mMediaPlayer.seek(mApiClient, position, resumeState)
-                    .setResultCallback(
-                            new ResultCallback<MediaChannelResult>() {
-                                @Override
-                                public void onResult(MediaChannelResult result) {
-                                    Status status = result.getStatus();
-                                    if (status.isSuccess()) {
-                                        mSeeking = false;
-                                    } else {
-                                        mSeeking = false;
-                                        mPlayPauseButton.setEnabled(true);
-                                        Log.w(TAG,
-                                                "Unable to seek: "
-                                                        + status.getStatusCode());
-                                    }
-                                }
 
-                            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        mFlintVideoManager.seekMedia(position);
     }
 
-    protected void onDeviceVolumeBarMoved(int volume) {
-        if (mApiClient == null) {
-            return;
-        }
-        try {
-            Flint.FlintApi.setVolume(mApiClient, volume / MAX_VOLUME_LEVEL);
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to change volume");
-        } catch (IllegalStateException e) {
-            // showErrorDialog(e.getMessage());
-        }
-    }
-
-    protected final int getSeekBehavior() {
-        if (mPlayerState == PLAYER_STATE_PLAYING) {
-            return AFTER_SEEK_PLAY;
-        }
-
-        if (mPlayerState == PLAYER_STATE_PAUSED) {
-            return AFTER_SEEK_PAUSE;
-        }
-
-        return AFTER_SEEK_DO_NOTHING;
-    }
-
-    //ValueCallback<String> callback = null;
-    
+    /**
+     * Called in UI timer thread to update current UI views.
+     */
     protected void onRefreshEvent() {
         if (!mSeeking) {
             updatePlaybackPosition();
         }
-        updateStreamVolume();
+
         updateButtonStates();
-
-        // Get Video's url.
-        if (mCurrentView != null && !isOpened) {
-            Log.e(TAG, "evaluateJavascript!!");
-
-            // add this for get video url.
-            // mCurrentView.getWebView().addJavascriptInterface(new
-            // VideoUrlHandler(),
-            // "videoHandler");
-            //
-            String GET_VIDEO_URL_SCRIPT = "(function () {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {alert('xxx:' + videos[0].src);}})();";
-            mCurrentView.getWebView().loadUrl(
-                    "javascript:" + GET_VIDEO_URL_SCRIPT);
-        }
     }
 
+    /**
+     * Set current player's status and update play/pause button status.
+     * 
+     * @param playerState
+     */
     protected final void setPlayerState(int playerState) {
         mPlayerState = playerState;
         if (mPlayerState == PLAYER_STATE_PAUSED) {
@@ -3865,10 +3196,21 @@ public class BrowserActivity extends FragmentActivity implements
                 || mPlayerState == PLAYER_STATE_BUFFERING);
     }
 
+    /**
+     * whether enable seek bar.
+     * 
+     * @param enabled
+     */
     protected final void setSeekBarEnabled(boolean enabled) {
         mMediaSeekBar.setEnabled(enabled);
     }
 
+    /**
+     * Get time by string format.
+     * 
+     * @param millisec
+     * @return
+     */
     private String formatTime(long millisec) {
         int seconds = (int) (millisec / 1000);
         int hours = seconds / (60 * 60);
@@ -3885,16 +3227,19 @@ public class BrowserActivity extends FragmentActivity implements
         return time;
     }
 
+    /**
+     * Called when volume changed.
+     * 
+     * @param volumeIncrement
+     */
     private void onVolumeChange(double volumeIncrement) {
-        if (mMediaPlayer == null) {
-            return;
-        }
-
         Log.e(TAG, "volumeIncrement:" + volumeIncrement);
 
         try {
-            double v = mMediaPlayer.getMediaStatus().getStreamVolume();
-            Log.e(TAG, "volumeIncrement:" + volumeIncrement + " v[" + v + "]");
+            double v = mFlintVideoManager.getMediaVolume();
+
+            Log.e("DLNA", "volumeIncrement:" + volumeIncrement + " v[" + v
+                    + "]");
             v += volumeIncrement;
             if (v > 1.0) {
                 v = 1.0;
@@ -3902,59 +3247,119 @@ public class BrowserActivity extends FragmentActivity implements
                 v = 0.0;
             }
 
-            mMediaPlayer.setStreamVolume(mApiClient, v).setResultCallback(
-                    new ResultCallback<MediaChannelResult>() {
-                        @Override
-                        public void onResult(MediaChannelResult result) {
-                            Status status = result.getStatus();
-                            if (!status.isSuccess()) {
-                                Log.w(TAG,
-                                        "Unable to set volume: "
-                                                + status.getStatusCode());
-                            }
-                        }
+            mFlintVideoManager.setMediaVolume(v);
 
-                    });
-        } catch (IllegalStateException e) {
+        } catch (Exception e) {
             // showErrorDialog(e.getMessage());
         }
     }
 
-    // private VideoUrlHandler mVideoUrlHandler = new VideoUrlHandler();
-
-    // public class VideoUrlHandler {
-    //
-    // @JavascriptInterface
-    // public void showVideoUrl(String url) {
-    // // Log.e(TAG, "Video url:" + url);
-    //
-    // if ((url != null && url.startsWith("http"))
-    // && (mCurrentVideoUrl == null || !mCurrentVideoUrl
-    // .equals(url))) {
-    // Log.e(TAG, "Get valid video Url: " + url);
-    //
-    // mCurrentVideoUrl = url;
-    // mHandler.postDelayed(mRefreshRunnable, 50);
-    // }
-    // }
-    // };
-
-    public void notifyGetVideoUrl(String url) {
-        if ((url != null && url.startsWith(VIDEO_URL_PREFIX))
-                && url.length() > 4 && (mCurrentVideoUrl == null || !mCurrentVideoUrl.equals(url.substring(4)))) { // 4 == lengthof("xxx:")
-            Log.e(TAG, "Get valid video Url: " + url);
-
-            mCurrentVideoUrl = url.substring(4);
-            mHandler.postDelayed(mRefreshRunnable, 1000);
-        }
-    }
-    
-    
+    /**
+     * refresh current time
+     * 
+     * @param position
+     * @param duration
+     */
     protected final void refreshSeekPosition(long position, long duration) {
         mFlingCurrentTimeTextView.setText(formatTime(position));
     }
 
+    /**
+     * Get current video's resolution name.
+     * 
+     * @return
+     */
+    public String getCurrentResolution() {
+        return mVideoResolutionTextView.getText().toString();
+    }
 
+    @Override
+    public void onDeviceSelected(String name) {
+        // TODO Auto-generated method stub
+
+        if (getCurrentVideoUrl() == null) {
+            Log.d(TAG, "url is " + getCurrentVideoUrl() + " ignore it!");
+            Toast.makeText(this, "url is null!ignore it!", Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+
+        mMediaRouteButton
+                .setImageResource(R.drawable.mr_ic_media_route_on_holo_dark);
+
+        // ready to play media: video url by api or other video url
+        if (mVideoResolutionTextView.getVisibility() == View.VISIBLE) {
+            mFlintVideoManager.playVideo(getSelectedVideoUrlByApi(),
+                    getCurrentVideoTitle());
+        } else {
+            mFlintVideoManager.playVideo(getCurrentVideoUrl(),
+                    getCurrentVideoTitle());
+        }
+
+        updateButtonStates();
+
+        // show device info
+        mFlingDeviceNameTextView.setText(name + "(Loading...)");
+        updateFlingDispInfo(true);
+    }
+
+    @Override
+    public void onDeviceUnselected() {
+        // TODO Auto-generated method stub
+        Log.e(TAG, "onDeviceUnselected!");
+
+        mMediaRouteButton
+                .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
+
+        cancelRefreshTimer();
+
+        clearMediaState();
+        updateButtonStates();
+    }
+
+    @Override
+    public void onApplicationDisconnected() {
+        // TODO Auto-generated method stub
+
+        clearMediaState();
+        updateButtonStates();
+    }
+
+    @Override
+    public void onConnectionFailed() {
+        // TODO Auto-generated method stub
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mMediaRouteButton
+                        .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
+
+                updateButtonStates();
+                clearMediaState();
+                cancelRefreshTimer();
+                // showErrorDialog(getString(R.string.error_no_device_connection));
+            }
+        });
+    }
+
+    @Override
+    public void onApplicationConnectionResult(String applicationStatus) {
+        // TODO Auto-generated method stub
+
+        startRefreshTimer();
+    }
+
+    @Override
+    public void onMediaSeekEnd() {
+        // TODO Auto-generated method stub
+
+        mSeeking = false;
+    }
+
+    /**
+     * Get video's play url by using rabbit's API
+     */
     private class MyHostnameVerifier implements HostnameVerifier {
         @Override
         public boolean verify(String hostname, SSLSession session) {
@@ -3985,6 +3390,14 @@ public class BrowserActivity extends FragmentActivity implements
 
     }
 
+    /**
+     * Send POST request.
+     * 
+     * @param url
+     * @param param
+     * @param data
+     * @return
+     */
     public String SendHttpsPOST(String url, List<NameValuePair> param,
             String data) {
         String result = null;
@@ -4089,7 +3502,7 @@ public class BrowserActivity extends FragmentActivity implements
      * 
      * @param result
      */
-    void processVideoUrls(String result) {
+    private void processVideoUrls(String result) {
         videoUrls.clear();
 
         // {"status":200,"data":[{"url":"http:\/\/v.youku.com\/v_show\/id_XODUwMDM0NDUy.html?from=y1.3-tv-grid-1007-9910.86804.1-1","id":"","num":"","vid":"","source":"youku","sourceName":"\u4f18\u9177\u89c6\u9891","playUrl":{"HD":["http:\/\/pl.youku.com\/playlist\/m3u8?ts=1427076444&keyframe=1&vid=XODUwMDM0NDUy&type=hd2&sid=442707644496121c78ca6&token=5158&oip=1008521675&ep=v4TS4z2PnxtMZfqTd5f%2FdgrHMEbE4Lhvk9YdQoGTJsv7lbbElD2WtWp9mT7DI5SF&did=3f2189e6a744e68de6761a20ceaf379aa8acfad4&ctype=21&ev=1"],"SD":["http:\/\/pl.youku.com\/playlist\/m3u8?ts=1427076444&keyframe=1&vid=XODUwMDM0NDUy&type=mp4&sid=442707644496121c78ca6&token=5158&oip=1008521675&ep=v4TS4z2PnxtMZfqTd5f%2FdgrHMEbE4Lhvk9YdQoGTJsv7lbbElD2WtWp9mT7DI5SF&did=3f2189e6a744e68de6761a20ceaf379aa8acfad4&ctype=21&ev=1"]}}]}
@@ -4104,10 +3517,13 @@ public class BrowserActivity extends FragmentActivity implements
                 final String url = r.getString("url");
                 JSONObject playUrl = r.getJSONObject("playUrl");
 
+                String label = "";
+
                 try {
                     JSONArray Smooth = playUrl.getJSONArray("Smooth");
                     videoUrls.put(getString(R.string.resolution_Smooth),
                             Smooth.getString(0));
+                    label = getString(R.string.resolution_Smooth);
                 } catch (Exception e) {
                     // e.printStackTrace();
                 }
@@ -4116,6 +3532,7 @@ public class BrowserActivity extends FragmentActivity implements
                     JSONArray SD = playUrl.getJSONArray("SD");
                     videoUrls.put(getString(R.string.resolution_SD),
                             SD.getString(0));
+                    label = getString(R.string.resolution_SD);
                 } catch (Exception e) {
                     // e.printStackTrace();
                 }
@@ -4124,6 +3541,8 @@ public class BrowserActivity extends FragmentActivity implements
                     JSONArray HD = playUrl.getJSONArray("HD");
                     videoUrls.put(getString(R.string.resolution_HD),
                             HD.getString(0));
+
+                    label = getString(R.string.resolution_HD);
                 } catch (Exception e) {
                     // e.printStackTrace();
                 }
@@ -4132,6 +3551,8 @@ public class BrowserActivity extends FragmentActivity implements
                     JSONArray Ultraclear = playUrl.getJSONArray("Ultraclear");
                     videoUrls.put(getString(R.string.resolution_Ultraclear),
                             Ultraclear.getString(0));
+
+                    label = getString(R.string.resolution_Ultraclear);
                 } catch (Exception e) {
                     // e.printStackTrace();
                 }
@@ -4140,6 +3561,8 @@ public class BrowserActivity extends FragmentActivity implements
                     JSONArray Bluray = playUrl.getJSONArray("Bluray");
                     videoUrls.put(getString(R.string.resolution_Bluray),
                             Bluray.getString(0));
+
+                    label = getString(R.string.resolution_Bluray);
                 } catch (Exception e) {
                     // e.printStackTrace();
                 }
@@ -4147,6 +3570,8 @@ public class BrowserActivity extends FragmentActivity implements
                 Log.e(TAG,
                         "playUrl:" + playUrl.toString() + "["
                                 + videoUrls.toString() + "]");
+
+                final String videoQualityLabel = label;
 
                 if (videoUrls.size() > 0) {
                     mHandler.post(new Runnable() {
@@ -4161,12 +3586,23 @@ public class BrowserActivity extends FragmentActivity implements
                                 listDialog.setDialogTitile(url);
                             }
 
-                            Toast.makeText(mContext, videoUrls.toString(),
-                                    Toast.LENGTH_SHORT).show();
+                            videoList.clear();
 
-                            mVideoResolutionTextView.setText(getString(R.string.resolution));
+                            videoList.addAll(videoUrls.keySet());
+
+                            mMediaFlingBar.show();
+
+                            mVideoResolutionTextView.setText(videoQualityLabel);
+
+                            setSelectedVideoUrlByApi(videoUrls
+                                    .get(videoQualityLabel));
+
                             mVideoResolutionTextView
                                     .setVisibility(View.VISIBLE);
+
+                            updateGetVideoRealBtnStatus(true);
+
+                            autoPlayIfIsNecessary(getSelectedVideoUrlByApi());
                         }
 
                     });
@@ -4177,10 +3613,11 @@ public class BrowserActivity extends FragmentActivity implements
                         public void run() {
                             // TODO Auto-generated method stub
 
-                            mVideoResolutionTextView.setText("");
-                            
-                            mVideoResolutionTextView
-                                    .setVisibility(View.INVISIBLE);
+                            hideVideoResolutionView();
+
+                            updateGetVideoRealBtnStatus(true);
+
+                            autoPlayIfIsNecessary(getCurrentVideoUrl());
                         }
 
                     });
@@ -4195,9 +3632,11 @@ public class BrowserActivity extends FragmentActivity implements
                 public void run() {
                     // TODO Auto-generated method stub
 
-                    mVideoResolutionTextView.setText("");
-                    
-                    mVideoResolutionTextView.setVisibility(View.INVISIBLE);
+                    hideVideoResolutionView();
+
+                    updateGetVideoRealBtnStatus(true);
+
+                    autoPlayIfIsNecessary(getCurrentVideoUrl());
                 }
 
             });
@@ -4211,7 +3650,7 @@ public class BrowserActivity extends FragmentActivity implements
     private String mSiteUrl;
 
     /**
-     * 初始化列表框
+     * Show video's play url list
      */
     private void initListDialog() {
         listDialog = CustomDialog.createListDialog(this,
@@ -4222,31 +3661,25 @@ public class BrowserActivity extends FragmentActivity implements
                             int arg2, long arg3) {
                         listDialog.dismiss();
 
+                        // disable auto play
+                        mAutoplayCheckbox.setChecked(false);
+                        mShouldAutoPlayMedia = false;
+
+                        setSelectedVideoUrlByApi(videoUrls.get(videoList
+                                .get(arg2)));
+
                         mVideoResolutionTextView.setText(videoList.get(arg2));
 
-                        //mCurrentVideoUrl = videoUrls.get(videoList.get(arg2));
-
-                        MediaMetadata metadata = new MediaMetadata(
-                                MediaMetadata.MEDIA_TYPE_MOVIE);
-                        mSelectedMedia = new MediaInfo.Builder(videoUrls.get(videoList.get(arg2)))
-                                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                                .setContentType("video/mp4")
-                                .setMetadata(metadata).build();
-
-                        mShouldAutoPlayMedia = false;
-                        
-                        Log.e(TAG, "should show!");
-                        if (mApiClient != null && mApiClient.isConnected()) {
-                            if (mMediaPlayer != null) {
-                                playMedia(mSelectedMedia);
-                            }
-
+                        if (mFlintVideoManager.isMediaConnected()) {
+                            mFlintVideoManager.playVideo(
+                                    videoUrls.get(videoList.get(arg2)),
+                                    getCurrentVideoTitle());
                         }
                     }
                 });
         if (mSiteUrl != null) {
             final String title = mCurrentView.getTitle();
-            listDialog.setDialogTitile(title + "[" + mSiteUrl + "]");
+            listDialog.setDialogTitile(title);
         } else {
             listDialog.setDialogTitile(getResources().getString(
                     R.string.custom_dialog_list_title_str));
@@ -4260,7 +3693,92 @@ public class BrowserActivity extends FragmentActivity implements
         listDialog.show();
     }
 
-    public String getCurrentResolution() {
-        return mVideoResolutionTextView.getText().toString();
+    /**
+     * Hide video resolution view.
+     */
+    private void hideVideoResolutionView() {
+        mVideoResolutionTextView.setText("");
+        mVideoResolutionTextView.setVisibility(View.INVISIBLE);
+    }
+
+    /**
+     * get video real play url by rabbit's api
+     * 
+     * @param url
+     */
+    private void getVideoPlayUrlByApi(final String url) {
+        hideVideoResolutionView();
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                if (mCurrentView == null) {
+                    return;
+                }
+
+                // TODO Auto-generated method stub
+                List<NameValuePair> param = new ArrayList<NameValuePair>();
+
+                param.add(new BasicNameValuePair("apptoken",
+                        "3e52201f5037ad9bd8e389348916bd3a"));
+                param.add(new BasicNameValuePair("method", "core.video.realurl"));
+                param.add(new BasicNameValuePair("packageName",
+                        "com.infthink.test"));
+                param.add(new BasicNameValuePair("url", url));
+
+                Log.e(TAG, "get real video url[" + url + "]site[" + mSiteUrl
+                        + "]");
+
+                SendHttpsPOST("https://play.aituzi.com", param, null);
+
+            }
+
+        }).start();
+    }
+
+    /**
+     * show or hide views related with get video's real play url.
+     * 
+     * @param show
+     */
+    void updateGetVideoRealBtnStatus(boolean show) {
+        if (!show) {
+            mVideoRefreshBtn.setVisibility(View.GONE);
+            mVideoRefreshProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            mVideoRefreshBtn.setVisibility(View.VISIBLE);
+            mVideoRefreshProgressBar.setVisibility(View.GONE);
+        }
+
+    }
+
+    /**
+     * auto fling if necessary
+     */
+    private void autoPlayIfIsNecessary(String url) {
+        if (!mShouldAutoPlayMedia || url == null) {
+            return;
+        }
+
+        Log.e(TAG, "should show!");
+
+        if (mFlintVideoManager.isMediaConnected()) {
+            mFlintVideoManager.playVideo(url, getCurrentVideoTitle());
+        }
+    }
+
+    public void notifyGetVideoUrl(String url) {
+        Log.e(TAG, "notifyGetVideoUrl:" + url);
+        if ((url != null && url.startsWith(VIDEO_URL_PREFIX))
+                && url.length() > 4
+                && (getCurrentVideoUrl() == null || !getCurrentVideoUrl()
+                        .equals(url.substring(4)))) {
+            Log.e(TAG, "Get valid video Url: " + url);
+
+            setCurrentVideoUrl(url.substring(4));
+            mHandler.postDelayed(mRefreshRunnable, 100);
+        }
     }
 }

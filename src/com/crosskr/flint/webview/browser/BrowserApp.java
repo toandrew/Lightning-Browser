@@ -1,5 +1,7 @@
 package com.crosskr.flint.webview.browser;
 
+import com.connectsdk.discovery.DiscoveryManager;
+
 import android.app.Application;
 import android.content.Context;
 
@@ -11,6 +13,8 @@ public class BrowserApp extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        
+        DiscoveryManager.init(getApplicationContext());
     }
 
     public static Context getAppContext() {

@@ -5,8 +5,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.crosskr.flint.webview.browser"
-    android:versionCode="7"
-    android:versionName="1.0" >
+    android:versionCode="8"
+    android:versionName="2.0" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
@@ -223,10 +223,12 @@
 
 
         <activity
+            android:icon="@drawable/ic_launcher"
             android:name="com.infthink.miuicastsender.SenderDemo"
             android:configChanges="orientation|screenSize"
             android:label="@string/cast_application_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask" 
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
 
             <!--
             intent-filter>
@@ -285,22 +287,6 @@
                 <data android:mimeType="application/x-mpegurl" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.infthink.miuicastsender.FetcherActivity115"
-            android:label="@string/cast_application_name"
-            android:theme="@android:style/Theme.NoDisplay" >
-            <intent-filter>
-                <action android:name="infthink.intent.action.VIDEO_PLAY_115" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="" />
-                <data android:scheme="file" />
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name="tv.matchstick.flint.service.FlintDeviceService"
             android:exported="false" >
