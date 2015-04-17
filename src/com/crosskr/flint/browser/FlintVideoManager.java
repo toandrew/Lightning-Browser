@@ -622,12 +622,25 @@ public class FlintVideoManager {
                     @Override
                     public void onError(ServiceCommandError error) {
                         if (mLaunchSession != null) {
-                            mLaunchSession.close(null);
-                            mLaunchSession = null;
+                            mLaunchSession.close(new ResponseListener<Object>() {
+
+                                @Override
+                                public void onError(ServiceCommandError error) {
+                                    // TODO Auto-generated method stub
+
+                                    doStop();
+                                }
+
+                                @Override
+                                public void onSuccess(Object object) {
+                                    // TODO Auto-generated method stub
+
+                                    doStop();
+                                }
+
+                            });
                         }
-
-                        onDeviceUnselected(null);
-
+                        
                         mStatusChangeListener.onConnectionFailed();
                     }
                 });
@@ -657,6 +670,9 @@ public class FlintVideoManager {
      * Stop receiver application.
      */
     public void stopTvApplication() {
+        RuntimeException e = new RuntimeException();
+        e.printStackTrace();
+        
         Log.e(TAG, "stopTvApplication!");
         if (getMediaPlayer() != null) {
             Log.e(TAG, "stopTvApplication 1");
@@ -764,7 +780,7 @@ public class FlintVideoManager {
         mMediaControl = null;
         mVolumeControl = null;
 
-        mLaunchSession = null;
+        //mLaunchSession = null;
 
         if (mStatusChangeListener != null) {
             mStatusChangeListener.onApplicationDisconnected();

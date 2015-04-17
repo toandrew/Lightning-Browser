@@ -3265,6 +3265,9 @@ public class BrowserActivity extends FlintBaseActivity implements
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                mMediaRouteButton
+                        .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
+                
                 updateButtonStates();
                 clearMediaState();
                 cancelRefreshTimer();
