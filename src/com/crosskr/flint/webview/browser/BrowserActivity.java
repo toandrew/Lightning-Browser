@@ -835,13 +835,13 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(0.1);
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(-0.1);
                 return true;
             }
