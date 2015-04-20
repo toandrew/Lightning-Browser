@@ -904,7 +904,7 @@ public class LightningView {
 		@Override
 		public boolean onJsAlert(WebView view,String url,
 		        String message,JsResult result) {
-		    Log.e(TAG, "onJsAlert:message:" + message);
+		    //Log.e(TAG, "onJsAlert:message:" + message);
 		    result.confirm();
 		    
 		    ((BrowserActivity)mActivity).notifyGetVideoUrl(message);

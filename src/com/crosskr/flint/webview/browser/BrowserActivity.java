@@ -2939,7 +2939,7 @@ public class BrowserActivity extends FlintBaseActivity implements
 
                 // Get Video's url.
                 if (mCurrentView != null && !isKeyBoardOpened) {
-                    Log.e(TAG, "try to extract real video url!");
+                    //Log.e(TAG, "try to extract real video url!");
                     String GET_VIDEO_URL_SCRIPT = "(function () {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {alert('xxx:' + videos[0].src);}})();";
                     mCurrentView.getWebView().loadUrl(
                             "javascript:" + GET_VIDEO_URL_SCRIPT);
@@ -3770,7 +3770,7 @@ public class BrowserActivity extends FlintBaseActivity implements
     }
 
     public void notifyGetVideoUrl(String url) {
-        Log.e(TAG, "notifyGetVideoUrl:" + url);
+        //Log.e(TAG, "notifyGetVideoUrl:" + url);
         if ((url != null && url.startsWith(VIDEO_URL_PREFIX))
                 && url.length() > 4
                 && (getCurrentVideoUrl() == null || !getCurrentVideoUrl()
