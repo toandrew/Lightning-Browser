@@ -562,6 +562,9 @@ public class SenderDemo extends FlintBaseActivity implements
                     .show();
             return;
         }
+        
+        mFlintVideoManager.playVideo(getCurrentVideoUrl(),
+                getCurrentVideoTitle());
 
         updateButtonStates();
 

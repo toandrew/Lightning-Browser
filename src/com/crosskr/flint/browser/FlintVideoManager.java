@@ -428,6 +428,8 @@ public class FlintVideoManager {
         public void onDeviceDisconnected(ConnectableDevice device) {
             // TODO Auto-generated method stub
 
+            device.removeListener(mDeviceListener);
+            
             Log.e(TAG, "onDeviceDisconnected:" + device);
         }
 
@@ -676,6 +678,7 @@ public class FlintVideoManager {
 
         if (mLaunchSession != null) {
             Log.e(TAG, "launchSession: type:" + mLaunchSession.getSessionType());
+            mLaunchSession.setSessionType(LaunchSessionType.Media);
             mLaunchSession.close(new ResponseListener<Object>() {
 
                 @Override
