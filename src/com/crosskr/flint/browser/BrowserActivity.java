@@ -780,13 +780,13 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(0.1);
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(-0.1);
                 return true;
             }
@@ -2795,6 +2795,11 @@ public class BrowserActivity extends FlintBaseActivity implements
         mRefreshRunnable = new Runnable() {
             @Override
             public void run() {
+                if (mQuit) {
+                    Log.e(TAG, "mRefreshRunnable:quit!");
+                    return;
+                }
+                
                 Log.e(TAG, "show media cast control?!["
                         + DiscoveryManager.getInstance().getCompatibleDevices()
                                 .size() + "]");
@@ -3228,6 +3233,10 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         mMediaRouteButton
                 .setImageResource(R.drawable.mr_ic_media_route_on_holo_dark);
+
+        // ready to play media: video url by api or other video url
+        mFlintVideoManager.playVideo(getCurrentVideoUrl(),
+                    getCurrentVideoTitle());
 
         updateButtonStates();
 

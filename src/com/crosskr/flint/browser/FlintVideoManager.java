@@ -571,7 +571,7 @@ public class FlintVideoManager {
     private void onDeviceUnselected(ConnectableDevice device) {
         mCurrentDeviceName = "";
         mCurrentTime = 0;
-        
+
         mQuit = true;
 
         setTv(null);
@@ -622,25 +622,27 @@ public class FlintVideoManager {
                     @Override
                     public void onError(ServiceCommandError error) {
                         if (mLaunchSession != null) {
-                            mLaunchSession.close(new ResponseListener<Object>() {
+                            mLaunchSession
+                                    .close(new ResponseListener<Object>() {
 
-                                @Override
-                                public void onError(ServiceCommandError error) {
-                                    // TODO Auto-generated method stub
+                                        @Override
+                                        public void onError(
+                                                ServiceCommandError error) {
+                                            // TODO Auto-generated method stub
 
-                                    doStop();
-                                }
+                                            doStop();
+                                        }
 
-                                @Override
-                                public void onSuccess(Object object) {
-                                    // TODO Auto-generated method stub
+                                        @Override
+                                        public void onSuccess(Object object) {
+                                            // TODO Auto-generated method stub
 
-                                    doStop();
-                                }
+                                            doStop();
+                                        }
 
-                            });
+                                    });
                         }
-                        
+
                         mStatusChangeListener.onConnectionFailed();
                     }
                 });
@@ -660,9 +662,6 @@ public class FlintVideoManager {
             mMediaPlayer = mTV.getCapability(MediaPlayer.class);
             mMediaControl = mTV.getCapability(MediaControl.class);
             mVolumeControl = mTV.getCapability(VolumeControl.class);
-
-            playVideo(mFlintBaseActivity.getCurrentVideoUrl(),
-                    mFlintBaseActivity.getCurrentVideoTitle());
         }
     }
 
@@ -672,32 +671,28 @@ public class FlintVideoManager {
     public void stopTvApplication() {
         RuntimeException e = new RuntimeException();
         e.printStackTrace();
-        
-        Log.e(TAG, "stopTvApplication!");
-        if (getMediaPlayer() != null) {
-            Log.e(TAG, "stopTvApplication 1");
-            if (mLaunchSession != null) {
-                Log.e(TAG,
-                        "launchSession: type:"
-                                + mLaunchSession.getSessionType());
-                mLaunchSession.close(new ResponseListener<Object>() {
 
-                    @Override
-                    public void onError(ServiceCommandError error) {
-                        // TODO Auto-generated method stub
+        Log.e(TAG, "stopTvApplication! session[" + mLaunchSession + "]");
 
-                        doStop();
-                    }
+        if (mLaunchSession != null) {
+            Log.e(TAG, "launchSession: type:" + mLaunchSession.getSessionType());
+            mLaunchSession.close(new ResponseListener<Object>() {
 
-                    @Override
-                    public void onSuccess(Object object) {
-                        // TODO Auto-generated method stub
+                @Override
+                public void onError(ServiceCommandError error) {
+                    // TODO Auto-generated method stub
 
-                        doStop();
-                    }
+                    doStop();
+                }
 
-                });
-            }
+                @Override
+                public void onSuccess(Object object) {
+                    // TODO Auto-generated method stub
+
+                    doStop();
+                }
+
+            });
         }
     }
 
@@ -780,7 +775,7 @@ public class FlintVideoManager {
         mMediaControl = null;
         mVolumeControl = null;
 
-        //mLaunchSession = null;
+        // mLaunchSession = null;
 
         if (mStatusChangeListener != null) {
             mStatusChangeListener.onApplicationDisconnected();
