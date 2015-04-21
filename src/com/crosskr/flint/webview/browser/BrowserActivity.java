@@ -155,8 +155,13 @@ import android.widget.VideoView;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.discovery.DiscoveryManager;
 import com.connectsdk.service.capability.MediaControl.PlayStateStatus;
+import com.github.amlcurran.showcaseview.ApiUtils;
+import com.github.amlcurran.showcaseview.ShowcaseView;
 //import com.umeng.analytics.MobclickAgent;
 //import com.umeng.update.UmengUpdateAgent;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 public class BrowserActivity extends FlintBaseActivity implements
         BrowserController, FlintStatusChangeListener {
@@ -835,13 +840,15 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE
+                    && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(0.1);
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE
+                    && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(-0.1);
                 return true;
             }
@@ -2756,6 +2763,14 @@ public class BrowserActivity extends FlintBaseActivity implements
 
     private String mSelectedVideoUrlByApi;
 
+    private ShowcaseView mShowcaseView;
+
+    private final ApiUtils apiUtils = new ApiUtils();
+
+    private int mCounter = 0;
+
+    private static final int HINT_SINGLE_ID = 0x123456;
+
     /**
      * Init all Flint related
      */
@@ -2769,8 +2784,7 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         mMediaFlingBar = (MediaFlingBar) findViewById(R.id.media_fling);
         mMediaFlingBar.show();
-        mMediaFlingBar.hide();
-
+        
         mMediaRouteButton = (ImageButton) mMediaFlingBar
                 .findViewById(R.id.media_route_button);
 
@@ -2881,7 +2895,7 @@ public class BrowserActivity extends FlintBaseActivity implements
                     Log.e(TAG, "mRefreshRunnable:quit!");
                     return;
                 }
-                
+
                 Log.e(TAG, "show media cast control?!["
                         + DiscoveryManager.getInstance().getCompatibleDevices()
                                 .size() + "]");
@@ -2939,12 +2953,12 @@ public class BrowserActivity extends FlintBaseActivity implements
 
                 // Get Video's url.
                 if (mCurrentView != null && !isKeyBoardOpened) {
-                    //Log.e(TAG, "try to extract real video url!");
+                    // Log.e(TAG, "try to extract real video url!");
                     String GET_VIDEO_URL_SCRIPT = "(function () {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {alert('xxx:' + videos[0].src);}})();";
                     mCurrentView.getWebView().loadUrl(
                             "javascript:" + GET_VIDEO_URL_SCRIPT);
                 }
-                
+
                 mHandler.removeCallbacks(mVideoUrlRunnable);
 
                 mHandler.postDelayed(mVideoUrlRunnable, REFRESH_INTERVAL_MS);
@@ -3008,6 +3022,9 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         mVideoRefreshProgressBar = (ProgressBar) mMediaFlingBar
                 .findViewById(R.id.media_get_video_url_progressbar);
+        
+        // show flint hints
+        showHint();
     }
 
     /**
@@ -3279,8 +3296,8 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         if (getCurrentVideoUrl() == null) {
             Log.d(TAG, "url is " + getCurrentVideoUrl() + " ignore it!");
-            Toast.makeText(this, "url is null!ignore it!", Toast.LENGTH_SHORT)
-                    .show();
+            Toast.makeText(BrowserActivity.this, getString(R.string.flint_empty_video_url), Toast.LENGTH_SHORT)
+            .show();
             return;
         }
 
@@ -3770,7 +3787,7 @@ public class BrowserActivity extends FlintBaseActivity implements
     }
 
     public void notifyGetVideoUrl(String url) {
-        //Log.e(TAG, "notifyGetVideoUrl:" + url);
+        // Log.e(TAG, "notifyGetVideoUrl:" + url);
         if ((url != null && url.startsWith(VIDEO_URL_PREFIX))
                 && url.length() > 4
                 && (getCurrentVideoUrl() == null || !getCurrentVideoUrl()
@@ -3779,6 +3796,71 @@ public class BrowserActivity extends FlintBaseActivity implements
 
             setCurrentVideoUrl(url.substring(4));
             mHandler.postDelayed(mRefreshRunnable, 100);
+        }
+    }
+
+    /**
+     * Use this to show user some hints on UI about how to use Flint functions.
+     */
+    private void showHint() {
+        if (mShowcaseView == null) {
+            mShowcaseView = new ShowcaseView.Builder(this, true)
+                    .setTarget(new ViewTarget(mCurrentView.getWebView()))
+                    .setStyle(R.style.CustomShowcaseTheme2)
+                    .singleShot(HINT_SINGLE_ID)
+                    .setContentTitle(getString(R.string.flint_hint_webview_title))
+                    .setContentText(getString(R.string.flint_hint_webview_details))
+                    .setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // TODO Auto-generated method stub
+                            Log.e(TAG, "showHint:mCounter" + mCounter);
+                            switch (mCounter) {
+                            case 0:
+                                mShowcaseView.setShowcase(new ViewTarget(
+                                        mMediaRouteButton), true);
+                                mShowcaseView.setContentTitle(getString(R.string.flint_hint_control_title));
+                                mShowcaseView.setContentText(getString(R.string.flint_hint_control_details));
+                                break;
+                                
+                            case 1:
+                                mShowcaseView.setShowcase(new ViewTarget(
+                                        mVideoRefreshBtn), true);
+                                mShowcaseView.setContentTitle(getString(R.string.flint_hint_video_quality_title));
+                                mShowcaseView.setContentText(getString(R.string.flint_hint_video_quality_details));
+                                break;
+                                
+                            case 2:
+                                mShowcaseView.setTarget(Target.NONE);
+                                mShowcaseView.setContentTitle(getString(R.string.flint_hint_final_title));
+                                mShowcaseView
+                                        .setContentText(getString(R.string.flint_hint_final_details));
+                                mShowcaseView
+                                        .setButtonText(getString(R.string.flint_hint_close));
+                                setAlpha(0.4f, mMediaRouteButton,
+                                        mVideoRefreshBtn, mCurrentView.getWebView());
+                                break;
+
+                            case 3:
+                                mShowcaseView.hide();
+                                setAlpha(1.0f, mMediaRouteButton,
+                                        mVideoRefreshBtn, mCurrentView.getWebView());
+                                break;
+                            }
+                            mCounter++;
+                        }
+
+                    }).build();
+        }
+        mShowcaseView.setButtonText(getString(R.string.flint_hint_next));
+        mShowcaseView.setShouldCentreText(false);
+    }
+
+    private void setAlpha(float alpha, View... views) {
+        if (apiUtils.isCompatWithHoneycomb()) {
+            for (View view : views) {
+                view.setAlpha(alpha);
+            }
         }
     }
 }

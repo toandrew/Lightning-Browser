@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.device.ConnectableDeviceListener;
@@ -396,6 +397,12 @@ public class FlintVideoManager {
      * process media route button clicked event
      */
     public void doMediaRouteButtonClicked() {
+        if (mFlintBaseActivity.getCurrentVideoUrl() == null) {
+            Toast.makeText(mFlintBaseActivity, mFlintBaseActivity.getString(R.string.flint_empty_video_url), Toast.LENGTH_SHORT)
+            .show();
+            return;
+        }
+        
         if (mTV == null) {
             mDeviceDialog.show();
         } else {
