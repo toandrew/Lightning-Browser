@@ -141,8 +141,13 @@ import android.widget.VideoView;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.discovery.DiscoveryManager;
 import com.connectsdk.service.capability.MediaControl.PlayStateStatus;
+import com.github.amlcurran.showcaseview.ApiUtils;
+import com.github.amlcurran.showcaseview.ShowcaseView;
 //import com.umeng.analytics.MobclickAgent;
 //import com.umeng.update.UmengUpdateAgent;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 public class BrowserActivity extends FlintBaseActivity implements
         BrowserController, FlintStatusChangeListener {
@@ -200,9 +205,6 @@ public class BrowserActivity extends FlintBaseActivity implements
     private static LayoutParams mMatchParent = new LayoutParams(
             LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     private BookmarkManager mBookmarkManager;
-
-    // used to send cust messages.
-    // private FlintMsgChannel mFlintMsgChannel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -2651,7 +2653,6 @@ public class BrowserActivity extends FlintBaseActivity implements
     private TextView mFlingCurrentTimeTextView;
     private TextView mFlingTotalTimeTextView;
     private TextView mFlingDeviceNameTextView;
-    // private TextView mFlingMediaInfoTextView;
 
     private TextView mVideoResolutionTextView;
 
@@ -2674,6 +2675,14 @@ public class BrowserActivity extends FlintBaseActivity implements
 
     private ProgressBar mVideoRefreshProgressBar;
 
+    private ShowcaseView mShowcaseView;
+
+    private final ApiUtils apiUtils = new ApiUtils();
+
+    private int mCounter = 0;
+
+    private static final int HINT_SINGLE_ID = 0x123457;
+
     /**
      * Init all Flint related
      */
@@ -2687,7 +2696,6 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         mMediaFlingBar = (MediaFlingBar) findViewById(R.id.media_fling);
         mMediaFlingBar.show();
-        mMediaFlingBar.hide();
 
         mMediaRouteButton = (ImageButton) mMediaFlingBar
                 .findViewById(R.id.media_route_button);
@@ -2955,6 +2963,9 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         mVideoRefreshProgressBar = (ProgressBar) mMediaFlingBar
                 .findViewById(R.id.media_get_video_url_progressbar);
+
+        // show flint hints
+        showHint();
     }
 
     /**
@@ -3226,8 +3237,9 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         if (getCurrentVideoUrl() == null) {
             Log.d(TAG, "url is " + getCurrentVideoUrl() + " ignore it!");
-            Toast.makeText(this, "url is null!ignore it!", Toast.LENGTH_SHORT)
-                    .show();
+            Toast.makeText(BrowserActivity.this,
+                    getString(R.string.flint_empty_video_url),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -3707,6 +3719,80 @@ public class BrowserActivity extends FlintBaseActivity implements
         if (mFlintVideoManager.isMediaConnected()) {
             mFlintVideoManager.playVideo(getCurrentVideoUrl(),
                     getCurrentVideoTitle());
+        }
+    }
+
+    /**
+     * Use this to show user some hints on UI about how to use Flint functions.
+     */
+    private void showHint() {
+        if (mShowcaseView == null) {
+            mShowcaseView = new ShowcaseView.Builder(this, true)
+                    .setTarget(new ViewTarget(mCurrentView.getWebView()))
+                    .setStyle(R.style.CustomShowcaseTheme2)
+                    .singleShot(HINT_SINGLE_ID)
+                    .setContentTitle(
+                            getString(R.string.flint_hint_webview_title))
+                    .setContentText(
+                            getString(R.string.flint_hint_webview_details))
+                    .setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // TODO Auto-generated method stub
+                            Log.e(TAG, "showHint:mCounter" + mCounter);
+                            switch (mCounter) {
+                            case 0:
+                                mShowcaseView.setShowcase(new ViewTarget(
+                                        mMediaRouteButton), true);
+                                mShowcaseView
+                                        .setContentTitle(getString(R.string.flint_hint_control_title));
+                                mShowcaseView
+                                        .setContentText(getString(R.string.flint_hint_control_details));
+                                break;
+
+                            case 1:
+                                mShowcaseView.setShowcase(new ViewTarget(
+                                        mVideoRefreshBtn), true);
+                                mShowcaseView
+                                        .setContentTitle(getString(R.string.flint_hint_video_quality_title));
+                                mShowcaseView
+                                        .setContentText(getString(R.string.flint_hint_video_quality_details));
+                                break;
+
+                            case 2:
+                                mShowcaseView.setTarget(Target.NONE);
+                                mShowcaseView
+                                        .setContentTitle(getString(R.string.flint_hint_final_title));
+                                mShowcaseView
+                                        .setContentText(getString(R.string.flint_hint_final_details));
+                                mShowcaseView
+                                        .setButtonText(getString(R.string.flint_hint_close));
+                                setAlpha(0.4f, mMediaRouteButton,
+                                        mVideoRefreshBtn,
+                                        mCurrentView.getWebView());
+                                break;
+
+                            case 3:
+                                mShowcaseView.hide();
+                                setAlpha(1.0f, mMediaRouteButton,
+                                        mVideoRefreshBtn,
+                                        mCurrentView.getWebView());
+                                break;
+                            }
+                            mCounter++;
+                        }
+
+                    }).build();
+        }
+        mShowcaseView.setButtonText(getString(R.string.flint_hint_next));
+        mShowcaseView.setShouldCentreText(false);
+    }
+
+    private void setAlpha(float alpha, View... views) {
+        if (apiUtils.isCompatWithHoneycomb()) {
+            for (View view : views) {
+                view.setAlpha(alpha);
+            }
         }
     }
 }

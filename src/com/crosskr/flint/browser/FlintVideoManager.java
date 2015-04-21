@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.device.ConnectableDeviceListener;
@@ -396,6 +397,12 @@ public class FlintVideoManager {
      * process media route button clicked event
      */
     public void doMediaRouteButtonClicked() {
+        if (mFlintBaseActivity.getCurrentVideoUrl() == null) {
+            Toast.makeText(mFlintBaseActivity, mFlintBaseActivity.getString(R.string.flint_empty_video_url), Toast.LENGTH_SHORT)
+            .show();
+            return;
+        }
+        
         if (mTV == null) {
             mDeviceDialog.show();
         } else {
@@ -430,7 +437,12 @@ public class FlintVideoManager {
 
             device.removeListener(mDeviceListener);
             
+            // here we will reset all things for device is disconnected!NOTE, "onConnectionFailure" will also finally call this func.
             Log.e(TAG, "onDeviceDisconnected:" + device);
+            if (mTV != null) {
+                mTV = null; // no need to disconnect again!
+                doStop();
+            }
         }
 
         @Override
@@ -623,6 +635,7 @@ public class FlintVideoManager {
 
                     @Override
                     public void onError(ServiceCommandError error) {
+                        Log.e(TAG, "onError!");
                         if (mLaunchSession != null) {
                             mLaunchSession
                                     .close(new ResponseListener<Object>() {
