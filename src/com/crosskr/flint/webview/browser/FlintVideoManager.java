@@ -437,7 +437,12 @@ public class FlintVideoManager {
 
             device.removeListener(mDeviceListener);
             
+            // here we will reset all things for device is disconnected!NOTE, "onConnectionFailure" will also finally call this func.
             Log.e(TAG, "onDeviceDisconnected:" + device);
+            if (mTV != null) {
+                mTV = null; // no need to disconnect again!
+                doStop();
+            }
         }
 
         @Override
