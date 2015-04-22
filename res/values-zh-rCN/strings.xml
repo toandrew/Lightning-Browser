@@ -202,7 +202,7 @@
     <string name="flint_hint_video_quality_title">如何投射不同清晰度的视频？</string>
     <string name="flint_hint_video_quality_details">\n
         \"清晰度\"按钮: 点击后获取视频各种清晰度的播放地址。\n\n
-        \"清晰度\"指示标签: 点击后可显示当前视频所有可用的清晰度\n\n\n
+        \"清晰度\"指示标签: 点击后可显示当前视频所有可用的清晰度\n\n
         另外，\n你也可以通过选择不同\"User Agent\"(应用程序菜单内)来投射更清晰的视频（取决于该网站能提供的视频清晰度）。
 	</string>
 	

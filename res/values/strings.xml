@@ -254,7 +254,7 @@
 
     <string name="flint_hint_video_quality_title">How to control the video quality?</string>
     <string name="flint_hint_video_quality_details">\n\"Video Quality\" button: Used to get current available video qualities if current site is supported by our server.\n\n\"Resolution\" label: Clicked to show current available video qualities.\n
-        \n\n\n
+        \n
         BTW, \n
         You can also use different \"User Agent\" which is located in menu bar to fling web videos with different video qualities!
 	</string>

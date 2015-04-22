@@ -2914,13 +2914,13 @@ public class BrowserActivity extends FlintBaseActivity implements
 
                     mMediaFlingBar.show();
 
+                    // hide
+                    hideVideoResolutionView();
+
                     final String url = mCurrentView.getUrl();
                     if (!url.equals(mSiteUrl)) {
                         getVideoPlayUrlByApi(url);
                     } else {
-                        // hide
-                        hideVideoResolutionView();
-
                         autoPlayIfIsNecessary(getCurrentVideoUrl());
                     }
                 }
@@ -3305,15 +3305,10 @@ public class BrowserActivity extends FlintBaseActivity implements
         mMediaRouteButton
                 .setImageResource(R.drawable.mr_ic_media_route_on_holo_dark);
 
-        // ready to play media: video url by api or other video url
-        if (mVideoResolutionTextView.getVisibility() == View.VISIBLE) {
-            mFlintVideoManager.playVideo(getSelectedVideoUrlByApi(),
-                    getCurrentVideoTitle());
-        } else {
-            mFlintVideoManager.playVideo(getCurrentVideoUrl(),
-                    getCurrentVideoTitle());
-        }
-
+        // ready to play media
+        mFlintVideoManager.playVideo(getCurrentVideoUrl(),
+                getCurrentVideoTitle());
+        
         updateButtonStates();
 
         // show device info
@@ -3612,20 +3607,15 @@ public class BrowserActivity extends FlintBaseActivity implements
 
                             mVideoResolutionTextView.setText(videoQualityLabel);
 
-                            setSelectedVideoUrlByApi(videoUrls
-                                    .get(videoQualityLabel));
-
-                            if (getCurrentVideoUrl() == null) {
-                                setCurrentVideoUrl(videoUrls
-                                        .get(videoQualityLabel));
-                            }
+                            setCurrentVideoUrl(videoUrls.get(videoQualityLabel));
 
                             mVideoResolutionTextView
                                     .setVisibility(View.VISIBLE);
 
                             updateGetVideoRealBtnStatus(true);
 
-                            autoPlayIfIsNecessary(getSelectedVideoUrlByApi());
+                            autoPlayIfIsNecessary(videoUrls
+                                    .get(videoQualityLabel));
                         }
 
                     });
@@ -3688,13 +3678,7 @@ public class BrowserActivity extends FlintBaseActivity implements
                         mAutoplayCheckbox.setChecked(false);
                         mShouldAutoPlayMedia = false;
 
-                        setSelectedVideoUrlByApi(videoUrls.get(videoList
-                                .get(arg2)));
-
-                        if (getCurrentVideoUrl() == null) {
-                            setCurrentVideoUrl(videoUrls.get(videoList
-                                    .get(arg2)));
-                        }
+                        setCurrentVideoUrl(videoUrls.get(videoList.get(arg2)));
 
                         mVideoResolutionTextView.setText(videoList.get(arg2));
 
@@ -3735,8 +3719,6 @@ public class BrowserActivity extends FlintBaseActivity implements
      * @param url
      */
     private void getVideoPlayUrlByApi(final String url) {
-        hideVideoResolutionView();
-
         new Thread(new Runnable() {
 
             @Override
@@ -3797,16 +3779,19 @@ public class BrowserActivity extends FlintBaseActivity implements
         }
     }
 
+    private String mFetchedVideoUrl;
+
     public void notifyGetVideoUrl(String url) {
-        // Log.e(TAG, "notifyGetVideoUrl:" + url);
         if ((url != null && url.startsWith(VIDEO_URL_PREFIX))
                 && url.length() > 4
-                && (getCurrentVideoUrl() == null || !getCurrentVideoUrl()
-                        .equals(url.substring(4)))) {
-            Log.e(TAG, "Get valid video Url: " + url);
+                && (mFetchedVideoUrl == null || !mFetchedVideoUrl.equals(url
+                        .substring(4)))) {
+            Log.e(TAG, "Get valid video Url[" + url + "]fetched[" + mFetchedVideoUrl+ "]");
 
-            setCurrentVideoUrl(url.substring(4));
-            mHandler.postDelayed(mRefreshRunnable, 100);
+            mFetchedVideoUrl = url.substring(4);
+
+            setCurrentVideoUrl(mFetchedVideoUrl);
+            mHandler.postDelayed(mRefreshRunnable, 0);
         }
     }
 

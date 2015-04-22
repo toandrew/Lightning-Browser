@@ -9,8 +9,6 @@ public class FlintBaseActivity extends FragmentActivity {
 
     private String mCurrentVideoTitle;
     
-    private String mSelectedVideoUrlByApi;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,21 +44,5 @@ public class FlintBaseActivity extends FragmentActivity {
      */
     public String getCurrentVideoTitle() {
         return mCurrentVideoTitle;
-    }
-    
-    /**
-     * Set current selected video url which are got by api
-     */
-    public void setSelectedVideoUrlByApi(String url) {
-        mSelectedVideoUrlByApi = url;
-    }
-
-    /**
-     * Get current video url
-     * 
-     * @return
-     */
-    public String getSelectedVideoUrlByApi() {
-        return mSelectedVideoUrlByApi;
     }
 }
