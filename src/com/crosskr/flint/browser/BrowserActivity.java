@@ -2719,7 +2719,7 @@ public class BrowserActivity extends FlintBaseActivity implements
             @Override
             public void onClick(View v) {
                 if (mPlayerState == PLAYER_STATE_FINISHED) {
-                    mHandler.postDelayed(mRefreshRunnable, 50);
+                    doPlay();
                 } else if (mPlayerState == PLAYER_STATE_PAUSED
                         || mPlayerState == PLAYER_STATE_BUFFERING) {
                     onPlayClicked();
@@ -2937,7 +2937,7 @@ public class BrowserActivity extends FlintBaseActivity implements
                         mShouldAutoPlayMedia = isChecked;
 
                         if (mShouldAutoPlayMedia) {
-                            mHandler.postDelayed(mRefreshRunnable, 50);
+                            doPlay();
                         }
                     }
                 });
@@ -3788,11 +3788,35 @@ public class BrowserActivity extends FlintBaseActivity implements
         mShowcaseView.setShouldCentreText(false);
     }
 
+    /**
+     * set alpha
+     * 
+     * @param alpha
+     * @param views
+     */
     private void setAlpha(float alpha, View... views) {
         if (apiUtils.isCompatWithHoneycomb()) {
             for (View view : views) {
                 view.setAlpha(alpha);
             }
         }
+    }
+
+    /**
+     * directly play current video
+     */
+    private void doPlay() {
+        mHandler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                if (DiscoveryManager.getInstance().getCompatibleDevices()
+                        .size() > 0) {
+                    autoPlayIfIsNecessary();
+                }
+
+            }
+        }, 50);
     }
 }
