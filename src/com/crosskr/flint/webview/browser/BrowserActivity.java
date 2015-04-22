@@ -8,7 +8,6 @@ import info.guardianproject.onionkit.ui.OrbotHelper;
 import info.guardianproject.onionkit.web.WebkitProxy;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -18,18 +17,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -40,9 +36,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
@@ -57,9 +50,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.umeng.analytics.MobclickAgent;
-import com.umeng.update.UmengUpdateAgent;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -95,13 +85,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Browser;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.MediaRouteButton;
-import android.support.v7.media.MediaRouteSelector;
-import android.support.v7.media.MediaRouter;
-import android.support.v7.media.MediaRouter.RouteInfo;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -152,16 +137,14 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.discovery.DiscoveryManager;
 import com.connectsdk.service.capability.MediaControl.PlayStateStatus;
 import com.github.amlcurran.showcaseview.ApiUtils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
-//import com.umeng.analytics.MobclickAgent;
-//import com.umeng.update.UmengUpdateAgent;
-import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
+import com.umeng.analytics.MobclickAgent;
+import com.umeng.update.UmengUpdateAgent;
 
 public class BrowserActivity extends FlintBaseActivity implements
         BrowserController, FlintStatusChangeListener {
@@ -2807,7 +2790,7 @@ public class BrowserActivity extends FlintBaseActivity implements
             @Override
             public void onClick(View v) {
                 if (mPlayerState == PLAYER_STATE_FINISHED) {
-                    mHandler.postDelayed(mRefreshRunnable, 50);
+                    doPlay();
                 } else if (mPlayerState == PLAYER_STATE_PAUSED
                         || mPlayerState == PLAYER_STATE_BUFFERING) {
                     onPlayClicked();
@@ -2996,7 +2979,7 @@ public class BrowserActivity extends FlintBaseActivity implements
                         mShouldAutoPlayMedia = isChecked;
 
                         if (mShouldAutoPlayMedia) {
-                            mHandler.postDelayed(mRefreshRunnable, 50);
+                            doPlay();
                         }
                     }
                 });
@@ -3308,7 +3291,7 @@ public class BrowserActivity extends FlintBaseActivity implements
         // ready to play media
         mFlintVideoManager.playVideo(getCurrentVideoUrl(),
                 getCurrentVideoTitle());
-        
+
         updateButtonStates();
 
         // show device info
@@ -3786,7 +3769,8 @@ public class BrowserActivity extends FlintBaseActivity implements
                 && url.length() > 4
                 && (mFetchedVideoUrl == null || !mFetchedVideoUrl.equals(url
                         .substring(4)))) {
-            Log.e(TAG, "Get valid video Url[" + url + "]fetched[" + mFetchedVideoUrl+ "]");
+            Log.e(TAG, "Get valid video Url[" + url + "]fetched["
+                    + mFetchedVideoUrl + "]");
 
             mFetchedVideoUrl = url.substring(4);
 
@@ -3861,11 +3845,35 @@ public class BrowserActivity extends FlintBaseActivity implements
         mShowcaseView.setShouldCentreText(false);
     }
 
+    /**
+     * set alpha
+     * 
+     * @param alpha
+     * @param views
+     */
     private void setAlpha(float alpha, View... views) {
         if (apiUtils.isCompatWithHoneycomb()) {
             for (View view : views) {
                 view.setAlpha(alpha);
             }
         }
+    }
+
+    /**
+     * directly play current video
+     */
+    private void doPlay() {
+        mHandler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                if (DiscoveryManager.getInstance().getCompatibleDevices()
+                        .size() > 0) {
+                    autoPlayIfIsNecessary(getCurrentVideoUrl());
+                }
+
+            }
+        }, 50);
     }
 }
