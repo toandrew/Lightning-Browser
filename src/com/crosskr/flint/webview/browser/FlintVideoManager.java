@@ -346,23 +346,7 @@ public class FlintVideoManager {
      */
     public PlayStateStatus getMediaStatus() {
         if (mMediaControl != null) {
-            mMediaControl.getPlayState(new PlayStateListener() {
-
-                @Override
-                public void onSuccess(PlayStateStatus object) {
-                    // TODO Auto-generated method stub
-
-                    mCurrentPlayStateStatus = object;
-                }
-
-                @Override
-                public void onError(ServiceCommandError error) {
-                    // TODO Auto-generated method stub
-
-                    mCurrentPlayStateStatus = PlayStateStatus.Unknown;
-                }
-
-            });
+            mMediaControl.getPlayState(mPlayStateListener);
         }
 
         return mCurrentPlayStateStatus;
@@ -488,7 +472,7 @@ public class FlintVideoManager {
                         mTV.addListener(mDeviceListener);
                         mTV.connect();
 
-                        Log.e(TAG, "mTV:" + mTV.toString());
+                        Log.e(TAG, "mTV[" + mTV.toString() + "]");
 
                         mDevicePicker.pickDevice(mTV);
                     }
@@ -746,8 +730,8 @@ public class FlintVideoManager {
         getMediaVolume();
 
         mStatusChangeListener
-                .onApplicationConnectionResult("Application running!");
-
+                .onApplicationConnectionResult("Application running!");;
+        
         if (getTv().hasCapability(MediaControl.PlayState_Subscribe)) {
             mMediaControl.subscribePlayState(mPlayStateListener);
         }
@@ -758,7 +742,7 @@ public class FlintVideoManager {
      */
     private void startUpdating() {
         if (mMediaControl != null
-                && getTv().hasCapability(MediaControl.Duration)) {
+                && getTv().hasCapability(MediaControl.Duration) && mDuration <= 0) {
             mMediaControl.getDuration(mDurationListener);
         }
     }
@@ -778,7 +762,8 @@ public class FlintVideoManager {
     private void doStop() {
         mCurrentDeviceName = "";
         mCurrentTime = 0;
-
+        mDuration = -1;
+        
         if (mTV != null) {
             mTV.disconnect();
 
@@ -804,17 +789,20 @@ public class FlintVideoManager {
 
         @Override
         public void onError(ServiceCommandError error) {
-            Log.d("LG", "Playstate Listener error = " + error);
+            Log.d(TAG, "Playstate Listener error = " + error);
+            
+            mCurrentPlayStateStatus = PlayStateStatus.Unknown;
         }
 
         @Override
         public void onSuccess(PlayStateStatus playState) {
             Log.d(TAG, "Playstate changed | playState = " + playState);
-
+            
+            mCurrentPlayStateStatus = playState;
+            
             switch (playState) {
             case Playing:
                 startUpdating();
-
                 break;
 
             case Finished:
