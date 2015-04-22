@@ -744,7 +744,7 @@ public class FlintVideoManager {
      */
     private void startUpdating() {
         if (mMediaControl != null
-                && getTv().hasCapability(MediaControl.Duration) && mDuration <= 0) {
+                && getTv().hasCapability(MediaControl.Duration)) {
             mMediaControl.getDuration(mDurationListener);
         }
     }
