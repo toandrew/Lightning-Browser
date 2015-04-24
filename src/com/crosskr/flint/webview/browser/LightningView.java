@@ -860,9 +860,7 @@ public class LightningView {
 
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-		    view.loadUrl(url);
-		    
-		    return true;
+		    return super.shouldOverrideUrlLoading(view, url);
 		    
 		    /*
 			if (mBrowserController.isIncognito()) {
