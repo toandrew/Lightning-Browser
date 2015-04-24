@@ -177,7 +177,14 @@ public class LightningView {
             @Override
             public boolean shouldOverrideUrlLoading(XWalkView view,
                     java.lang.String url) {
-                Log.e("light", "haha URL:" + url);
+                Log.e("light", "!haha URL:" + url);
+                
+                if (url.startsWith("file:")) {
+                    return false;
+                }
+                return super.shouldOverrideUrlLoading(view, url);
+                
+                /*
                 if (mBrowserController.isIncognito()) {
                     return super.shouldOverrideUrlLoading(view, url);
                 }
@@ -209,6 +216,7 @@ public class LightningView {
                     }
                 }
                 return mIntentUtils.startActivityForUrl(mWebView, url);
+                */
             }
         });
 
