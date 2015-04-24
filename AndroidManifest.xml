@@ -5,8 +5,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.crosskr.flint.webview.browser"
-    android:versionCode="15"
-    android:versionName="2.1.5" >
+    android:versionCode="16"
+    android:versionName="2.1.6" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
@@ -323,6 +323,10 @@
         <meta-data
             android:name="UMENG_CHANNEL"
             android:value="INFTHINK" />
+        
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>
