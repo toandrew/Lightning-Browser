@@ -217,8 +217,6 @@ public class BrowserActivity extends FlintBaseActivity implements
         super.onStart();
 
         Log.e(TAG, "onStart");
-
-        mFlintVideoManager.onStart();
     }
 
     @Override
@@ -226,8 +224,6 @@ public class BrowserActivity extends FlintBaseActivity implements
         super.onStop();
 
         Log.e(TAG, "onStop");
-
-        mFlintVideoManager.onStart();
     }
 
     @SuppressWarnings("deprecation")
@@ -1492,6 +1488,8 @@ public class BrowserActivity extends FlintBaseActivity implements
         }
 
         mQuit = true;
+
+		mFlintVideoManager.onStop();
 
         if (mServerSocket != null) {
             try {
@@ -2966,6 +2964,8 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         // show flint hints
         showHint();
+        
+        mFlintVideoManager.onStart();
     }
 
     /**
