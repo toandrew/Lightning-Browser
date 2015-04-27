@@ -214,8 +214,6 @@ public class BrowserActivity extends FlintBaseActivity implements
         super.onStart();
 
         Log.e(TAG, "onStart");
-
-        mFlintVideoManager.onStart();
     }
 
     @Override
@@ -223,8 +221,6 @@ public class BrowserActivity extends FlintBaseActivity implements
         super.onStop();
 
         Log.e(TAG, "onStop");
-
-        mFlintVideoManager.onStart();
     }
 
     /**
@@ -1531,6 +1527,8 @@ public class BrowserActivity extends FlintBaseActivity implements
         }
 
         mQuit = true;
+
+        mFlintVideoManager.onStop();
 
         super.onDestroy();
     }
@@ -3008,6 +3006,8 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         // show flint hints
         showHint();
+        
+        mFlintVideoManager.onStart();
     }
 
     /**

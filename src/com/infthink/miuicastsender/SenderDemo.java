@@ -123,6 +123,8 @@ public class SenderDemo extends FlintBaseActivity implements
     //private String mCurrentVideoUrl;
 
     private MenuItem mMediaRouteMenuItem;
+    
+    private boolean mQuit = false;
 
     private String processLocalVideoUrl(String url) {
         String real_url = url;
@@ -143,10 +145,9 @@ public class SenderDemo extends FlintBaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        NotificationManager notificationManager = (NotificationManager) this
-                .getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(0);
-
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.cancelAll();
+        
         setContentView(R.layout.video_details);
 
         Intent flingIntent = new Intent(SenderDemo.this, FxService.class);
@@ -168,7 +169,7 @@ public class SenderDemo extends FlintBaseActivity implements
         };
 
         Intent intent = getIntent();
-        Log.e(TAG, "intent");
+        Log.e(TAG, "intent:" + intent);
         if (intent != null
                 && intent.getAction() != null
                 && (intent.getAction().equals(ACTION_DUOKAN_VIDEOPLAY) || intent
@@ -210,6 +211,10 @@ public class SenderDemo extends FlintBaseActivity implements
         mRefreshRunnable = new Runnable() {
             @Override
             public void run() {
+                if (mQuit) {
+                    return;
+                }
+                
                 onRefreshEvent();
                 startRefreshTimer();
             }
@@ -292,13 +297,14 @@ public class SenderDemo extends FlintBaseActivity implements
                     }
 
                 });
+        
+        mFlintVideoManager.onStart();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.e(TAG, "onStart!");
-        mFlintVideoManager.onStart();
     }
 
     @Override
@@ -306,8 +312,6 @@ public class SenderDemo extends FlintBaseActivity implements
         super.onStop();
 
         Log.e(TAG, "onStop!");
-
-        mFlintVideoManager.onStop();
     }
 
     @Override
@@ -334,7 +338,6 @@ public class SenderDemo extends FlintBaseActivity implements
     }
 
     private void initWebserver() {
-        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         startServer(8080);
     }
 
@@ -434,13 +437,21 @@ public class SenderDemo extends FlintBaseActivity implements
 
     @Override
     protected void onDestroy() {
+        Log.e(TAG, "onDestroy!");
+        
+        mQuit = true;
+        
         if (mSearchTimer != null) {
             mSearchTimer.cancel();
             mSearchTimer = null;
         }
 
         mHandler.removeMessages(MSG_ID_REFRESH_DEV_LIST);
-
+        
+        mNotificationManager.cancelAll();
+        
+        mFlintVideoManager.onStop();
+        
         stopServer();
         super.onDestroy();
     }
