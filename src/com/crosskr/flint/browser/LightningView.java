@@ -438,10 +438,8 @@ public class LightningView {
         String lang = Locale.getDefault().getLanguage();
         if (lang.equals("zh")) {
             defaultUseragent = 1;
-            mWebView.load("file:///android_asset/sites/index.html", null);
         } else {
             defaultUseragent = 4;
-            mWebView.load("file:///android_asset/sites/index_en.html", null);
         }
         
         Log.e(TAG, "set user agent[" + mPreferences.getInt(PreferenceConstants.USER_AGENT, defaultUseragent) + "]default[" + defaultUseragent + "]");
