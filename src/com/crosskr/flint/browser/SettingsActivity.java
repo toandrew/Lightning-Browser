@@ -3,6 +3,8 @@
  */
 package com.crosskr.flint.browser;
 
+import java.util.Locale;
+
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -38,6 +40,8 @@ public class SettingsActivity extends Activity {
 	private Context mContext;
 	private Activity mActivity;
 
+    int defaultUseragent = 1;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -138,7 +142,13 @@ public class SettingsActivity extends Activity {
 		privacy(privacy);
 		advanced(advanced);
 		about(about);
-		
+
+        String lang = Locale.getDefault().getLanguage();
+        if (lang.equals("zh")) {
+            defaultUseragent = 1;
+        } else {
+            defaultUseragent = 4;
+        }
 		
 		RelativeLayout agent = (RelativeLayout) findViewById(R.id.layoutUserAgent);
 		agent(agent);
@@ -148,8 +158,8 @@ public class SettingsActivity extends Activity {
 	private TextView mAgentTextView;
     public void agent(RelativeLayout view) {
         mAgentTextView = (TextView) findViewById(R.id.agentText);
-        
-        mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
+
+        mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, defaultUseragent);
         switch (mAgentChoice) {
         case 1:
             mAgentTextView.setText(getResources().getString(R.string.agent_default));
@@ -179,7 +189,7 @@ public class SettingsActivity extends Activity {
             public void onClick(View v) {
                 AlertDialog.Builder agentPicker = new AlertDialog.Builder(mActivity);
                 agentPicker.setTitle(getResources().getString(R.string.title_user_agent));
-                mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
+                mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, defaultUseragent);
                 agentPicker.setSingleChoiceItems(R.array.user_agent, mAgentChoice - 1,
                         new DialogInterface.OnClickListener() {
 
