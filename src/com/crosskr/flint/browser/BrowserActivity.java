@@ -26,8 +26,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -40,15 +38,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -87,7 +85,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Browser;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
@@ -138,16 +135,14 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.discovery.DiscoveryManager;
 import com.connectsdk.service.capability.MediaControl.PlayStateStatus;
 import com.github.amlcurran.showcaseview.ApiUtils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
-//import com.umeng.analytics.MobclickAgent;
-//import com.umeng.update.UmengUpdateAgent;
-import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
+//import com.umeng.analytics.MobclickAgent;
+//import com.umeng.update.UmengUpdateAgent;
 
 public class BrowserActivity extends FlintBaseActivity implements
         BrowserController, FlintStatusChangeListener {
@@ -778,13 +773,15 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE
+                    && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(0.1);
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             if (mMediaFlingBar != null
-                    && mMediaFlingBar.getVisibility() == View.VISIBLE && mFlintVideoManager.isDeviceConnected()) {
+                    && mMediaFlingBar.getVisibility() == View.VISIBLE
+                    && mFlintVideoManager.isDeviceConnected()) {
                 onVolumeChange(-0.1);
                 return true;
             }
@@ -1489,7 +1486,17 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         mQuit = true;
 
-		mFlintVideoManager.onStop();
+        if (mGetVideoUrlRunnable != null) {
+            try {
+                synchronized (mGetVideoUrlRunnable) {
+                    mGetVideoUrlRunnable.notify();
+                }
+            } catch (Exception e) {
+
+            }
+        }
+
+        mFlintVideoManager.onStop();
 
         if (mServerSocket != null) {
             try {
@@ -2681,6 +2688,22 @@ public class BrowserActivity extends FlintBaseActivity implements
 
     private static final int HINT_SINGLE_ID = 0x123457;
 
+    private boolean mIsZh = true;
+
+    private SSLContext mSslcontext = null;
+
+    MyTrustManager tm = null;
+
+    X509HostnameVerifier mHostnameVerifier = null;
+
+    HttpsURLConnection httpsConn = null;
+
+    private Runnable mGetVideoUrlRunnable;
+
+    private String mCurrentUrl = null;
+
+    private javax.net.ssl.SSLSocketFactory mSSLSocketFactory;
+
     /**
      * Init all Flint related
      */
@@ -2689,6 +2712,23 @@ public class BrowserActivity extends FlintBaseActivity implements
         // MobclickAgent.updateOnlineConfig(mContext);
 
         // UmengUpdateAgent.update(this);
+        try {
+            mSslcontext = SSLContext.getInstance("TLS");
+            tm = new MyTrustManager();
+            mSslcontext.init(null, new TrustManager[] { tm },
+                    new java.security.SecureRandom());
+            mHostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+            mSSLSocketFactory = mSslcontext.getSocketFactory();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String lang = Locale.getDefault().getLanguage();
+        if (lang.equals("zh")) {
+            mIsZh = true;
+        } else {
+            //mIsZh = false; // does not send get video url request in other lang???
+        }
 
         Log.e(TAG, "initFlingServerSocket!");
 
@@ -2805,17 +2845,19 @@ public class BrowserActivity extends FlintBaseActivity implements
                     Log.e(TAG, "mRefreshRunnable:quit!");
                     return;
                 }
-                
+
                 Log.e(TAG, "show media cast control?!["
                         + DiscoveryManager.getInstance().getCompatibleDevices()
                                 .size() + "]");
 
                 if (DiscoveryManager.getInstance().getCompatibleDevices()
                         .size() > 0) {
-                    
+
                     if (mCurrentView == null) {
                         return;
                     }
+
+                    mCurrentUrl = mCurrentView.getUrl();
 
                     setCurrentVideoTitle(mCurrentView.getTitle());
 
@@ -2824,13 +2866,19 @@ public class BrowserActivity extends FlintBaseActivity implements
 
                     mMediaFlingBar.show();
 
-                    final String url = mCurrentView.getUrl();
-                    if (!url.equals(mSiteUrl)) {
-                        getVideoPlayUrlByApi(url);
-                    } else {
-                        // hide
-                        hideVideoResolutionView();
+                    // hide
+                    hideVideoResolutionView();
 
+                    final String url = mCurrentView.getUrl();
+                    if (!url.equals(mSiteUrl) && mIsZh) {
+                        try {
+                            synchronized (mGetVideoUrlRunnable) {
+                                mGetVideoUrlRunnable.notify();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
                         autoPlayIfIsNecessary();
                     }
                 }
@@ -2846,11 +2894,45 @@ public class BrowserActivity extends FlintBaseActivity implements
                     return;
                 }
 
+                if (mCurrentView != null) {
+                    mCurrentUrl = mCurrentView.getUrl();
+                }
+
                 onRefreshEvent();
 
                 startRefreshTimer();
             }
         };
+
+        mGetVideoUrlRunnable = new Runnable() {
+            @Override
+            public void run() {
+                while (!mQuit) {
+                    try {
+                        synchronized (this) {
+                            Log.e(TAG, "mGetVideoUrlRunnable:wait!");
+                            this.wait();
+                            Log.e(TAG, "mGetVideoUrlRunnable:quit wait!!");
+                        }
+
+                        if (mQuit) {
+                            Log.e(TAG, "mGetVideoUrlRunnable:quit!");
+                            return;
+                        }
+
+                        final String url = mCurrentUrl;
+
+                        getVideoPlayUrlByApi(url);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Log.e(TAG, "mGetVideoUrlRunnable:quit!");
+            }
+        };
+
+        new Thread(mGetVideoUrlRunnable).start();
 
         new Thread(new Runnable() {
             @Override
@@ -2947,14 +3029,21 @@ public class BrowserActivity extends FlintBaseActivity implements
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                if (mCurrentView == null) {
+                if (mCurrentView == null || !mIsZh) {
                     return;
                 }
 
                 updateGetVideoRealBtnStatus(false);
 
-                final String url = mCurrentView.getUrl();
-                getVideoPlayUrlByApi(url);
+                mCurrentUrl = mCurrentView.getUrl();
+                
+                try {
+                    synchronized (mGetVideoUrlRunnable) {
+                        mGetVideoUrlRunnable.notify();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
         });
@@ -2964,7 +3053,7 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         // show flint hints
         showHint();
-        
+
         mFlintVideoManager.onStart();
     }
 
@@ -3248,7 +3337,7 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         // ready to play media: video url by api or other video url
         mFlintVideoManager.playVideo(getCurrentVideoUrl(),
-                    getCurrentVideoTitle());
+                getCurrentVideoTitle());
 
         updateButtonStates();
 
@@ -3288,7 +3377,7 @@ public class BrowserActivity extends FlintBaseActivity implements
             public void run() {
                 mMediaRouteButton
                         .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
-                
+
                 updateButtonStates();
                 clearMediaState();
                 cancelRefreshTimer();
@@ -3309,17 +3398,6 @@ public class BrowserActivity extends FlintBaseActivity implements
         // TODO Auto-generated method stub
 
         mSeeking = false;
-    }
-
-    /**
-     * Get video's play url by using rabbit's API
-     */
-    private class MyHostnameVerifier implements HostnameVerifier {
-        @Override
-        public boolean verify(String hostname, SSLSession session) {
-            // TODO Auto-generated method stub
-            return true;
-        }
     }
 
     private class MyTrustManager implements X509TrustManager {
@@ -3355,41 +3433,22 @@ public class BrowserActivity extends FlintBaseActivity implements
     public String SendHttpsPOST(String url, List<NameValuePair> param,
             String data) {
         String result = null;
-
         Log.e(TAG, "SendHttpsPOST!");
 
         // 使用此工具可以将键值对编码成"Key=Value&amp;Key2=Value2&amp;Key3=Value3&rdquo;形式的请求参数
         String requestParam = URLEncodedUtils.format(param, "UTF-8");
 
         try {
-            // 设置SSLContext
-            SSLContext sslcontext = SSLContext.getInstance("TLS");
-            sslcontext.init(null, new TrustManager[] { new MyTrustManager() },
-                    null);
-
-            Log.e(TAG, "SendHttpsPOST! 1");
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext
-                    .getSocketFactory());
-            HttpsURLConnection
-                    .setDefaultHostnameVerifier(new MyHostnameVerifier());
-
-            Log.e(TAG, "SendHttpsPOST! 2");
-            // 打开连接
-            // 要发送的POST请求url?Key=Value&amp;Key2=Value2&amp;Key3=Value3的形式
-            // URL requestUrl = new URL(url + "?" + requestParam);
             URL requestUrl = new URL(url);
-            HttpsURLConnection httpsConn = (HttpsURLConnection) requestUrl
-                    .openConnection();
+            httpsConn = (HttpsURLConnection) requestUrl.openConnection();
 
-            Log.e(TAG, "SendHttpsPOST! 3");
+            httpsConn.setSSLSocketFactory(mSSLSocketFactory);
+            httpsConn.setHostnameVerifier(mHostnameVerifier);
 
-            // 设置套接工厂
-            // httpsConn.setSSLSocketFactory(sslcontext.getSocketFactory());
-
-            // 加入数据
+            // POST
             httpsConn.setRequestMethod("POST");
-            Log.e(TAG, "SendHttpsPOST! 4");
 
+            httpsConn.setConnectTimeout(5000);
             httpsConn.setDoOutput(true);
             httpsConn.setDoInput(true);
             httpsConn.setUseCaches(false);
@@ -3408,17 +3467,13 @@ public class BrowserActivity extends FlintBaseActivity implements
                 }
             }
 
-            Log.e(TAG, "SendHttpsPOST! 5");
-
-            Log.e(TAG, "SendHttpsPOST! 6");
-
-            // 获取输入流
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    httpsConn.getInputStream()));
-            Log.e(TAG, "SendHttpsPOST! 7");
             int code = httpsConn.getResponseCode();
-            Log.e(TAG, "SendHttpsPOST! 8");
             if (HttpsURLConnection.HTTP_OK == code) {
+
+                // 获取输入流
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        httpsConn.getInputStream()));
+
                 String temp = in.readLine();
                 /* 连接成一个字符串 */
                 while (temp != null) {
@@ -3428,6 +3483,7 @@ public class BrowserActivity extends FlintBaseActivity implements
                         result = temp;
                     temp = in.readLine();
                 }
+                in.close();
 
                 Log.e(TAG, "SendHttpsPOST:response[" + result + "]");
 
@@ -3436,16 +3492,17 @@ public class BrowserActivity extends FlintBaseActivity implements
             }
 
             Log.e(TAG, "SendHttpsPOST![" + code + "]");
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (ProtocolException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (httpsConn != null) {
+                httpsConn.disconnect();
+                httpsConn = null;
+            }
         }
 
         return result;
@@ -3659,35 +3716,25 @@ public class BrowserActivity extends FlintBaseActivity implements
      * @param url
      */
     private void getVideoPlayUrlByApi(final String url) {
-        hideVideoResolutionView();
+        Log.e(TAG, "getVideoPlayUrlByApi: " + url + "]mCurrentView["
+                + mCurrentView + "]");
 
-        new Thread(new Runnable() {
+        if (mCurrentView == null) {
+            return;
+        }
 
-            @Override
-            public void run() {
+        // TODO Auto-generated method stub
+        List<NameValuePair> param = new ArrayList<NameValuePair>();
 
-                if (mCurrentView == null) {
-                    return;
-                }
+        param.add(new BasicNameValuePair("apptoken",
+                "3e52201f5037ad9bd8e389348916bd3a"));
+        param.add(new BasicNameValuePair("method", "core.video.realurl"));
+        param.add(new BasicNameValuePair("packageName", "com.infthink.test"));
+        param.add(new BasicNameValuePair("url", url));
 
-                // TODO Auto-generated method stub
-                List<NameValuePair> param = new ArrayList<NameValuePair>();
+        Log.e(TAG, "get real video url[" + url + "]site[" + mSiteUrl + "]");
 
-                param.add(new BasicNameValuePair("apptoken",
-                        "3e52201f5037ad9bd8e389348916bd3a"));
-                param.add(new BasicNameValuePair("method", "core.video.realurl"));
-                param.add(new BasicNameValuePair("packageName",
-                        "com.infthink.test"));
-                param.add(new BasicNameValuePair("url", url));
-
-                Log.e(TAG, "get real video url[" + url + "]site[" + mSiteUrl
-                        + "]");
-
-                SendHttpsPOST("https://play.aituzi.com", param, null);
-
-            }
-
-        }).start();
+        SendHttpsPOST("https://play.aituzi.com", param, null);
     }
 
     /**
