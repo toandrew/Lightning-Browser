@@ -98,6 +98,7 @@ public class LightningView {
 
 		mWebView.setWebChromeClient(new LightningChromeClient(activity));
 		mWebView.setWebViewClient(new LightningWebClient(activity));
+
 		mWebView.setDownloadListener(new LightningDownloadListener(activity));
 		mGestureDetector = new GestureDetector(activity, new CustomGestureListener());
 		mWebView.setOnTouchListener(new OnTouchListener() {

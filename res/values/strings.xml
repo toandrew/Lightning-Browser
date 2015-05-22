@@ -193,8 +193,8 @@
     <string name="settings_privacy">Privacy Settings</string>
     <string name="settings_about">About</string>
     <string name="settings_about_explain">Details about version, author and license.</string>
-    <string name="do_fling">您是否需要投射此文件？</string>
-    <string name="action_fling">投射</string>
+    <string name="do_fling">Do you want to fling this file？</string>
+    <string name="action_fling">Fling</string>
     <string name="castappname">NETCAST</string>
     <string name="imguri">www.infthink.com</string>
     <string name="title">NETCAST</string>
@@ -266,4 +266,11 @@
     <string name="flint_hint_final_details">\nFor more info, please visit our web site: \nhttp://www.openflint.org</string>
     
     <string name="flint_empty_video_url">Sorry, no video to fling!</string>
+    
+    <string name="action_install">Install</string>
+    <string name="do_install">Do you want to install this application?</string>
+    <string name="install_apk_desc">Please select the device to install the application!</string>
+    <string name="apk_installing">Installing...</string>
+    
+    <string name="cancel_apk_installing">Cancel installing...</string>
 </resources>

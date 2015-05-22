@@ -214,4 +214,11 @@
     <string name="flint_hint_final_details">\n获取更多信息，请访问我们的网站： \nhttp://www.openflint.org</string>
     
     <string name="flint_empty_video_url">哎呀~没有可投射的视频?!先找个视频网站转转?...</string>
+    
+    <string name="action_install">安装</string>
+    <string name="do_install">您是否需要安装此应用？</string>
+    <string name="install_apk_desc">请选择要安装该应用的设备</string>
+    <string name="apk_installing">安装中...</string>
+    
+    <string name="cancel_apk_installing">取消安装...</string>
 </resources>

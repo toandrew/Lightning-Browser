@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Copyright 2014 A.C.R. Development
--->
+<!-- Copyright 2014 A.C.R. Development -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.crosskr.flint.webview.browser"
-    android:versionCode="21"
-    android:versionName="2.2" >
+    android:versionCode="22"
+    android:versionName="2.3" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
@@ -27,7 +25,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    
+
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
@@ -47,16 +45,16 @@
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" 
-        android:theme="@style/Theme.AppCompat">
+        android:label="@string/app_name"
+        android:theme="@style/Theme.AppCompat" >
         <activity
             android:name="com.crosskr.flint.webview.browser.MainActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:theme="@style/LightTheme" 
-             android:windowSoftInputMode="adjustResize">
+            android:theme="@style/LightTheme"
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -208,7 +206,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name="com.crosskr.flint.webview.browser.BookmarkActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
@@ -220,14 +217,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-
         <activity
-            android:icon="@drawable/ic_launcher"
+            android:name="com.crosskr.flint.webview.browser.FlintApkInstallActivity"
+            android:configChanges="orientation|screenSize"
+            android:icon="@drawable/icon"
+            android:label="@string/install_apk_desc"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+        <activity
             android:name="com.infthink.miuicastsender.SenderDemo"
             android:configChanges="orientation|screenSize"
+            android:icon="@drawable/ic_launcher"
             android:label="@string/cast_application_name"
-            android:launchMode="singleTask" 
+            android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
 
             <!--
@@ -243,7 +245,8 @@
                 <data android:scheme="file" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-            </intent-filter-->
+            </intent-filter
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -287,6 +290,7 @@
                 <data android:mimeType="application/x-mpegurl" />
             </intent-filter>
         </activity>
+
         <service
             android:name="tv.matchstick.flint.service.FlintDeviceService"
             android:exported="false" >
@@ -323,7 +327,6 @@
         <meta-data
             android:name="UMENG_CHANNEL"
             android:value="INFTHINK" />
-        
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
