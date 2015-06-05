@@ -35,6 +35,7 @@ import org.apache.http.util.ByteArrayBuffer;
 
 import java.io.*;
 import java.net.*;
+import java.util.Locale;
 
 public class LightningView {
     private static final String TAG = "LightningView";
@@ -144,7 +145,12 @@ public class LightningView {
 				// don't load anything, the user is looking for a blank tab
 			}
 		} else {
-            mWebView.loadUrl("file:///android_asset/sites/index.html");
+		    String lang = Locale.getDefault().getLanguage();
+		    if (lang.equals("zh")) {
+		        mWebView.loadUrl("file:///android_asset/sites/index.html", null);
+		    } else {
+		        mWebView.loadUrl("file:///android_asset/sites/index_en.html", null);
+		    }
 
 //			if (mHomepage.startsWith("about:home")) {
 //				mWebView.loadUrl(getHomepage());
@@ -290,7 +296,19 @@ public class LightningView {
 			}
 		}
 
-		switch (mPreferences.getInt(PreferenceConstants.USER_AGENT, 1)) {
+		int defaultUseragent = 1;
+		String lang = Locale.getDefault().getLanguage();
+		if (lang.equals("zh")) {
+		    defaultUseragent = 1;
+		    mWebView.loadUrl("file:///android_asset/sites/index.html", null);
+		} else {
+		    defaultUseragent = 4;
+		    mWebView.loadUrl("file:///android_asset/sites/index_en.html", null);
+		}
+		        
+		Log.e(TAG, "set user agent[" + mPreferences.getInt(PreferenceConstants.USER_AGENT, defaultUseragent) + "]default[" + defaultUseragent + "]");
+		       
+		switch (mPreferences.getInt(PreferenceConstants.USER_AGENT, defaultUseragent)) {
 			case 1:
 				if (API > 16) {
 					mSettings.setUserAgentString(WebSettings.getDefaultUserAgent(context));

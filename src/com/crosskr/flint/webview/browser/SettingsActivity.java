@@ -30,6 +30,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import info.guardianproject.onionkit.ui.OrbotHelper;
 
+import java.util.Locale;
+
 public class SettingsActivity extends Activity {
 
 	private static int API = android.os.Build.VERSION.SDK_INT;
@@ -37,6 +39,8 @@ public class SettingsActivity extends Activity {
 	private SharedPreferences mPreferences;
 	private Context mContext;
 	private Activity mActivity;
+	
+	int defaultUseragent = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +143,12 @@ public class SettingsActivity extends Activity {
 		advanced(advanced);
 		about(about);
 		
+		String lang = Locale.getDefault().getLanguage();
+		if (lang.equals("zh")) {
+		    defaultUseragent = 1;
+		} else {
+		    defaultUseragent = 4;
+		}
 		
 		RelativeLayout agent = (RelativeLayout) findViewById(R.id.layoutUserAgent);
 		agent(agent);
@@ -149,7 +159,7 @@ public class SettingsActivity extends Activity {
     public void agent(RelativeLayout view) {
         mAgentTextView = (TextView) findViewById(R.id.agentText);
         
-        mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
+        mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, defaultUseragent);
         switch (mAgentChoice) {
         case 1:
             mAgentTextView.setText(getResources().getString(R.string.agent_default));
@@ -179,7 +189,7 @@ public class SettingsActivity extends Activity {
             public void onClick(View v) {
                 AlertDialog.Builder agentPicker = new AlertDialog.Builder(mActivity);
                 agentPicker.setTitle(getResources().getString(R.string.title_user_agent));
-                mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, 1);
+                mAgentChoice = mPreferences.getInt(PreferenceConstants.USER_AGENT, defaultUseragent);
                 agentPicker.setSingleChoiceItems(R.array.user_agent, mAgentChoice - 1,
                         new DialogInterface.OnClickListener() {
 

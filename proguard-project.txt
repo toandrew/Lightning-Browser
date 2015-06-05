@@ -46,6 +46,18 @@
     native <methods>;
 }
 
+-keep class com.google.** {*;}
+-keep class info.guardianproject.** {*;}
+-keep class com.github.amlcurran.showcaseview.** {*;}
+-keep class android.support.v4.** {*;}
+-keep class com.connectsdk.** {*;}
+-keep class com.umeng.** {*;}
+-keep class u.aly.** {*;}
+-keep class u.upd.** {*;}
+-keep class com.alimama.** {*;}
+-keep class com.strangeberry.jmdns.** {*;}
+-keep class com.strangeberry.jmdns.tools.Browser {*;}
+
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
 }
