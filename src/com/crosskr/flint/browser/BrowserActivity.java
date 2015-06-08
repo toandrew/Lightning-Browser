@@ -143,6 +143,8 @@ import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 //import com.umeng.analytics.MobclickAgent;
 //import com.umeng.update.UmengUpdateAgent;
+import com.umeng.analytics.MobclickAgent;
+import com.umeng.update.UmengUpdateAgent;
 
 public class BrowserActivity extends FlintBaseActivity implements
         BrowserController, FlintStatusChangeListener {
@@ -2709,9 +2711,10 @@ public class BrowserActivity extends FlintBaseActivity implements
      */
     private void initFlint() {
 
-        // MobclickAgent.updateOnlineConfig(mContext);
+        MobclickAgent.updateOnlineConfig(mContext);
 
-        // UmengUpdateAgent.update(this);
+        UmengUpdateAgent.update(mContext);
+        
         try {
             mSslcontext = SSLContext.getInstance("TLS");
             tm = new MyTrustManager();
