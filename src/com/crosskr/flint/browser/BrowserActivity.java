@@ -544,7 +544,7 @@ public class BrowserActivity extends FlintBaseActivity implements
             public void run() {
                 initFlint();
             }
-        }, 1000);
+        }, 500);
     }
 
     /*
@@ -2755,7 +2755,7 @@ public class BrowserActivity extends FlintBaseActivity implements
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-
+                
                 mFlintVideoManager.doMediaRouteButtonClicked();
             }
 
