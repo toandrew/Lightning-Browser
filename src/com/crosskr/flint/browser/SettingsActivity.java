@@ -30,7 +30,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import info.guardianproject.onionkit.ui.OrbotHelper;
+//import info.guardianproject.onionkit.ui.OrbotHelper;
 
 public class SettingsActivity extends Activity {
 
@@ -382,11 +382,11 @@ public class SettingsActivity extends Activity {
 			}
 
 		});
-		OrbotHelper oh = new OrbotHelper(this);
-		if (!oh.isOrbotInstalled()) {
-			orbot.setEnabled(false);
-		}
-
+//		OrbotHelper oh = new OrbotHelper(this);
+//		if (!oh.isOrbotInstalled()) {
+//			orbot.setEnabled(false);
+//		}
+		orbot.setEnabled(false);
 		orbot.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 			@Override

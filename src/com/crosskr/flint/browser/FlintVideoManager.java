@@ -98,9 +98,8 @@ public class FlintVideoManager {
 
         mStatusChangeListener = listener;
 
-        // connectsdk
         setupPicker();
-
+        
         DiscoveryManager.getInstance().setPairingLevel(PairingLevel.ON);
     }
 

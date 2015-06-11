@@ -4,8 +4,8 @@
 
 package com.crosskr.flint.browser;
 
-import info.guardianproject.onionkit.ui.OrbotHelper;
-import info.guardianproject.onionkit.web.WebkitProxy;
+//import info.guardianproject.onionkit.ui.OrbotHelper;
+//import info.guardianproject.onionkit.web.WebkitProxy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -141,8 +141,6 @@ import com.github.amlcurran.showcaseview.ApiUtils;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-//import com.umeng.analytics.MobclickAgent;
-//import com.umeng.update.UmengUpdateAgent;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.update.UmengUpdateAgent;
 
@@ -541,8 +539,12 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         checkForTor();
 
-        initFlint();
-
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                initFlint();
+            }
+        }, 1000);
     }
 
     /*
@@ -552,7 +554,7 @@ public class BrowserActivity extends FlintBaseActivity implements
     public boolean checkForTor() {
         boolean useProxy = mPreferences.getBoolean(
                 PreferenceConstants.USE_PROXY, false);
-
+/*
         OrbotHelper oh = new OrbotHelper(this);
         if (oh.isOrbotInstalled()
                 && !mPreferences.getBoolean(
@@ -596,27 +598,31 @@ public class BrowserActivity extends FlintBaseActivity implements
             mEditPrefs.apply();
             return false;
         }
+*/
+        mEditPrefs.putBoolean(PreferenceConstants.USE_PROXY, false);
+        mEditPrefs.apply();
+        return false;
     }
 
     /*
      * Initialize WebKit Proxying for Tor
      */
     public void initializeTor() {
-
-        OrbotHelper oh = new OrbotHelper(this);
-        if (!oh.isOrbotRunning()) {
-            oh.requestOrbotStart(this);
-        }
-        try {
-            String host = mPreferences.getString(
-                    PreferenceConstants.USE_PROXY_HOST, "localhost");
-            int port = mPreferences.getInt(PreferenceConstants.USE_PROXY_PORT,
-                    8118);
-            WebkitProxy.setProxy("com.crosskr.flint.browser.BrowserApp",
-                    getApplicationContext(), host, port);
-        } catch (Exception e) {
-            Log.d(Constants.TAG, "error enabling web proxying", e);
-        }
+//
+//        OrbotHelper oh = new OrbotHelper(this);
+//        if (!oh.isOrbotRunning()) {
+//            oh.requestOrbotStart(this);
+//        }
+//        try {
+//            String host = mPreferences.getString(
+//                    PreferenceConstants.USE_PROXY_HOST, "localhost");
+//            int port = mPreferences.getInt(PreferenceConstants.USE_PROXY_PORT,
+//                    8118);
+//            WebkitProxy.setProxy("com.crosskr.flint.browser.BrowserApp",
+//                    getApplicationContext(), host, port);
+//        } catch (Exception e) {
+//            Log.d(Constants.TAG, "error enabling web proxying", e);
+//        }
 
     }
 
@@ -749,12 +755,12 @@ public class BrowserActivity extends FlintBaseActivity implements
         if (mPreferences.getBoolean(PreferenceConstants.USE_PROXY, false)) {
             initializeTor();
         } else {
-            try {
-                WebkitProxy.resetProxy("com.crosskr.flint.browser.BrowserApp",
-                        getApplicationContext());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            try {
+//                WebkitProxy.resetProxy("com.crosskr.flint.browser.BrowserApp",
+//                        getApplicationContext());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
@@ -1448,7 +1454,7 @@ public class BrowserActivity extends FlintBaseActivity implements
     protected void onPause() {
         super.onPause();
 
-        // MobclickAgent.onPause(this);
+        MobclickAgent.onPause(this);
 
         Log.i(Constants.TAG, "onPause");
         if (mCurrentView != null) {
@@ -1515,7 +1521,7 @@ public class BrowserActivity extends FlintBaseActivity implements
     protected void onResume() {
         super.onResume();
 
-        // MobclickAgent.onResume(this);
+        MobclickAgent.onResume(this);
 
         Log.i(Constants.TAG, "onResume");
         if (mSearchAdapter != null) {
@@ -2711,10 +2717,12 @@ public class BrowserActivity extends FlintBaseActivity implements
      */
     private void initFlint() {
 
+        MobclickAgent.setCatchUncaughtExceptions(true);
+
         MobclickAgent.updateOnlineConfig(mContext);
 
         UmengUpdateAgent.update(mContext);
-        
+
         try {
             mSslcontext = SSLContext.getInstance("TLS");
             tm = new MyTrustManager();
@@ -2730,7 +2738,8 @@ public class BrowserActivity extends FlintBaseActivity implements
         if (lang.equals("zh")) {
             mIsZh = true;
         } else {
-            //mIsZh = false; // does not send get video url request in other lang???
+            // mIsZh = false; // does not send get video url request in other
+            // lang???
         }
 
         Log.e(TAG, "initFlingServerSocket!");
@@ -3039,7 +3048,7 @@ public class BrowserActivity extends FlintBaseActivity implements
                 updateGetVideoRealBtnStatus(false);
 
                 mCurrentUrl = mCurrentView.getUrl();
-                
+
                 try {
                     synchronized (mGetVideoUrlRunnable) {
                         mGetVideoUrlRunnable.notify();
