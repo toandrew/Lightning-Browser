@@ -22,7 +22,7 @@ public class BrowserApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        dexTool();
+        //dexTool();
 
         context = getApplicationContext();
 

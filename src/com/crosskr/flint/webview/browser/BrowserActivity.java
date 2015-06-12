@@ -4,9 +4,6 @@
 
 package com.crosskr.flint.webview.browser;
 
-import info.guardianproject.onionkit.ui.OrbotHelper;
-import info.guardianproject.onionkit.web.WebkitProxy;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -581,8 +578,15 @@ public class BrowserActivity extends FlintBaseActivity implements
 
         checkForTor();
 
-        initFlint();
+        mHandler.postDelayed(new Runnable() {
 
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                initFlint();
+            }
+   
+        }, 500);
     }
 
     /*
@@ -592,7 +596,7 @@ public class BrowserActivity extends FlintBaseActivity implements
     public boolean checkForTor() {
         boolean useProxy = mPreferences.getBoolean(
                 PreferenceConstants.USE_PROXY, false);
-
+/*
         OrbotHelper oh = new OrbotHelper(this);
         if (oh.isOrbotInstalled()
                 && !mPreferences.getBoolean(
@@ -636,6 +640,11 @@ public class BrowserActivity extends FlintBaseActivity implements
             mEditPrefs.apply();
             return false;
         }
+        */
+        
+        mEditPrefs.putBoolean(PreferenceConstants.USE_PROXY, false);
+        mEditPrefs.apply();
+        return false;
     }
 
     /*
@@ -643,21 +652,21 @@ public class BrowserActivity extends FlintBaseActivity implements
      */
     public void initializeTor() {
 
-        OrbotHelper oh = new OrbotHelper(this);
-        if (!oh.isOrbotRunning()) {
-            oh.requestOrbotStart(this);
-        }
-        try {
-            String host = mPreferences.getString(
-                    PreferenceConstants.USE_PROXY_HOST, "localhost");
-            int port = mPreferences.getInt(PreferenceConstants.USE_PROXY_PORT,
-                    8118);
-            WebkitProxy.setProxy(
-                    "com.crosskr.flint.webview.browser.BrowserApp",
-                    getApplicationContext(), host, port);
-        } catch (Exception e) {
-            Log.d(Constants.TAG, "error enabling web proxying", e);
-        }
+//        OrbotHelper oh = new OrbotHelper(this);
+//        if (!oh.isOrbotRunning()) {
+//            oh.requestOrbotStart(this);
+//        }
+//        try {
+//            String host = mPreferences.getString(
+//                    PreferenceConstants.USE_PROXY_HOST, "localhost");
+//            int port = mPreferences.getInt(PreferenceConstants.USE_PROXY_PORT,
+//                    8118);
+//            WebkitProxy.setProxy(
+//                    "com.crosskr.flint.webview.browser.BrowserApp",
+//                    getApplicationContext(), host, port);
+//        } catch (Exception e) {
+//            Log.d(Constants.TAG, "error enabling web proxying", e);
+//        }
 
     }
 
@@ -787,17 +796,17 @@ public class BrowserActivity extends FlintBaseActivity implements
         }
 
         updateCookiePreference();
-        if (mPreferences.getBoolean(PreferenceConstants.USE_PROXY, false)) {
-            initializeTor();
-        } else {
-            try {
-                WebkitProxy.resetProxy(
-                        "com.crosskr.flint.webview.browser.BrowserApp",
-                        getApplicationContext());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        if (mPreferences.getBoolean(PreferenceConstants.USE_PROXY, false)) {
+//            initializeTor();
+//        } else {
+//            try {
+//                WebkitProxy.resetProxy(
+//                        "com.crosskr.flint.webview.browser.BrowserApp",
+//                        getApplicationContext());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     /*
