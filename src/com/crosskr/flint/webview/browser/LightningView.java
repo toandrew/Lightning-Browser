@@ -83,7 +83,7 @@ public class LightningView {
 		mWebView.setFocusableInTouchMode(true);
 		mWebView.setFocusable(true);
 		mWebView.setAnimationCacheEnabled(false);
-		mWebView.setDrawingCacheEnabled(true);
+		mWebView.setDrawingCacheEnabled(false);
 		mWebView.setBackgroundColor(activity.getResources().getColor(android.R.color.white));
 
 		if (API > 15) {

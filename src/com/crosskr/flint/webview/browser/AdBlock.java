@@ -33,11 +33,11 @@ public class AdBlock {
 			loadBlockedDomainsList(context);
 		}
 		mPreferences = context.getSharedPreferences(PreferenceConstants.PREFERENCES, 0);
-		mBlockAds = mPreferences.getBoolean(PreferenceConstants.BLOCK_ADS, false);
+		mBlockAds = false;//mPreferences.getBoolean(PreferenceConstants.BLOCK_ADS, false);
 	}
 
 	public void updatePreference() {
-		mBlockAds = mPreferences.getBoolean(PreferenceConstants.BLOCK_ADS, false);
+		mBlockAds = false;//mPreferences.getBoolean(PreferenceConstants.BLOCK_ADS, false);
 	}
 
 	private void loadBlockedDomainsList(final Context context) {
