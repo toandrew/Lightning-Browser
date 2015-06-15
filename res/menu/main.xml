@@ -27,4 +27,5 @@
     <item android:id="@+id/action_settings" android:title="@string/settings" ></item>
     
     <item android:id="@+id/action_fling" android:title="@string/flint" ></item>
+    <item android:id="@+id/action_feedback" android:title="@string/feedback" ></item>
 </menu>

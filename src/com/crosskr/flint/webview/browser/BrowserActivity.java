@@ -139,6 +139,7 @@ import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.fb.FeedbackAgent;
 import com.umeng.update.UmengUpdateAgent;
 
 public class BrowserActivity extends FlintBaseActivity implements
@@ -949,6 +950,11 @@ public class BrowserActivity extends FlintBaseActivity implements
                 mMediaFlingBar.show();
             }
 
+            return true;
+            
+        case R.id.action_feedback:
+            FeedbackAgent agent = new FeedbackAgent(mContext);
+            agent.startFeedbackActivity();
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -2784,6 +2790,8 @@ public class BrowserActivity extends FlintBaseActivity implements
     private String mCurrentUrl = null;
 
     private javax.net.ssl.SSLSocketFactory mSSLSocketFactory;
+    
+    private FeedbackAgent mFeedbackAgent;
 
     /**
      * Init all Flint related

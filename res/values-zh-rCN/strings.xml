@@ -221,4 +221,6 @@
     <string name="apk_installing">安装中...</string>
     
     <string name="cancel_apk_installing">取消安装...</string>
+    
+    <string name="feedback">用户反馈</string>
 </resources>

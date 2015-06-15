@@ -319,6 +319,7 @@
             android:name="com.umeng.update.UpdateDialogActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
+        <activity android:name="com.umeng.fb.ConversationActivity" />
 
         <meta-data
             android:name="UMENG_APPKEY"

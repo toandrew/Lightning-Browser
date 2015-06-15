@@ -273,4 +273,6 @@
     <string name="apk_installing">Installing...</string>
     
     <string name="cancel_apk_installing">Cancel installing...</string>
+    
+    <string name="feedback">Feedback</string>
 </resources>
