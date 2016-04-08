@@ -99,7 +99,9 @@ dependencies {
     // Use the following code to update the libnetcipher submodule
     // git submodule foreach git reset --hard
     // git submodule update --remote
-    compile project(':libnetcipher')
+    //compile project(':libnetcipher')
+
+    compile 'info.guardianproject.netcipher:netcipher:1.2'
 
     // memory leak analysis
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
