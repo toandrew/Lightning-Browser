@@ -60,7 +60,8 @@ public class Service extends VpnBuilder implements Runnable {
                 }
             });
             int startTimeoutMillis = 60000;
-            String analyticsTrackingID = "UA-21815217-14";
+            //String analyticsTrackingID = "UA-21815217-14";
+            String analyticsTrackingID = null; // does not use gms to track info.
             org.lantern.mobilesdk.StartResult result = org.lantern.mobilesdk.Lantern.enable(getApplicationContext(), startTimeoutMillis, analyticsTrackingID);
             configure(result.getSOCKS5Addr());
 
