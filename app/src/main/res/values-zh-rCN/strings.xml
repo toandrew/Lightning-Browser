@@ -94,7 +94,7 @@
     <string name="action_manual">手工</string>
     <string name="action_auto">自动</string>
     <string name="action_follow_me">联系我</string>
-    <string name="url_twitter">twitter.com/ACRDevelopment</string>
+    <string name="url_twitter">https://twitter.com/zember_infthink</string>
     <string name="clear_cache">清除缓存</string>
     <string name="message_cache_cleared">缓存已清除</string>
     <string name="message_import">书签导入成功</string>
