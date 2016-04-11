@@ -6,12 +6,14 @@ package acr.browser.lightning.activity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
@@ -21,7 +23,11 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.VpnService;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -86,6 +92,9 @@ import android.widget.VideoView;
 import com.anthonycr.grant.PermissionsManager;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+
+import org.getlantern.lantern.config.LanternConfig;
+import org.getlantern.lantern.vpn.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -227,6 +236,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
     abstract Observable<Void> updateCookiePreference();
 
+    private BroadcastReceiver mReceiver;
+    private SharedPreferences mPrefs = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -265,6 +277,21 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                 }
             }
         });
+
+        mPrefs = org.getlantern.lantern.sdk.Utils.getSharedPrefs(this);
+
+        // the ACTION_SHUTDOWN intent is broadcast when the phone is
+        // about to be shutdown. We register a receiver to make sure we
+        // clear the preferences and switch the VpnService to the off
+        // state when this happens
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SHUTDOWN);
+        filter.addAction(Intent.ACTION_SHUTDOWN);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+
+        mReceiver = new LanternReceiver();
+        registerReceiver(mReceiver, filter);
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
@@ -1074,6 +1101,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         } else if (isIncognito()) {
             WebUtils.clearWebStorage();     // We want to make sure incognito mode is secure
         }
+
+        // stop vpn???
+        stopLantern();
     }
 
     @Override
@@ -1207,6 +1237,16 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mHistoryDatabase = null;
         }
 
+        stopLantern();
+
+        try {
+            if (mReceiver != null) {
+                unregisterReceiver(mReceiver);
+            }
+        } catch (Exception e) {
+
+        }
+
         super.onDestroy();
     }
 
@@ -1241,6 +1281,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         BrowserApp.get(this).registerReceiver(mNetworkReceiver, filter);
 
         mEventBus.register(mBusEventListener);
+
+        enableVPN();
     }
 
     /**
@@ -1565,6 +1607,30 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+        if (requestCode == REQUEST_VPN) {
+            super.onActivityResult(requestCode, resultCode, intent);
+
+            if (resultCode != RESULT_OK) {
+                // no permission given to open
+                // VPN connection; return to off state
+                toggleSwitch(false);
+            } else {
+                toggleSwitch(true);
+
+                Handler h = new Handler();
+                h.postDelayed(new Runnable () {
+
+                    public void run ()
+                    {
+                        sendIntentToService();
+                    }
+                }, 1000);
+            }
+
+            return;
+        }
+
         if (API < Build.VERSION_CODES.LOLLIPOP) {
             if (requestCode == 1) {
                 if (null == mUploadMessage) {
@@ -2354,4 +2420,83 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
         }
     };
+
+    private final static int REQUEST_VPN = 7777;
+
+    // Prompt the user to enable full-device VPN mode
+    private void enableVPN() {
+        if (Service.IsRunning) {
+            Log.w(TAG, "VPN service is running! ignore enableVPN!");
+            return;
+        }
+
+        Log.d(TAG, "Load VPN configuration");
+
+        try {
+            startVpnService();
+        } catch (Exception e) {
+            Log.d(TAG, "Could not establish VPN connection: " + e.getMessage());
+        }
+    }
+
+    // Make a VPN connection from the client
+    // We should only have one active VPN connection per client
+    private void startVpnService () {
+        Intent intent = VpnService.prepare(this);
+        if (intent != null) {
+            Log.w(TAG,"Requesting VPN connection");
+            startActivityForResult(intent, REQUEST_VPN);
+        } else {
+            Log.w(TAG, "VPN enabled, starting Lantern...");
+            toggleSwitch(true);
+            sendIntentToService();
+        }
+    }
+
+    private void stopLantern() {
+        if (Service.IsRunning) {
+            Service.IsRunning = false;
+            org.getlantern.lantern.sdk.Utils.clearPreferences(this);
+        }
+    }
+
+    private void sendIntentToService() {
+        startService(new Intent(this, Service.class));
+    }
+
+    // LanternReceiver is used to capture broadcasts
+    // such as network connectivity and when the app
+    // is powered off
+    public class LanternReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_SHUTDOWN)) {
+                // whenever the device is powered off or the app
+                // abruptly closed, we want to clear user preferences
+                org.getlantern.lantern.sdk.Utils.clearPreferences(context);
+            } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
+                //restart(context, intent);
+            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                // whenever a user disconnects from Wifi and Lantern is running
+                NetworkInfo networkInfo =
+                        intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                if (useVpn() &&
+                        networkInfo.getType() == ConnectivityManager.TYPE_WIFI &&
+                        !networkInfo.isConnected()) {
+
+                    stopLantern();
+                }
+            }
+        }
+    }
+
+    private boolean useVpn() {
+        return mPrefs.getBoolean(LanternConfig.PREF_USE_VPN, false);
+    }
+
+    private void toggleSwitch(boolean useVpn) {
+        // store the updated preference
+        mPrefs.edit().putBoolean(LanternConfig.PREF_USE_VPN, useVpn).commit();
+    }
 }
