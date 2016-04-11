@@ -137,6 +137,9 @@ import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import com.umeng.analytics.AnalyticsConfig;
+import com.umeng.analytics.MobclickAgent;
+
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserView, UIController, OnClickListener, OnLongClickListener {
 
     private static final String TAG = BrowserActivity.class.getSimpleName();
@@ -292,6 +295,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         mReceiver = new LanternReceiver();
         registerReceiver(mReceiver, filter);
+
+        AnalyticsConfig.setAppkey(this, Constants.UMENG_APP_KEY);
+        AnalyticsConfig.setChannel(Constants.UMENG_CHANNEL);
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
@@ -1212,6 +1218,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
 
         mEventBus.unregister(mBusEventListener);
+
+        // UMENG
+        MobclickAgent.onPause(this);
     }
 
     void saveOpenTabs() {
@@ -1283,6 +1292,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mEventBus.register(mBusEventListener);
 
         enableVPN();
+
+        // UMENG
+        MobclickAgent.onResume(this);
     }
 
     /**
