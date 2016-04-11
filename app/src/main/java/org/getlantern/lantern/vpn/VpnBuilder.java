@@ -44,7 +44,7 @@ public class VpnBuilder extends VpnService {
 
     private static final String TAG = "VpnBuilder";
     protected Thread vpnThread;
-    private final static String mSessionName = "LanternVpn";
+    private final static String mSessionName = "CrosserVpn";
     private final static String mNetMask = "255.255.255.0";
     private final static String mVirtualIP = "26.25.0.0";
     private final static int VPN_MTU = 1500;

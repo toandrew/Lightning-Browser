@@ -17,7 +17,7 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
-    <string name="app_name">Crosskr Browser</string>
+    <string name="app_name">Crosser Browser</string>
     <string name="action_new_tab">New Tab</string>
     <string name="action_share">Share</string>
     <string name="action_history">History</string>
@@ -115,7 +115,7 @@
     <string name="action_manual">Manual</string>
     <string name="action_auto">Auto</string>
     <string name="action_follow_me">Contact Me</string>
-    <string name="url_twitter">twitter.com/RestainoAnthony</string>
+    <string name="url_twitter">https://twitter.com/zember_infthink</string>
     <string name="clear_cache">Clear Cache</string>
     <string name="message_cache_cleared">Cache Cleared</string>
     <string name="message_import">Bookmarks Were Imported</string>
