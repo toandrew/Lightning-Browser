@@ -8,9 +8,11 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.crashlytics.android.Crashlytics;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.otto.Bus;
 
+import io.fabric.sdk.android.Fabric;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -34,6 +36,7 @@ public class BrowserApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         mAppComponent = DaggerAppComponent.builder().appModule(new AppModule(this)).build();
         mAppComponent.inject(this);
 
