@@ -1,4 +1,14 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 
@@ -133,7 +143,7 @@ dependencies {
     compile 'com.google.guava:guava:19.0'
     compile 'com.mandrillapp.wrapper.lutung:lutung:0.0.6'
     compile 'com.github.tony19:timber-loggly:1.0.1'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true
     }
 
