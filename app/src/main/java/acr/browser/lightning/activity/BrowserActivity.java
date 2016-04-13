@@ -140,6 +140,8 @@ import butterknife.ButterKnife;
 import com.umeng.analytics.AnalyticsConfig;
 import com.umeng.analytics.MobclickAgent;
 
+import com.mopub.mobileads.MoPubView;
+
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserView, UIController, OnClickListener, OnLongClickListener {
 
     private static final String TAG = BrowserActivity.class.getSimpleName();
@@ -242,6 +244,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private BroadcastReceiver mReceiver;
     private SharedPreferences mPrefs = null;
 
+    private MoPubView moPubView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -298,6 +302,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         AnalyticsConfig.setAppkey(this, Constants.UMENG_APP_KEY);
         AnalyticsConfig.setChannel(Constants.UMENG_CHANNEL);
+
+        moPubView = (MoPubView) findViewById(R.id.my_ad);
+        // TODO: Replace this test id with your personal ad unit id
+        moPubView.setAdUnitId("e3dafa7b980e4a25b92de8d8983ce00e");
+        moPubView.loadAd();
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
@@ -1255,6 +1264,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         } catch (Exception e) {
 
         }
+
+        moPubView.destroy();
 
         super.onDestroy();
     }
