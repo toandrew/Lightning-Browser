@@ -84,6 +84,10 @@ android {
     packagingOptions {
         exclude '.readme'
     }
+
+    dexOptions {
+        jumboMode = true
+    }
 }
 
 dexcount {
@@ -149,4 +153,7 @@ dependencies {
     }
 
     compile 'com.umeng.analytics:analytics:latest.integration'
+    compile('com.mopub:mopub-sdk:4.5.1@aar') {
+        transitive = true;
+    }
 }

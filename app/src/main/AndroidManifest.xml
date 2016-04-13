@@ -159,6 +159,7 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="cc03c676289a42de14f0f5efe0c28b12c7e736e4" />
+
     </application>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
