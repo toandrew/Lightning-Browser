@@ -42,7 +42,6 @@ import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.async.AsyncExecutor;
 import acr.browser.lightning.bus.BookmarkEvents;
 import acr.browser.lightning.bus.BrowserEvents;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryItem;
@@ -56,6 +55,8 @@ import acr.browser.lightning.react.Schedulers;
 import acr.browser.lightning.react.Subscriber;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.view.LightningView;
+import acr.browser.lightning.constant.*;
+
 
 public class BookmarksFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener {
 

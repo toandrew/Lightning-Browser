@@ -9,8 +9,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.Utils;
+import acr.browser.lightning.constant.*;
 
 class IconCacheTask implements Runnable {
     private final Uri uri;

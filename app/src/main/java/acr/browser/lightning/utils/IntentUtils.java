@@ -17,8 +17,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.constant.*;
 
 public class IntentUtils {
 

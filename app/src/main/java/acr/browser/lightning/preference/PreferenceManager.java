@@ -8,8 +8,8 @@ import android.support.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.download.DownloadHandler;
+import acr.browser.lightning.constant.Constants;
 
 @Singleton
 public class PreferenceManager {

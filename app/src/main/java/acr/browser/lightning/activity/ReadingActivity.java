@@ -26,7 +26,6 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.react.Action;
 import acr.browser.lightning.react.Observable;
@@ -40,6 +39,7 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import acr.browser.lightning.constant.*;
 
 public class ReadingActivity extends AppCompatActivity {
 

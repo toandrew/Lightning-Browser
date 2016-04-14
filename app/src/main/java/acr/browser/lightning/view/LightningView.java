@@ -41,10 +41,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.constant.BookmarkPage;
-import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.HistoryPage;
-import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
@@ -58,6 +54,8 @@ import acr.browser.lightning.react.OnSubscribe;
 import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.utils.Utils;
+
+import acr.browser.lightning.constant.*;
 
 /**
  * {@link LightningView} acts as a tab for the browser,

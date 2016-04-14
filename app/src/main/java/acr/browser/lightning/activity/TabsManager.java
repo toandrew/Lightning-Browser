@@ -21,10 +21,6 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.constant.BookmarkPage;
-import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.HistoryPage;
-import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.preference.PreferenceManager;
@@ -36,6 +32,8 @@ import acr.browser.lightning.react.Subscriber;
 import acr.browser.lightning.utils.FileUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.LightningView;
+
+import acr.browser.lightning.constant.*;
 
 /**
  * A manager singleton that holds all the {@link LightningView}

@@ -18,9 +18,9 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.utils.Utils;
+import acr.browser.lightning.constant.*;
 
 public class ImageDownloadTask extends AsyncTask<Void, Void, Bitmap> {
 

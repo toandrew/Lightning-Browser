@@ -73,6 +73,12 @@ android {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId 'com.infthink.browser.lite'
             versionCode 1
+
+            dependencies {
+                compile('com.mopub:mopub-sdk:4.5.1@aar') {
+                    transitive = true;
+                }
+            }
         }
     }
 
@@ -152,7 +158,4 @@ dependencies {
     }
 
     compile 'com.umeng.analytics:analytics:latest.integration'
-    compile('com.mopub:mopub-sdk:4.5.1@aar') {
-        transitive = true;
-    }
 }

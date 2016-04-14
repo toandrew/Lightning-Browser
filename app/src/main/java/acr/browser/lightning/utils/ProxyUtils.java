@@ -16,10 +16,11 @@ import javax.inject.Singleton;
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.web.WebkitProxy;
+
+import acr.browser.lightning.constant.*;
 
 @Singleton
 public class ProxyUtils {

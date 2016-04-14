@@ -10,7 +10,6 @@ import acr.browser.lightning.activity.TabsManager;
 import acr.browser.lightning.activity.ThemableBrowserActivity;
 import acr.browser.lightning.activity.ThemableSettingsActivity;
 import acr.browser.lightning.browser.BrowserPresenter;
-import acr.browser.lightning.constant.StartPage;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.download.LightningDownloadListener;
 import acr.browser.lightning.fragment.BookmarkSettingsFragment;
@@ -25,6 +24,8 @@ import acr.browser.lightning.utils.ProxyUtils;
 import acr.browser.lightning.view.LightningView;
 import acr.browser.lightning.view.LightningWebClient;
 import dagger.Component;
+
+import acr.browser.lightning.constant.StartPage;
 
 @Singleton
 @Component(modules = {AppModule.class})

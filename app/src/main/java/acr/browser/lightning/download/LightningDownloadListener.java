@@ -13,13 +13,13 @@ import android.webkit.URLUtil;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 
 import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
 
 import javax.inject.Inject;
+import acr.browser.lightning.constant.*;
 
 public class LightningDownloadListener implements DownloadListener {
 

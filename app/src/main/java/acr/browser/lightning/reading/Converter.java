@@ -24,8 +24,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Locale;
-
-import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.constant.*;
 
 /**
  * This class is not thread safe. Use one new instance every time due to
