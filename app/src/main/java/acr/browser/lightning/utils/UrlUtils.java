@@ -23,10 +23,7 @@ import android.webkit.URLUtil;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import acr.browser.lightning.constant.BookmarkPage;
-import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.HistoryPage;
-import acr.browser.lightning.constant.StartPage;
+import acr.browser.lightning.constant.*;
 
 /**
  * Utility methods for Url manipulation

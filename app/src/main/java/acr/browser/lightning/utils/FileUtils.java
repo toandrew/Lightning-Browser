@@ -14,8 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.constant.Constants;
-
+import acr.browser.lightning.constant.*;
 /**
  * A utility class containing helpful methods
  * pertaining to file storage.

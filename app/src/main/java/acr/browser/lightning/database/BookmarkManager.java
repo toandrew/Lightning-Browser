@@ -36,8 +36,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.R;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.utils.Utils;
+import acr.browser.lightning.constant.Constants;
 
 @Singleton
 public class BookmarkManager {

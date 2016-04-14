@@ -112,9 +112,6 @@ import acr.browser.lightning.bus.BookmarkEvents;
 import acr.browser.lightning.bus.BrowserEvents;
 import acr.browser.lightning.bus.NavigationEvents;
 import acr.browser.lightning.bus.TabEvents;
-import acr.browser.lightning.constant.BookmarkPage;
-import acr.browser.lightning.constant.Constants;
-import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
@@ -143,6 +140,11 @@ import com.umeng.analytics.AnalyticsConfig;
 import com.umeng.analytics.MobclickAgent;
 
 import com.mopub.mobileads.MoPubView;
+
+import acr.browser.lightning.constant.MyConstants;
+import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.constant.HistoryPage;
+import acr.browser.lightning.constant.BookmarkPage;
 
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserView, UIController, OnClickListener, OnLongClickListener {
 
@@ -302,13 +304,14 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mReceiver = new LanternReceiver();
         registerReceiver(mReceiver, filter);
 
-        AnalyticsConfig.setAppkey(this, Constants.UMENG_APP_KEY);
-        AnalyticsConfig.setChannel(Constants.UMENG_CHANNEL);
+        AnalyticsConfig.setAppkey(this, MyConstants.UMENG_APP_KEY);
+        AnalyticsConfig.setChannel(MyConstants.UMENG_CHANNEL);
 
         moPubView = (MoPubView) findViewById(R.id.my_ad);
-        // TODO: Replace this test id with your personal ad unit id
-        moPubView.setAdUnitId("e3dafa7b980e4a25b92de8d8983ce00e");
-        moPubView.loadAd();
+        if (moPubView != null) {
+            moPubView.setAdUnitId("e3dafa7b980e4a25b92de8d8983ce00e");
+            moPubView.loadAd();
+        }
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
@@ -1283,7 +1286,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         }
 
-        moPubView.destroy();
+        if (moPubView != null) {
+            moPubView.destroy();
+        }
 
         super.onDestroy();
     }

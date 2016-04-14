@@ -19,9 +19,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
-
+import acr.browser.lightning.constant.*;
 @Singleton
 public class AdBlock {
 

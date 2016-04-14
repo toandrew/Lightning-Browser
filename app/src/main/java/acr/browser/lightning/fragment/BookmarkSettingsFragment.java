@@ -34,7 +34,6 @@ import javax.inject.Inject;
 
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.BookmarkLocalSync;
 import acr.browser.lightning.database.BookmarkLocalSync.Source;
 import acr.browser.lightning.database.BookmarkManager;
@@ -43,6 +42,8 @@ import acr.browser.lightning.react.OnSubscribe;
 import acr.browser.lightning.react.Schedulers;
 import acr.browser.lightning.utils.Preconditions;
 import acr.browser.lightning.utils.Utils;
+import acr.browser.lightning.constant.*;
+
 
 public class BookmarkSettingsFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
 

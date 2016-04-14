@@ -21,6 +21,7 @@ import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.view.LightningView;
+import acr.browser.lightning.constant.*;
 
 public class HistoryPage extends AsyncTask<Void, Void, Void> {
 

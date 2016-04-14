@@ -30,8 +30,8 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.activity.MainActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
+import acr.browser.lightning.constant.*;
 
 /**
  * Handle download requests

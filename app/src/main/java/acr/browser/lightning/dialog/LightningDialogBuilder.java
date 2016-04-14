@@ -24,14 +24,13 @@ import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BookmarkEvents;
 import acr.browser.lightning.bus.BrowserEvents;
-import acr.browser.lightning.constant.BookmarkPage;
-import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.Utils;
 
+import acr.browser.lightning.constant.*;
 /**
  * TODO Rename this class it doesn't build dialogs only for bookmarks
  * <p/>

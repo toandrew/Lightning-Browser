@@ -25,6 +25,7 @@ import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.view.LightningView;
+import acr.browser.lightning.constant.*;
 
 public final class BookmarkPage extends AsyncTask<Void, Void, Void> {
 
