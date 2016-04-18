@@ -4,10 +4,13 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.getlantern.lantern.sdk.Utils;
 
+import acr.browser.lightning.constant.Constants;
 import go.lantern.Lantern;
 
 public class Service extends VpnBuilder implements Runnable {
@@ -65,6 +68,8 @@ public class Service extends VpnBuilder implements Runnable {
             org.lantern.mobilesdk.StartResult result = org.lantern.mobilesdk.Lantern.enable(getApplicationContext(), startTimeoutMillis, analyticsTrackingID);
             configure(result.getSOCKS5Addr());
 
+            updateVpnStatus(Constants.VPN_SERVICE_STATUS_STARTED);
+
             while (IsRunning) {
                 // sleep to avoid busy looping
                 Thread.sleep(100);
@@ -90,6 +95,9 @@ public class Service extends VpnBuilder implements Runnable {
 
         stopSelf();
         IsRunning = false;
+
+        // show sth when service stopped.
+        updateVpnStatus(Constants.VPN_SERVICE_STATUS_STOPPED);
     }
 
     @Override
@@ -98,5 +106,17 @@ public class Service extends VpnBuilder implements Runnable {
         if (mThread != null) {
             mThread.interrupt();
         }
+    }
+
+    @Override
+    public void onRevoke() {
+        Log.d(TAG, "onRevoke!!!!");
+        super.onRevoke();
+    }
+
+    private void updateVpnStatus(String status) {
+        Intent intent = new Intent(Constants.INTENT_UPDATE_VPN_SERVICE_STATUS);
+        intent.putExtra(Constants.VPN_SERVICE_STATUS, status);
+        sendBroadcast(intent);
     }
 }

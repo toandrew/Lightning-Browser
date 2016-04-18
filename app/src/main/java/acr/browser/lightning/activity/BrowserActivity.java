@@ -88,6 +88,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.VideoView;
+import android.os.AsyncTask;
+import android.widget.Toast;
+
+import java.lang.ref.WeakReference;
 
 import com.anthonycr.grant.PermissionsManager;
 import com.squareup.otto.Bus;
@@ -136,8 +140,6 @@ import butterknife.ButterKnife;
 
 import com.umeng.analytics.AnalyticsConfig;
 import com.umeng.analytics.MobclickAgent;
-
-import com.mopub.mobileads.MoPubView;
 
 import acr.browser.lightning.constant.MyConstants;
 import acr.browser.lightning.constant.Constants;
@@ -246,7 +248,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private BroadcastReceiver mReceiver;
     private SharedPreferences mPrefs = null;
 
-    private MoPubView moPubView;
+    private final MyHandler mHandler = new MyHandler(this);
+
+    private int mTabNum = 0;
+
+    private AdManager mAdManager = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -298,6 +304,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        filter.addAction(Constants.INTENT_UPDATE_VPN_SERVICE_STATUS);
 
         mReceiver = new LanternReceiver();
         registerReceiver(mReceiver, filter);
@@ -305,11 +312,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         AnalyticsConfig.setAppkey(this, MyConstants.UMENG_APP_KEY);
         AnalyticsConfig.setChannel(MyConstants.UMENG_CHANNEL);
 
-        moPubView = (MoPubView) findViewById(R.id.my_ad);
-        if (moPubView != null) {
-            moPubView.setAdUnitId("e3dafa7b980e4a25b92de8d8983ce00e");
-            moPubView.loadAd();
-        }
+        mAdManager = new AdManager(this);
+        mAdManager.onCreate();
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
@@ -1268,9 +1272,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         }
 
-        if (moPubView != null) {
-            moPubView.destroy();
-        }
+        mHandler.removeCallbacksAndMessages(null);
+
+        mAdManager.onDestroy();
 
         super.onDestroy();
     }
@@ -1290,6 +1294,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        enableVPN();
+
         Log.d(TAG, "onResume");
         if (mSuggestionsAdapter != null) {
             mSuggestionsAdapter.refreshPreferences();
@@ -1306,8 +1313,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         BrowserApp.get(this).registerReceiver(mNetworkReceiver, filter);
 
         mEventBus.register(mBusEventListener);
-
-        enableVPN();
 
         // UMENG
         MobclickAgent.onResume(this);
@@ -1444,9 +1449,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
     @Override
     public void updateTabNumber(int number) {
+        mTabNum = number;
+
         if (mArrowImage != null && mShowTabsInDrawer) {
             mArrowImage.setImageBitmap(DrawableUtils.getRoundedNumberImage(number, Utils.dpToPx(24),
-                    Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme), Utils.dpToPx(2.5f)));
+                    Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme, Service.IsRunning), Utils.dpToPx(2.5f)));
         }
     }
 
@@ -2515,6 +2522,13 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
                     stopLantern();
                 }
+            } else if (action.equals(Constants.INTENT_UPDATE_VPN_SERVICE_STATUS)) {
+                String status = intent.getStringExtra(Constants.VPN_SERVICE_STATUS);
+                if (Constants.VPN_SERVICE_STATUS_STARTED.equals(status)) {
+                    mHandler.sendEmptyMessage(Constants.VPN_SERVICE_UPDATE_STARTED);
+                } else {
+                    mHandler.sendEmptyMessage(Constants.VPN_SERVICE_UPDATE_STOPPED);
+                }
             }
         }
     }
@@ -2526,5 +2540,32 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private void toggleSwitch(boolean useVpn) {
         // store the updated preference
         mPrefs.edit().putBoolean(LanternConfig.PREF_USE_VPN, useVpn).commit();
+    }
+
+    private static class MyHandler extends Handler {
+        private final WeakReference<BrowserActivity> mActivity;
+
+        public MyHandler(BrowserActivity activity) {
+            mActivity = new WeakReference(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            BrowserActivity activity = mActivity.get();
+            if (activity != null) {
+                switch(msg.what) {
+                    case Constants.VPN_SERVICE_UPDATE_STARTED:
+                        Toast startToast = Toast.makeText(activity, R.string.vpn_status_started, Toast.LENGTH_SHORT);
+                        startToast.show();
+                        break;
+                    case Constants.VPN_SERVICE_UPDATE_STOPPED:
+                        Toast stopToast = Toast.makeText(activity, R.string.vpn_status_stopped, Toast.LENGTH_SHORT);
+                        stopToast.show();
+                        break;
+                }
+
+                activity.updateTabNumber(activity.mTabNum);
+            }
+        }
     }
 }

@@ -56,7 +56,10 @@ public class ThemeUtils {
     }
 
     @ColorInt
-    public static int getIconThemeColor(@NonNull Context context, boolean dark) {
+    public static int getIconThemeColor(@NonNull Context context, boolean dark, boolean vpnServiceRunning) {
+        if (vpnServiceRunning) {
+            return ContextCompat.getColor(context, R.color.icon_vpn_service_running);
+        }
         return (dark) ? getIconDarkThemeColor(context) : getIconLightThemeColor(context);
     }
 
