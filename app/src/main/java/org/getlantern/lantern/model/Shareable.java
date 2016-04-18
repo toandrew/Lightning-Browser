@@ -24,16 +24,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import acr.browser.lightning.R;
-import org.getlantern.lantern.activity.LanternMainActivity;
+import acr.browser.lightning.activity.BrowserActivity;
 
 public class Shareable {
     private static final String TAG = "Shareable";
 
     final private Resources resources;
     final private PackageManager packageManager;
-    final private LanternMainActivity activity;
+    final private BrowserActivity activity;
 
-    public Shareable(final LanternMainActivity activity) {
+    public Shareable(final BrowserActivity activity) {
         this.activity = activity;
         this.resources = activity.getResources();
         this.packageManager = activity.getPackageManager();

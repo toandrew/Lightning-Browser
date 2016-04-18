@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:2.0.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.2.1'
     }
@@ -14,8 +14,6 @@ ext {
     internalScript = new File(projectDir, 'internal.gradle')
 
     enableTestCodeCoverage = true
-    libflashlight = 'libflashlight+@aar'
-
 
     compileSdkVersion = 23
     targetSdkVersion = 23
@@ -28,8 +26,7 @@ ext {
     deployScript = new File(lanternDir, 'deploy.gradle')
 
     libs = fileTree(dir: 'libs', include: ['*.jar'])
-    appCompat = 'com.android.support:appcompat-v7:23.0.1'
-    yaml    = 'org.yaml:snakeyaml:1.10'
+    supportLibVersion = '23.2.1'
     mavenAntTasks = 'org.apache.maven:maven-ant-tasks:2.1.3'
 }
 

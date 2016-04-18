@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.getlantern.lantern.activity.LanternMainActivity;
+import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.R;
 
 import org.getlantern.lantern.android.vpn.Tun2Socks;
@@ -86,7 +86,7 @@ public class VpnBuilder extends VpnService {
             builder.addRoute(addr[0], Integer.parseInt(addr[1]));
         }
 
-        Intent intent = new Intent(this, LanternMainActivity.class);
+        Intent intent = new Intent(this, BrowserActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         builder.setConfigureIntent(pendingIntent);
 
