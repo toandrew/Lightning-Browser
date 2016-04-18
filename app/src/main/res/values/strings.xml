@@ -277,4 +277,6 @@
     <string name="error_update">Error Downloading Update</string>
     <string name="manual_update">Try manually installing the latest version from &lt;a href="https://lantern-android.io">here1&lt;/a></string>
 
+    <string name="vpn_status_started">VPN service is started!</string>
+    <string name="vpn_status_stopped">VPN service is stopped!!</string>
 </resources>

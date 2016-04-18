@@ -297,4 +297,6 @@
   <string name="item_preview_country">美国</string>
   <string name="item_preview_dialCode">+1</string>
 
+    <string name="vpn_status_started">VPN服务已打开!</string>
+    <string name="vpn_status_stopped">VPN服务已关闭!!</string>
 </resources>
