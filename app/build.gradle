@@ -15,13 +15,20 @@ apply plugin: 'com.getkeepsafe.dexcount'
 android {
     useLibrary 'org.apache.http.legacy'
 
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/maven/commons-io/commons-io/pom.xml'
+        exclude 'META-INF/maven/commons-io/commons-io/pom.properties'
+    }
+
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionName "1.0.1"
+        versionName "1.0.2"
         generatedDensities = []
     }
 
@@ -67,12 +74,12 @@ android {
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId 'com.infthink.browser.full'
-            versionCode 3
+            versionCode 4
         }
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId 'com.infthink.browser.lite'
-            versionCode 3
+            versionCode 4
 
             dependencies {
                 compile('com.mopub:mopub-sdk:4.5.1@aar') {
@@ -147,13 +154,18 @@ dependencies {
     // memory leak analysis
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+
     compile(name: 'liblantern', ext: 'aar')
     compile(name: 'android-sdk-debug', ext: 'aar')
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile appCompat
+
+    compile "com.android.support:support-v4:${supportLibVersion}"
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+
     compile 'com.google.guava:guava:19.0'
-    compile 'com.mandrillapp.wrapper.lutung:lutung:0.0.6'
-    compile 'com.github.tony19:timber-loggly:1.0.1'
+    compile ('com.mandrillapp.wrapper.lutung:lutung:0.0.7') {
+        exclude group: 'org.apache.commons', module: 'commons-io'
+    }
     compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true
     }

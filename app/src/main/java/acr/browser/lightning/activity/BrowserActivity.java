@@ -89,7 +89,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.VideoView;
-import android.os.AsyncTask;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
@@ -147,6 +146,8 @@ import acr.browser.lightning.constant.MyConstants;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.constant.BookmarkPage;
+
+import org.lantern.mobilesdk.Lantern;
 
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserView, UIController, OnClickListener, OnLongClickListener {
 
@@ -295,7 +296,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
         });
 
-        mPrefs = org.getlantern.lantern.sdk.Utils.getSharedPrefs(this);
+        mPrefs = org.getlantern.lantern.model.Utils.getSharedPrefs(this);
 
         // the ACTION_SHUTDOWN intent is broadcast when the phone is
         // about to be shutdown. We register a receiver to make sure we
@@ -1668,16 +1669,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                 // VPN connection; return to off state
                 toggleSwitch(false);
             } else {
+	            Lantern.disable(getApplicationContext());
                 toggleSwitch(true);
 
-                Handler h = new Handler();
-                h.postDelayed(new Runnable () {
-
-                    public void run ()
-                    {
-                        sendIntentToService();
-                    }
-                }, 1000);
+	            sendIntentToService();
             }
 
             return;
@@ -2501,6 +2496,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             startActivityForResult(intent, REQUEST_VPN);
         } else {
             Log.w(TAG, "VPN enabled, starting Lantern...");
+	        Lantern.disable(getApplicationContext());
             toggleSwitch(true);
             sendIntentToService();
         }
@@ -2509,7 +2505,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private void stopLantern() {
         if (Service.IsRunning) {
             Service.IsRunning = false;
-            org.getlantern.lantern.sdk.Utils.clearPreferences(this);
+            org.getlantern.lantern.model.Utils.clearPreferences(this);
         }
     }
 
@@ -2527,9 +2523,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             if (action.equals(Intent.ACTION_SHUTDOWN)) {
                 // whenever the device is powered off or the app
                 // abruptly closed, we want to clear user preferences
-                org.getlantern.lantern.sdk.Utils.clearPreferences(context);
-            } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
-                //restart(context, intent);
+                org.getlantern.lantern.model.Utils.clearPreferences(context);
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 // whenever a user disconnects from Wifi and Lantern is running
                 NetworkInfo networkInfo =

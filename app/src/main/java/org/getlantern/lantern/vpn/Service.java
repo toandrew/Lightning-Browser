@@ -4,14 +4,13 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
-import org.getlantern.lantern.sdk.Utils;
+import org.getlantern.lantern.model.Utils;
+
+import go.lantern.Lantern;
 
 import acr.browser.lightning.constant.Constants;
-import go.lantern.Lantern;
 
 public class Service extends VpnBuilder implements Runnable {
 
