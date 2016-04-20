@@ -1471,7 +1471,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         if (mArrowImage != null && mShowTabsInDrawer) {
             mArrowImage.setImageBitmap(DrawableUtils.getRoundedNumberImage(number, Utils.dpToPx(24),
-                    Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme, Service.IsRunning), Utils.dpToPx(2.5f)));
+                    Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme, Service.isRunning(getApplicationContext())), Utils.dpToPx(2.5f)));
         }
     }
 
@@ -2473,7 +2473,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
     // Prompt the user to enable full-device VPN mode
     private void enableVPN() {
-        if (Service.IsRunning) {
+        if (Service.isRunning(getApplicationContext())) {
             Log.w(TAG, "VPN service is running! ignore enableVPN!");
             return;
         }
@@ -2503,6 +2503,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     private void stopLantern() {
+        Log.e(TAG, "stopLantern[" + Service.IsRunning + "][" + Service.isRunning(getApplicationContext()));
         if (Service.IsRunning) {
             Service.IsRunning = false;
             org.getlantern.lantern.model.Utils.clearPreferences(this);
@@ -2569,12 +2570,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             if (activity != null) {
                 switch(msg.what) {
                     case Constants.VPN_SERVICE_UPDATE_STARTED:
-                        Toast startToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_started, Toast.LENGTH_SHORT);
-                        startToast.show();
+//                        Toast startToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_started, Toast.LENGTH_SHORT);
+//                        startToast.show();
                         break;
                     case Constants.VPN_SERVICE_UPDATE_STOPPED:
-                        Toast stopToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_stopped, Toast.LENGTH_SHORT);
-                        stopToast.show();
+//                        Toast stopToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_stopped, Toast.LENGTH_SHORT);
+//                        stopToast.show();
                         break;
                     case Constants.VPN_SERVICE_NOT_PREPARED:
                         Toast notPrepareToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_not_prepared, Toast.LENGTH_LONG);
@@ -2582,6 +2583,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
                         // stop vpn???
                         activity.stopLantern();
+                        break;
                 }
 
                 activity.updateTabNumber(activity.mTabNum);
