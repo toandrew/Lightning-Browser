@@ -29,6 +29,7 @@ import java.util.Map;
 
 import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.R;
+import acr.browser.lightning.constant.Constants;
 
 import org.getlantern.lantern.android.vpn.Tun2Socks;
 
@@ -86,6 +87,16 @@ public class VpnBuilder extends VpnService {
             builder.addRoute(addr[0], Integer.parseInt(addr[1]));
         }
 
+        // Close the old interface since the parameters have been changed.
+        if (mInterface != null) {
+            try {
+                Log.e(TAG, "VPN mInterface is not null, close it ????!!!!! ");
+                mInterface.close();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+
         Intent intent = new Intent(this, BrowserActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         builder.setConfigureIntent(pendingIntent);
@@ -106,6 +117,11 @@ public class VpnBuilder extends VpnService {
                 Locale defaultLocale = Locale.getDefault();
 
                 createBuilder();
+
+                if (mInterface == null) { // android's bug. see https://code.google.com/p/android/issues/detail?id=81708
+                    updateVpnStatus(Constants.VPN_SERVICE_STATUS_NOT_PREPARED);
+                    return;
+                }
 
                 // revert back to the user's default locale
                 Locale.setDefault(defaultLocale);
@@ -227,4 +243,9 @@ public class VpnBuilder extends VpnService {
         }
     }
 
+    public void updateVpnStatus(String status) {
+        Intent intent = new Intent(Constants.INTENT_UPDATE_VPN_SERVICE_STATUS);
+        intent.putExtra(Constants.VPN_SERVICE_STATUS, status);
+        sendBroadcast(intent);
+    }
 }

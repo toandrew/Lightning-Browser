@@ -2520,8 +2520,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                 String status = intent.getStringExtra(Constants.VPN_SERVICE_STATUS);
                 if (Constants.VPN_SERVICE_STATUS_STARTED.equals(status)) {
                     mHandler.sendEmptyMessage(Constants.VPN_SERVICE_UPDATE_STARTED);
-                } else {
+                } else if (Constants.VPN_SERVICE_STATUS_STOPPED.equals(status)) {
                     mHandler.sendEmptyMessage(Constants.VPN_SERVICE_UPDATE_STOPPED);
+                } else if (Constants.VPN_SERVICE_STATUS_NOT_PREPARED.equals(status)) {
+                    mHandler.sendEmptyMessage(Constants.VPN_SERVICE_NOT_PREPARED);
                 }
             }
         }
@@ -2549,13 +2551,19 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             if (activity != null) {
                 switch(msg.what) {
                     case Constants.VPN_SERVICE_UPDATE_STARTED:
-                        Toast startToast = Toast.makeText(activity, R.string.vpn_status_started, Toast.LENGTH_SHORT);
+                        Toast startToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_started, Toast.LENGTH_SHORT);
                         startToast.show();
                         break;
                     case Constants.VPN_SERVICE_UPDATE_STOPPED:
-                        Toast stopToast = Toast.makeText(activity, R.string.vpn_status_stopped, Toast.LENGTH_SHORT);
+                        Toast stopToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_stopped, Toast.LENGTH_SHORT);
                         stopToast.show();
                         break;
+                    case Constants.VPN_SERVICE_NOT_PREPARED:
+                        Toast notPrepareToast = Toast.makeText(activity.getApplicationContext(), R.string.vpn_status_not_prepared, Toast.LENGTH_LONG);
+                        notPrepareToast.show();
+
+                        // stop vpn???
+                        activity.stopLantern();
                 }
 
                 activity.updateTabNumber(activity.mTabNum);

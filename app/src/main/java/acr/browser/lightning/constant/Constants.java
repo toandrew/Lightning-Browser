@@ -66,9 +66,11 @@ public final class Constants {
     public static final String INTENT_ORIGIN = "URL_INTENT_ORIGIN";
 
     public static final String INTENT_UPDATE_VPN_SERVICE_STATUS = "com.infthink.browser.intent.vpn.status";
-    public static final String VPN_SERVICE_STATUS = "TATUS";
+    public static final String VPN_SERVICE_STATUS = "STATUS";
     public static final String VPN_SERVICE_STATUS_STARTED = "started";
     public static final String VPN_SERVICE_STATUS_STOPPED = "stopped";
+    public static final String VPN_SERVICE_STATUS_NOT_PREPARED = "notprepared";
     public static final int VPN_SERVICE_UPDATE_STARTED = 200;
     public static final int VPN_SERVICE_UPDATE_STOPPED = 201;
+    public static final int VPN_SERVICE_NOT_PREPARED = 202;
 }
