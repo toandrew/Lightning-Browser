@@ -79,7 +79,7 @@ public class Service extends VpnBuilder implements Runnable {
             e.printStackTrace();
             Log.e(TAG, "Fatal error", e);
         } finally {
-            Log.e(TAG, "Lantern terminated.");
+            Log.e(TAG, "Lantern terminated.[" + IsRunning + "]");
             stop();
         }
     }
