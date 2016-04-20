@@ -299,4 +299,5 @@
 
     <string name="vpn_status_started">VPN服务已打开!</string>
     <string name="vpn_status_stopped">VPN服务已关闭!!</string>
+    <string name="vpn_status_not_prepared">VPN服务出错!!!</string>
 </resources>

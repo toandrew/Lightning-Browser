@@ -112,10 +112,4 @@ public class Service extends VpnBuilder implements Runnable {
         Log.d(TAG, "onRevoke!!!!");
         super.onRevoke();
     }
-
-    private void updateVpnStatus(String status) {
-        Intent intent = new Intent(Constants.INTENT_UPDATE_VPN_SERVICE_STATUS);
-        intent.putExtra(Constants.VPN_SERVICE_STATUS, status);
-        sendBroadcast(intent);
-    }
 }
