@@ -63,6 +63,7 @@ public class PreferenceManager {
         public static final String INITIAL_CHECK_FOR_I2P = "checkForI2P";
 
         public static final String LEAK_CANARY = "leakCanary";
+        public static final String INITIAL_CHECK_FOR_CORSSKR_VPN = "checkForCrossKrVPN";
     }
 
     @NonNull private final SharedPreferences mPrefs;
@@ -92,6 +93,10 @@ public class PreferenceManager {
 
     public boolean getCheckedForI2P() {
         return mPrefs.getBoolean(Name.INITIAL_CHECK_FOR_I2P, false);
+    }
+
+    public boolean getCheckedForCrossKrVPN() {
+        return mPrefs.getBoolean(Name.INITIAL_CHECK_FOR_CORSSKR_VPN, true);
     }
 
     public boolean getClearCacheExit() {
@@ -224,11 +229,11 @@ public class PreferenceManager {
     }
 
     public boolean getUseProxy() {
-        return mPrefs.getBoolean(Name.USE_PROXY, false);
+        return mPrefs.getBoolean(Name.USE_PROXY, true);
     }
 
     public int getProxyChoice() {
-        return mPrefs.getInt(Name.PROXY_CHOICE, Constants.NO_PROXY);
+        return mPrefs.getInt(Name.PROXY_CHOICE, Constants.PROXY_CROSSKR_VPN);
     }
 
     public int getUserAgentChoice() {
@@ -307,6 +312,10 @@ public class PreferenceManager {
 
     public void setCheckedForI2P(boolean check) {
         putBoolean(Name.INITIAL_CHECK_FOR_I2P, check);
+    }
+
+    public void setCheckedForCrossKrVPN(boolean check) {
+        putBoolean(Name.INITIAL_CHECK_FOR_CORSSKR_VPN, check);
     }
 
     public void setClearCacheExit(boolean enable) {

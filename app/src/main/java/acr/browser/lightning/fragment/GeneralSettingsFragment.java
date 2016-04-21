@@ -228,6 +228,9 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
             case Constants.PROXY_MANUAL:
                 manualProxyPicker();
                 break;
+            case Constants.PROXY_CROSSKR_VPN:
+                choice = ProxyUtils.setProxyChoice(choice, mActivity);
+                break;
         }
 
         mPreferenceManager.setProxyChoice(choice);

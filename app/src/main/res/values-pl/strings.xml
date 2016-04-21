@@ -133,6 +133,7 @@
         <item>Orbot</item>
         <item>I2P</item>
         <item>Ręczne ustawienia</item>
+        <item>CrossKr VPN</item>
     </string-array>
     <string name="manual_proxy">Ręczne ustawienia proxy</string>
     <string name="host">Host:</string>

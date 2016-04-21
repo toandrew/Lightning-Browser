@@ -139,6 +139,7 @@
         <item>Orbot</item>
         <item>I2P</item>
         <item>Manual</item>
+        <item>CrossKr VPN</item>
     </string-array>
     <string name="manual_proxy">Proxy manual</string>
     <string name="host">Servidor:</string>

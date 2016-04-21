@@ -59,6 +59,8 @@ public final class Constants {
     public static final int PROXY_I2P = 2;
     public static final int PROXY_MANUAL = 3;
 
+    public static final int PROXY_CROSSKR_VPN = 4;
+
     public static final String DEFAULT_ENCODING = "UTF-8";
 
     public static final String[] TEXT_ENCODINGS = {"ISO-8859-1", "UTF-8", "GBK", "Big5", "ISO-2022-JP", "SHIFT_JS", "EUC-JP", "EUC-KR"};
@@ -70,7 +72,12 @@ public final class Constants {
     public static final String VPN_SERVICE_STATUS_STARTED = "started";
     public static final String VPN_SERVICE_STATUS_STOPPED = "stopped";
     public static final String VPN_SERVICE_STATUS_NOT_PREPARED = "notprepared";
+    public static final String VPN_SERVICE_STATUS_ENABLE_VPN = "enablevpn";
+    public static final String VPN_SERVICE_STATUS_DISABLE_VPN = "disablevpn";
     public static final int VPN_SERVICE_UPDATE_STARTED = 200;
     public static final int VPN_SERVICE_UPDATE_STOPPED = 201;
     public static final int VPN_SERVICE_NOT_PREPARED = 202;
+    public static final int VPN_SERVICE_ENABLE_VPN = 203;
+    public static final int VPN_SERVICE_DISABLE_VPN = 204;
+
 }

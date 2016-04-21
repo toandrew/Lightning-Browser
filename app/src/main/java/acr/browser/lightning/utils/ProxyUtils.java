@@ -10,6 +10,8 @@ import com.squareup.otto.Bus;
 
 import net.i2p.android.ui.I2PAndroidHelper;
 
+import org.getlantern.lantern.vpn.Service;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -52,10 +54,18 @@ public class ProxyUtils {
         boolean i2pChecked = mPreferences.getCheckedForI2P();
         boolean i2p = i2pInstalled && !i2pChecked;
 
+        boolean crosskrVpn = mPreferences.getCheckedForCrossKrVPN();
+
+        if (!useProxy && crosskrVpn) {
+            mPreferences.setProxyChoice(Constants.PROXY_CROSSKR_VPN);
+            return;
+        }
+
         // TODO Is the idea to show this per-session, or only once?
         if (!useProxy && (orbot || i2p)) {
             if (orbot) mPreferences.setCheckedForTor(true);
             if (i2p) mPreferences.setCheckedForI2P(true);
+
             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
             if (orbotInstalled && i2pInstalled) {
@@ -128,7 +138,11 @@ public class ProxyUtils {
                 host = "localhost";
                 port = 4444;
                 break;
-
+            case Constants.PROXY_CROSSKR_VPN:
+                if (!Service.isRunning(activity.getApplicationContext())) {
+                    Utils.toggleCrossKrVpn(activity, true);
+                }
+                return;
             default:
                 host = mPreferences.getProxyHost();
                 port = mPreferences.getProxyPort();
@@ -157,9 +171,14 @@ public class ProxyUtils {
     }
 
     public void updateProxySettings(@NonNull Activity activity) {
+        Log.e(Constants.TAG, "updateProxySettings:" + mPreferences.getUseProxy());
         if (mPreferences.getUseProxy()) {
             initializeProxy(activity);
         } else {
+            if (Service.isRunning(activity.getApplicationContext())) { // disable Crosskr vpn
+                Utils.toggleCrossKrVpn(activity, false);
+            }
+
             try {
                 WebkitProxy.resetProxy(BrowserApp.class.getName(), activity.getApplicationContext());
             } catch (Exception e) {
@@ -192,6 +211,10 @@ public class ProxyUtils {
     public static int setProxyChoice(int choice, @NonNull Activity activity) {
         switch (choice) {
             case Constants.PROXY_ORBOT:
+                if (Service.isRunning(activity.getApplicationContext())) { // disable Crosskr vpn
+                    Utils.toggleCrossKrVpn(activity, false);
+                }
+
                 if (!OrbotHelper.isOrbotInstalled(activity)) {
                     choice = Constants.NO_PROXY;
                     Utils.showSnackbar(activity, R.string.install_orbot);
@@ -199,6 +222,10 @@ public class ProxyUtils {
                 break;
 
             case Constants.PROXY_I2P:
+                if (Service.isRunning(activity.getApplicationContext())) { // disable Crosskr vpn
+                    Utils.toggleCrossKrVpn(activity, false);
+                }
+
                 I2PAndroidHelper ih = new I2PAndroidHelper(BrowserApp.get(activity));
                 if (!ih.isI2PAndroidInstalled()) {
                     choice = Constants.NO_PROXY;
@@ -206,6 +233,14 @@ public class ProxyUtils {
                 }
                 break;
             case Constants.PROXY_MANUAL:
+                if (Service.isRunning(activity.getApplicationContext())) { // disable Crosskr vpn
+                    Utils.toggleCrossKrVpn(activity, false);
+                }
+                break;
+            case Constants.PROXY_CROSSKR_VPN:
+                if (!Service.isRunning(activity.getApplicationContext())) { // enable Crosskr vpn
+                    Utils.toggleCrossKrVpn(activity, true);
+                }
                 break;
         }
         return choice;
