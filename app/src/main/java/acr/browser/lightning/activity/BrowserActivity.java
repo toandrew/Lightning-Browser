@@ -1223,6 +1223,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+
+        mAdManager.onPause();
+
         Log.d(TAG, "onPause");
         mTabsManager.pauseAll();
         try {
@@ -1297,6 +1300,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         super.onResume();
 
         enableVPN();
+
+        mAdManager.onResume();
 
         Log.d(TAG, "onResume");
         if (mSuggestionsAdapter != null) {
