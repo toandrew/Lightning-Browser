@@ -10,6 +10,14 @@ public class AdManager {
         // TODO
     }
 
+    public void onResume() {
+        // TODO
+    }
+
+    public void onPause() {
+        // TODO
+    }
+
     public void onDestroy() {
         // TODO
     }

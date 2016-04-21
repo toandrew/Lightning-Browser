@@ -82,9 +82,7 @@ android {
             versionCode 6
 
             dependencies {
-                compile('com.mopub:mopub-sdk:4.5.1@aar') {
-                    transitive = true;
-                }
+                compile 'com.google.android.gms:play-services-ads:7.5.0'
             }
         }
     }
