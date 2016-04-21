@@ -417,4 +417,15 @@ public final class Utils {
         Utils.showSnackbar(activity, R.string.message_added_to_homescreen);
     }
 
+    public static void toggleCrossKrVpn(@NonNull Activity activity, boolean enable) {
+        Log.e(Constants.TAG, "toggleCrossKrVpn: " + enable);
+        Intent intent = new Intent(Constants.INTENT_UPDATE_VPN_SERVICE_STATUS);
+        if (enable) {
+            intent.putExtra(Constants.VPN_SERVICE_STATUS, Constants.VPN_SERVICE_STATUS_ENABLE_VPN);
+        } else {
+            intent.putExtra(Constants.VPN_SERVICE_STATUS, Constants.VPN_SERVICE_STATUS_DISABLE_VPN);
+        }
+
+        activity.sendBroadcast(intent);
+    }
 }

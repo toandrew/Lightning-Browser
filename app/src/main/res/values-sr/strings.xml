@@ -150,6 +150,7 @@
         <item>Орбот</item>
         <item>I2P</item>
         <item>Ручно</item>
+        <item>CrossKr VPN</item>
     </string-array>
     <string name="manual_proxy">Ручне поставке проксија</string>
     <string name="host">Домаћин:</string>

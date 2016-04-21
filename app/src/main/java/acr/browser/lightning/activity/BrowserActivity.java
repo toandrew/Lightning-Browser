@@ -1454,7 +1454,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         if (mArrowImage != null && mShowTabsInDrawer) {
             mArrowImage.setImageBitmap(DrawableUtils.getRoundedNumberImage(number, Utils.dpToPx(24),
-                    Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme, Service.isRunning(getApplicationContext())), Utils.dpToPx(2.5f)));
+                    Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme, Service.IsRunning && Service.isRunning(getApplicationContext())), Utils.dpToPx(2.5f)));
         }
     }
 
@@ -2525,6 +2525,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     mHandler.sendEmptyMessage(Constants.VPN_SERVICE_UPDATE_STOPPED);
                 } else if (Constants.VPN_SERVICE_STATUS_NOT_PREPARED.equals(status)) {
                     mHandler.sendEmptyMessage(Constants.VPN_SERVICE_NOT_PREPARED);
+                } else if (Constants.VPN_SERVICE_STATUS_ENABLE_VPN.equals(status)) {
+                    mHandler.sendEmptyMessage(Constants.VPN_SERVICE_ENABLE_VPN);
+                } else if (Constants.VPN_SERVICE_STATUS_DISABLE_VPN.equals(status)) {
+                    mHandler.sendEmptyMessage(Constants.VPN_SERVICE_DISABLE_VPN);
                 }
             }
         }
@@ -2564,6 +2568,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                         notPrepareToast.show();
 
                         // stop vpn???
+                        activity.stopLantern();
+                        break;
+                    case Constants.VPN_SERVICE_ENABLE_VPN:
+                        activity.enableVPN();
+                        break;
+                    case Constants.VPN_SERVICE_DISABLE_VPN:
                         activity.stopLantern();
                         break;
                 }
