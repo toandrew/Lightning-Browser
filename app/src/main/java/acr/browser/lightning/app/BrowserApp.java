@@ -4,8 +4,10 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.multidex.MultiDex;
 import android.webkit.WebView;
 
+import com.connectsdk.discovery.DiscoveryManager;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.otto.Bus;
 
@@ -33,6 +35,8 @@ public class BrowserApp extends Application {
         if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
+
+        DiscoveryManager.init(getApplicationContext());
     }
 
     @NonNull
@@ -58,4 +62,10 @@ public class BrowserApp extends Application {
         return get(context).mBus;
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+
+        MultiDex.install(this);
+    }
 }

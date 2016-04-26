@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -82,6 +83,9 @@ public class StartPage extends AsyncTask<Void, Void, Void> {
         LightningView tab = mTabReference.get();
         if (tab != null) {
             tab.loadUrl(mStartpageUrl);
+
+            // show hint????
+            tab.showHint();
         }
     }
 
@@ -93,6 +97,17 @@ public class StartPage extends AsyncTask<Void, Void, Void> {
      */
     @NonNull
     private String getHomepage() {
+
+        // show flint home page
+        if (Constants.HOMEPAGE.equals(mPreferenceManager.getHomepage())) {
+            String lang = Locale.getDefault().getLanguage();
+            if (lang.equals("zh")) {
+                return "file:///android_asset/sites/index.html";
+            }
+
+            return "file:///android_asset/sites/index_en.html";
+        }
+
         StringBuilder homepageBuilder = new StringBuilder(HEAD_1 + mTitle + HEAD_2);
         String icon;
         String searchUrl;

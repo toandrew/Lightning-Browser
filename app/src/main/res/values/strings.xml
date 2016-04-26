@@ -237,4 +237,87 @@
 
     <string name="faq">FAQ</string>
     <string name="faq_description">Frequently Asked Questions</string>
+
+    <string name="do_fling">Do you want to fling this file？</string>
+    <string name="action_fling">Fling</string>
+    <string name="castappname">NETCAST</string>
+    <string name="imguri">www.infthink.com</string>
+    <string name="title">NETCAST</string>
+    <string name="cast_app_name">"Cast"</string>
+    <string name="btnplay">play</string>
+    <string name="btnpause">pause</string>
+    <string name="btnpre">rewind</string>
+    <string name="btnnext">fastforward</string>
+    <string name="btnstop">stop</string>
+    <string name="tvshowtext">Ready to Cast</string>
+    <string name="tvdeviceslist">Cast devices list</string>
+    <string name="cast_application_name">超级棒播放器</string>
+    <string name="cast_server_name">CastServer</string>
+    <string name="sender_app_name">Sender</string>
+    <string name="action_cast">Cast</string>
+    <string name="start_service">Start Service</string>
+    <string name="stop_service">Stop Service</string>
+    <string name="start_local">local</string>
+    <string name="start_net">network</string>
+    <string name="config_setting">settings</string>
+    <string name="end_session">endSession</string>
+    <string name="send">send</string>
+    <string name="ip_addr">ip_addr</string>
+    <string name="ip_port">port</string>
+    <string name="appname">AppName</string>
+    <string name="radio_sender">"Sender"</string>
+    <string name="radio_cast">"Cast"</string>
+    <string name="cmd_start_session">"Start Session"</string>
+    <string name="cmd_end_session">"End Session"</string>
+    <string name="cmd_send_message">"Send Message"</string>
+    <string name="bufferingtext">Buffering...</string>
+    <string name="flint">Fling</string>
+    <string name="agent_ipad">Ipad</string>
+    <string name="agent_iphone">Iphone</string>
+    <string name="agent_android_tablet">Android Tablet</string>
+    <string name="action_user_agent">User Agent</string>
+    <string name="custom_dialog_list_title_str">Choose a Resolution</string>
+    <string name="resolution">Resolution</string>
+    <string name="resolution_Smooth">Smooth</string>
+    <string name="resolution_SD">SD</string>
+    <string name="resolution_HD">HD</string>
+    <string name="resolution_Ultraclear">Ultraclear</string>
+    <string name="resolution_Bluray">Bluray</string>
+
+    <string name="media_autoplay">Auto fling</string>
+    
+    <string name="flint_hint_next">More...</string>
+    <string name="flint_hint_close">OK!</string>
+    
+    <string name="flint_hint_control_title">How to control fling videos?</string>
+    <string name="flint_hint_control_details">\n
+        \"Auto Fling\": Directly fling videos when device is selected.\n\n
+        \"Fling\" button: Used to connect or disconnect tv devices.\n\n
+        \"video\" controls: Play, Stop, Seek.\n\n
+        \"volume\" control: Please use mobile\'s volume key to control fling video\'s volume.\n
+    </string>
+
+    <string name="flint_hint_video_quality_title">How to control the video quality?</string>
+    <string name="flint_hint_video_quality_details">\n\"Video Quality\" button: Used to get current available video qualities if current site is supported by our server.\n\n\"Resolution\" label: Clicked to show current available video qualities.\n
+        \n
+        BTW, \n
+        You can also use different \"User Agent\" which is located in menu bar to fling web videos with different video qualities!
+	</string>
+	
+    <string name="flint_hint_webview_title">How to fling videos on web?</string>
+    <string name="flint_hint_webview_details">\nIn order to fling web videos, firstly, please click the web video link.\nWait until a toast is shown which is the vidoe\'s play url, then you can fling this video to your tv.</string>
+
+    <string name="flint_hint_final_title">Thank You! </string>
+    <string name="flint_hint_final_details">\nFor more info, please visit our web site: \nhttp://www.openflint.org</string>
+    
+    <string name="flint_empty_video_url">Sorry, no video to fling!</string>
+    
+    <string name="action_install">Install</string>
+    <string name="do_install">Do you want to install this application?</string>
+    <string name="install_apk_desc">Please select the device to install the application!</string>
+    <string name="apk_installing">Installing...</string>
+    
+    <string name="cancel_apk_installing">Cancel installing...</string>
+    
+    <string name="feedback">Feedback</string>
 </resources>

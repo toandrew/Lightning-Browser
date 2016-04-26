@@ -24,6 +24,12 @@
             <include layout="@layout/browser_content"/>
 
             <include layout="@layout/search_interface"/>
+
+            <acr.browser.lightning.flint.MediaFlintBar
+                android:id="@+id/media_fling"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+			  	android:visibility="gone"/>
         </LinearLayout>
 
         <FrameLayout

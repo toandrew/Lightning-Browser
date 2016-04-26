@@ -110,6 +110,7 @@ import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryDatabase;
 import acr.browser.lightning.database.HistoryItem;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
+import acr.browser.lightning.flint.CrossKrFlintManager;
 import acr.browser.lightning.fragment.BookmarksFragment;
 import acr.browser.lightning.fragment.TabsFragment;
 import acr.browser.lightning.search.SuggestionsAdapter;
@@ -227,6 +228,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
     abstract Observable<Void> updateCookiePreference();
 
+    // flint control
+    CrossKrFlintManager mCrossKrFlintManager = new CrossKrFlintManager(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -265,6 +269,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                 }
             }
         });
+
+        mCrossKrFlintManager.onCreate(this);
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
@@ -1182,6 +1188,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
 
         mEventBus.unregister(mBusEventListener);
+
+        mCrossKrFlintManager.onPause();
     }
 
     void saveOpenTabs() {
@@ -1194,6 +1202,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     protected void onStop() {
         super.onStop();
         mProxyUtils.onStop();
+
+        mCrossKrFlintManager.onStop();
     }
 
     @Override
@@ -1207,6 +1217,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mHistoryDatabase = null;
         }
 
+        mCrossKrFlintManager.onDestroy();
+
         super.onDestroy();
     }
 
@@ -1214,6 +1226,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     protected void onStart() {
         super.onStart();
         mProxyUtils.onStart(this);
+
+        mCrossKrFlintManager.onStart();
     }
 
     @Override
@@ -1241,6 +1255,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         BrowserApp.get(this).registerReceiver(mNetworkReceiver, filter);
 
         mEventBus.register(mBusEventListener);
+
+        mCrossKrFlintManager.onResume();
     }
 
     /**
@@ -2354,4 +2370,21 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
         }
     };
+
+    /**
+     * Get current video's resolution name.
+     *
+     * @return
+     */
+    public String getCurrentResolution() {
+        return mCrossKrFlintManager.getCurrentResolution();
+    }
+
+    public LightningView getCurrentView() {
+        return mTabsManager.getCurrentTab();
+    }
+
+    public CrossKrFlintManager getFlintManager() {
+        return mCrossKrFlintManager;
+    }
 }

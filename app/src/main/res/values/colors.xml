@@ -37,4 +37,16 @@
 
     <color name="error_red">#F44336</color>
 
+  <color name="mediacontroller_bg_pressed">#ff53c1bd</color>
+  <color name="mediacontroller_bg">#99000000</color>
+
+      <color name="custom_dialog_white_bg">#90ffffff</color>
+    <color name="custom_dialog_bg">#90070401</color>
+    <color name="custom_dialog_enter_bg">#ffa3620a</color>
+    <color name="custom_dialog_cancel_bg">#ff606060</color>
+    <color name="custom_dialog_text_color">#E0E0E0</color>
+    <color name="custom_dialog_text_gary_color">#B1B1B1</color>
+    <color name="custom_dialog_text_orange_color">#F89026</color>
+    <color name="custom_dialog_line_gary_color">#434343</color>
+
 </resources>

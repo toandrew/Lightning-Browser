@@ -7,10 +7,13 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 23
-        versionName "4.3.3"
+        versionName "2.6"
         generatedDensities = []
+
+        // Enabling multidex support.
+        multiDexEnabled true
     }
 
     aaptOptions {
@@ -39,14 +42,14 @@ android {
     productFlavors {
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
-            applicationId "acr.browser.lightning"
-            versionCode 88
+            applicationId "com.crosskr.flint.webview.browser"
+            versionCode 25
         }
 
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
-            applicationId "acr.browser.barebones"
-            versionCode 90
+            applicationId "com.crosskr.flint.webview.browser.lite"
+            versionCode 25
         }
     }
 
@@ -56,6 +59,12 @@ android {
 
     packagingOptions {
         exclude '.readme'
+    }
+
+    useLibrary 'org.apache.http.legacy'
+
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 }
 
@@ -105,4 +114,10 @@ dependencies {
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     provided 'javax.annotation:jsr250-api:1.0'
+
+    compile project(':matchstick')
+    compile project(':library')
+    compile project(':google_cast')
+
+    compile 'com.android.support:multidex:1.0.0'
 }

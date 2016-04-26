@@ -40,6 +40,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.BookmarkPage;
 import acr.browser.lightning.constant.Constants;
@@ -49,6 +50,7 @@ import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.download.LightningDownloadListener;
+import acr.browser.lightning.flint.CrossKrFlintManager;
 import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.react.Action;
 import acr.browser.lightning.react.Observable;
@@ -1205,6 +1207,13 @@ public class LightningView {
             if (view != null) {
                 view.longClickPage(url);
             }
+        }
+    }
+
+    public void showHint() {
+        CrossKrFlintManager flintManager = ((BrowserActivity)mActivity).getFlintManager();
+        if (flintManager != null) {
+            flintManager.showHint(this);
         }
     }
 }
