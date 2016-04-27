@@ -57,16 +57,15 @@
             android:layout_alignParentLeft="true"/>
 
       	<ImageButton
-      	    android:id="@+id/media_get_video_url_btn"
+      	    android:id="@+id/media_close_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
            	android:background="@android:color/transparent"
-            android:src="@drawable/ic_children_video_quality" 
+            android:src="@drawable/ic_flint_close"
            	android:layout_alignTop="@id/media_auto_play"
            	android:layout_alignBottom="@id/media_auto_play"
-           	android:layout_marginRight="5dp"
-            android:visibility="gone"/>
+           	android:layout_marginRight="5dp" />
       	
       	<ProgressBar
       	    android:id="@+id/media_get_video_url_progressbar"

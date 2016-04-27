@@ -220,4 +220,5 @@
     <string name="cancel_apk_installing">取消安装...</string>
     
     <string name="feedback">用户反馈</string>
+    <string name="show_flint">显示投射控制</string>
 </resources>

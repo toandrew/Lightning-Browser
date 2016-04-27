@@ -784,6 +784,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     startActivity(read);
                 }
                 return true;
+            case R.id.action_show_flint:
+                mCrossKrFlintManager.showFlintPanel();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

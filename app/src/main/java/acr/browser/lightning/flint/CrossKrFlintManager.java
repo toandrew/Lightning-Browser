@@ -58,6 +58,8 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
     private ImageButton mPlayPauseButton;
 
+    private ImageButton mClosePanelButton;
+
     private SeekBar mMediaSeekBar;
 
     private FlintVideoManager mFlintVideoManager;
@@ -266,6 +268,10 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         return mActivity;
     }
 
+    public void showFlintPanel() {
+        mMediaFlintBar.show();
+    }
+
     private static class MyHandler extends Handler {
         private final WeakReference<BrowserActivity> mActivity;
 
@@ -387,7 +393,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                 if (DiscoveryManager.getInstance().getCompatibleDevices()
                         .size() > 0) {
 
-                    if (getCurrentView() == null) {
+                    if (getCurrentView() == null || mMediaFlintBar.getVisibility() != View.VISIBLE) {
                         return;
                     }
 
@@ -397,8 +403,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
                     Toast.makeText(mContext, getCurrentVideoUrl(),
                             Toast.LENGTH_SHORT).show();
-
-                    mMediaFlintBar.show();
 
                     autoPlayIfIsNecessary(getCurrentVideoUrl());
                 }
@@ -467,6 +471,15 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                         }
                     }
                 });
+
+        mClosePanelButton = (ImageButton) mMediaFlintBar
+                .findViewById(R.id.media_close_btn);
+        mClosePanelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMediaFlintBar.hide();
+            }
+        });
 
         mFlintVideoManager.onStart();
     }

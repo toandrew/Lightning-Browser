@@ -320,4 +320,5 @@
     <string name="cancel_apk_installing">Cancel installing...</string>
     
     <string name="feedback">Feedback</string>
+    <string name="show_flint">Show Fling Panel</string>
 </resources>

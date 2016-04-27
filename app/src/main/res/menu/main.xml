@@ -51,4 +51,7 @@
         android:id="@+id/action_settings"
         android:title="@string/settings"/>
 
+    <item
+        android:id="@+id/action_show_flint"
+        android:title="@string/show_flint"/>
 </menu>
