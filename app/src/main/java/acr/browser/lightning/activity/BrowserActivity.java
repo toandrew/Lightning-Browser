@@ -2371,15 +2371,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         }
     };
 
-    /**
-     * Get current video's resolution name.
-     *
-     * @return
-     */
-    public String getCurrentResolution() {
-        return mCrossKrFlintManager.getCurrentResolution();
-    }
-
     public LightningView getCurrentView() {
         return mTabsManager.getCurrentTab();
     }

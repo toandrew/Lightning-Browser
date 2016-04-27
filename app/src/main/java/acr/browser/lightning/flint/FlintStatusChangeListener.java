@@ -16,8 +16,6 @@
 
 package acr.browser.lightning.flint;
 
-import android.net.Uri;
-
 /**
  * Flint related status.
  * 

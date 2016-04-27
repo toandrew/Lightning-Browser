@@ -541,6 +541,8 @@ public class DiscoveryManager implements ConnectableDeviceListener, DiscoveryPro
             provider.stop();
         }
 
+        discoveryListeners.clear();
+
         if (multicastLock.isHeld()) {
             multicastLock.release();
         }

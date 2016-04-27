@@ -32,15 +32,6 @@
             android:background="@color/mediacontroller_bg"
             android:src="@drawable/line" />
 
-        <CheckBox
-            android:id="@+id/device_hardware_decoder"
-            style="@style/MediaController_Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Use Hardware Decoder"
-            android:visibility="gone" />
-                
         <TextView
             android:id="@+id/media_info"
             style="@style/MediaController_Text"
@@ -74,7 +65,8 @@
             android:src="@drawable/ic_children_video_quality" 
            	android:layout_alignTop="@id/media_auto_play"
            	android:layout_alignBottom="@id/media_auto_play"
-           	android:layout_marginRight="5dp"/>
+           	android:layout_marginRight="5dp"
+            android:visibility="gone"/>
       	
       	<ProgressBar
       	    android:id="@+id/media_get_video_url_progressbar"
@@ -134,16 +126,17 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:text="@string/resolution"
-            android:textColor="@color/custom_dialog_text_orange_color" />
+            android:textColor="@color/custom_dialog_text_orange_color"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/mediacontroller_time_total"
             style="@style/MediaController_Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@id/resolution" />
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true" />
 
         <SeekBar
             android:id="@+id/mediacontroller_seekbar"

@@ -7,27 +7,14 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import acr.browser.lightning.R;
@@ -40,16 +27,6 @@ import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.ApiUtils;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Created by jianmin on 16-4-25.
@@ -67,7 +44,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
     protected static final int PLAYER_STATE_BUFFERING = 3;
     protected static final int PLAYER_STATE_FINISHED = 4;
 
-    private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS.toMillis(1);
+    private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS.toMillis(3);
 
     private static final String VIDEO_URL_PREFIX = "xxx:";
 
@@ -75,15 +52,11 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
     private MyHandler mHandler = null;
 
-    private boolean mIsZh = true;
-
     private MediaFlintBar mMediaFlintBar;
 
     private ImageButton mMediaRouteButton;
 
     private ImageButton mPlayPauseButton;
-
-    private ImageButton mVideoRefreshBtn;
 
     private SeekBar mMediaSeekBar;
 
@@ -98,10 +71,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
     private TextView mFlingTotalTimeTextView;
 
     private TextView mFlingDeviceNameTextView;
-
-    private TextView mVideoResolutionTextView;
-
-    private CustomDialog listDialog;
 
     private Runnable mRefreshRunnable;
 
@@ -119,22 +88,16 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
     private Runnable mRefreshFlingRunnable;
 
-    private Runnable mGetVideoUrlRunnable;
-
     private Runnable mVideoUrlRunnable;
 
     /**
-     * Use the followings to chech whether input method is active!
+     * Use the followings to check whether input method is active!
      */
     boolean isKeyBoardOpened = false;
-
-    private CheckBox mHardwareDecoderCheckbox;
 
     private CheckBox mAutoplayCheckbox;
 
     private boolean mShouldAutoPlayMedia = true;
-
-    private ProgressBar mVideoRefreshProgressBar;
 
     private boolean mSeeking;
 
@@ -142,17 +105,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
     private int mCounter = 0;
 
-    HttpsURLConnection httpsConn = null;
-
-    private SSLSocketFactory mSSLSocketFactory;
-
-    private X509HostnameVerifier mHostnameVerifier = null;
-
     private String mFetchedVideoUrl;
-
-    Map<String, String> videoUrls = new HashMap<String, String>();
-
-    ArrayList<String> videoList = new ArrayList<String>();
 
     private final ApiUtils apiUtils = new ApiUtils();
 
@@ -173,7 +126,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                 initFlint();
             }
 
-        }, 1000);
+        }, 500);
     }
 
     public void onResume() {
@@ -199,15 +152,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
         mQuit = true;
 
-        if (mGetVideoUrlRunnable != null) {
-            try {
-                synchronized (mGetVideoUrlRunnable) {
-                    mGetVideoUrlRunnable.notify();
-                }
-            } catch (Exception e) {
-
-            }
-        }
         if (mFlintVideoManager != null) {
             mFlintVideoManager.onStop();
         }
@@ -314,15 +258,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         mSeeking = false;
     }
 
-    /**
-     * Get current video's resolution name.
-     *
-     * @return
-     */
-    public String getCurrentResolution() {
-        return mVideoResolutionTextView.getText().toString();
-    }
-
     public Context getContext() {
         return mContext;
     }
@@ -352,14 +287,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
      * Init all flint related
      */
     private void initFlint() {
-        // get current system language.
-        String lang = Locale.getDefault().getLanguage();
-        if (lang.equals("zh")) {
-            mIsZh = true;
-        } else {
-            mIsZh = false;
-        }
-
         mMediaFlintBar = (MediaFlintBar) mActivity.findViewById(R.id.media_fling);
         mMediaFlintBar.show();
 
@@ -371,7 +298,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-
                 mFlintVideoManager.doMediaRouteButtonClicked();
             }
 
@@ -444,26 +370,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         mFlingDeviceNameTextView = (TextView) mMediaFlintBar
                 .findViewById(R.id.fling_device_name);
 
-        mVideoResolutionTextView = (TextView) mMediaFlintBar
-                .findViewById(R.id.resolution);
-
-        mVideoResolutionTextView.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                if (listDialog != null) {
-                    listDialog.dismiss();
-                }
-                Log.e(TAG, "onClick!");
-
-                initListDialog();
-            }
-
-        });
-
-        hideVideoResolutionView();
-
         setPlayerState(PLAYER_STATE_NONE);
 
         mRefreshRunnable = new Runnable() {
@@ -494,21 +400,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
                     mMediaFlintBar.show();
 
-                    // hide
-                    hideVideoResolutionView();
-
-                    final String url = getCurrentView().getUrl();
-                    if (!url.equals(mSiteUrl) && mIsZh) {
-                        try {
-                            synchronized (mGetVideoUrlRunnable) {
-                                mGetVideoUrlRunnable.notify();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        autoPlayIfIsNecessary(getCurrentVideoUrl());
-                    }
+                    autoPlayIfIsNecessary(getCurrentVideoUrl());
                 }
             }
 
@@ -532,37 +424,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
             }
         };
 
-        mGetVideoUrlRunnable = new Runnable() {
-            @Override
-            public void run() {
-                while (!mQuit) {
-                    try {
-                        synchronized (this) {
-                            Log.e(TAG, "mGetVideoUrlRunnable:wait!");
-                            this.wait();
-                            Log.e(TAG, "mGetVideoUrlRunnable:quit wait!!");
-                        }
-
-                        if (mQuit) {
-                            Log.e(TAG, "mGetVideoUrlRunnable:quit!");
-                            return;
-                        }
-
-                        final String url = mCurrentUrl;
-
-                        getVideoPlayUrlByApi(url);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                Log.e(TAG, "mGetVideoUrlRunnable:quit!");
-            }
-        };
-
-        new Thread(mGetVideoUrlRunnable).start();
-
-        // use this thread to get video url!
+        // Use this thread to get video url!
         mVideoUrlRunnable = new Runnable() {
             @Override
             public void run() {
@@ -586,21 +448,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         };
         mHandler.postDelayed(mVideoUrlRunnable, REFRESH_INTERVAL_MS);
 
-        mHardwareDecoderCheckbox = (CheckBox) mMediaFlintBar
-                .findViewById(R.id.device_hardware_decoder);
-        mHardwareDecoderCheckbox
-                .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView,
-                                                 boolean isChecked) {
-                        // TODO Auto-generated method stub
-
-                        Log.e(TAG, "setHardwareDecoder:" + isChecked);
-                    }
-
-                });
-
         mAutoplayCheckbox = (CheckBox) mMediaFlintBar
                 .findViewById(R.id.media_auto_play);
         mAutoplayCheckbox
@@ -620,35 +467,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                         }
                     }
                 });
-
-        mVideoRefreshBtn = (ImageButton) mMediaFlintBar
-                .findViewById(R.id.media_get_video_url_btn);
-        mVideoRefreshBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                if (getCurrentView() == null || !mIsZh) {
-                    return;
-                }
-
-                updateGetVideoRealBtnStatus(false);
-
-                mCurrentUrl = getCurrentView().getUrl();
-
-                try {
-                    synchronized (mGetVideoUrlRunnable) {
-                        mGetVideoUrlRunnable.notify();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-        });
-
-        mVideoRefreshProgressBar = (ProgressBar) mMediaFlintBar
-                .findViewById(R.id.media_get_video_url_progressbar);
 
         mFlintVideoManager.onStart();
     }
@@ -706,57 +524,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
      */
     protected final void refreshSeekPosition(long position, long duration) {
         mFlingCurrentTimeTextView.setText(formatTime(position));
-    }
-
-    /**
-     * Show video's play url list
-     */
-    private void initListDialog() {
-        listDialog = CustomDialog.createListDialog(mContext,
-                new AdapterView.OnItemClickListener() {
-
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1,
-                                            int arg2, long arg3) {
-                        listDialog.dismiss();
-
-                        // disable auto play
-                        mAutoplayCheckbox.setChecked(false);
-                        mShouldAutoPlayMedia = false;
-
-                        setCurrentVideoUrl(videoUrls.get(videoList.get(arg2)));
-
-                        mVideoResolutionTextView.setText(videoList.get(arg2));
-
-                        if (mFlintVideoManager.isMediaConnected()) {
-                            mFlintVideoManager.playVideo(
-                                    videoUrls.get(videoList.get(arg2)),
-                                    getCurrentVideoTitle());
-                        }
-                    }
-                });
-        if (mSiteUrl != null) {
-            final String title = getCurrentView().getTitle();
-            listDialog.setDialogTitile(title);
-        } else {
-            listDialog.setDialogTitile(mContext.getResources().getString(
-                    R.string.custom_dialog_list_title_str));
-        }
-
-        videoList.clear();
-
-        videoList.addAll(videoUrls.keySet());
-
-        listDialog.setListData(videoList);
-        listDialog.show();
-    }
-
-    /**
-     * Hide video resolution view.
-     */
-    private void hideVideoResolutionView() {
-        mVideoResolutionTextView.setText("");
-        mVideoResolutionTextView.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -819,33 +586,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         mHandler.postDelayed(mRefreshFlingRunnable, REFRESH_INTERVAL_MS);
     }
 
-    /**
-     * get video real play url by rabbit's api
-     *
-     * @param url
-     */
-    private void getVideoPlayUrlByApi(final String url) {
-        Log.e(TAG, "getVideoPlayUrlByApi: " + url + "]mCurrentView["
-                + getCurrentView() + "]");
-
-        if (getCurrentView() == null) {
-            return;
-        }
-
-        // TODO Auto-generated method stub
-        List<NameValuePair> param = new ArrayList<NameValuePair>();
-
-        param.add(new BasicNameValuePair("apptoken",
-                "3e52201f5037ad9bd8e389348916bd3a"));
-        param.add(new BasicNameValuePair("method", "core.video.realurl"));
-        param.add(new BasicNameValuePair("packageName", "com.infthink.test"));
-        param.add(new BasicNameValuePair("url", url));
-
-        Log.e(TAG, "get real video url[" + url + "]site[" + mSiteUrl + "]");
-
-        SendHttpsPOST("https://play.aituzi.com", param, null);
-    }
-
     private void setListenerToRootView() {
         final View activityRootView = mActivity.getWindow().getDecorView().findViewById(
                 R.id.content_frame);
@@ -881,22 +621,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
     }
 
     /**
-     * show or hide views related with get video's real play url.
-     *
-     * @param show
-     */
-    private void updateGetVideoRealBtnStatus(boolean show) {
-        if (!show) {
-            mVideoRefreshBtn.setVisibility(View.GONE);
-            mVideoRefreshProgressBar.setVisibility(View.VISIBLE);
-        } else {
-            mVideoRefreshBtn.setVisibility(View.VISIBLE);
-            mVideoRefreshProgressBar.setVisibility(View.GONE);
-        }
-
-    }
-
-    /**
      * Use this to show user some hints on UI about how to use Flint functions.
      */
     public void showHint(LightningView view) {
@@ -925,15 +649,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                                     break;
 
                                 case 1:
-                                    mShowcaseView.setShowcase(new ViewTarget(
-                                            mVideoRefreshBtn), true);
-                                    mShowcaseView
-                                            .setContentTitle(mContext.getString(R.string.flint_hint_video_quality_title));
-                                    mShowcaseView
-                                            .setContentText(mContext.getString(R.string.flint_hint_video_quality_details));
-                                    break;
-
-                                case 2:
                                     mShowcaseView.setTarget(Target.NONE);
                                     mShowcaseView
                                             .setContentTitle(mContext.getString(R.string.flint_hint_final_title));
@@ -941,16 +656,12 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                                             .setContentText(mContext.getString(R.string.flint_hint_final_details));
                                     mShowcaseView
                                             .setButtonText(mContext.getString(R.string.flint_hint_close));
-                                    setAlpha(0.4f, mMediaRouteButton,
-                                            mVideoRefreshBtn,
-                                            getCurrentView().getWebView());
+                                    setAlpha(0.4f, mMediaRouteButton, getCurrentView().getWebView());
                                     break;
 
-                                case 3:
+                                case 2:
                                     mShowcaseView.hide();
-                                    setAlpha(1.0f, mMediaRouteButton,
-                                            mVideoRefreshBtn,
-                                            getCurrentView().getWebView());
+                                    setAlpha(1.0f, mMediaRouteButton, getCurrentView().getWebView());
                                     break;
                             }
                             mCounter++;
@@ -1073,92 +784,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
     }
 
     /**
-     * Send POST request.
-     *
-     * @param url
-     * @param param
-     * @param data
-     * @return
-     */
-    public String SendHttpsPOST(String url, List<NameValuePair> param,
-                                String data) {
-        String result = null;
-        Log.e(TAG, "SendHttpsPOST!");
-
-        // 使用此工具可以将键值对编码成"Key=Value&amp;Key2=Value2&amp;Key3=Value3&rdquo;形式的请求参数
-        String requestParam = URLEncodedUtils.format(param, "UTF-8");
-
-        try {
-            URL requestUrl = new URL(url);
-            httpsConn = (HttpsURLConnection) requestUrl.openConnection();
-
-            httpsConn.setSSLSocketFactory(mSSLSocketFactory);
-            httpsConn.setHostnameVerifier(mHostnameVerifier);
-
-            // POST
-            httpsConn.setRequestMethod("POST");
-
-            httpsConn.setConnectTimeout(5000);
-            httpsConn.setDoOutput(true);
-            httpsConn.setDoInput(true);
-            httpsConn.setUseCaches(false);
-            httpsConn.setRequestProperty("Content-Type",
-                    "application/x-www-form-urlencoded");
-
-            // send the POST request to server
-            OutputStream outputStream = null;
-            try {
-                outputStream = httpsConn.getOutputStream();
-                outputStream.write(requestParam.toString().getBytes("utf-8"));
-                outputStream.flush();
-            } finally {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            }
-
-            int code = httpsConn.getResponseCode();
-            if (HttpsURLConnection.HTTP_OK == code) {
-
-                // 获取输入流
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        httpsConn.getInputStream()));
-
-                String temp = in.readLine();
-                /* 连接成一个字符串 */
-                while (temp != null) {
-                    if (result != null)
-                        result += temp;
-                    else
-                        result = temp;
-                    temp = in.readLine();
-                }
-                in.close();
-
-                Log.e(TAG, "SendHttpsPOST:response[" + result + "]");
-
-                // ready to processs video urls!
-                processVideoUrls(result);
-            }
-
-            Log.e(TAG, "SendHttpsPOST![" + code + "]");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (httpsConn != null) {
-                httpsConn.disconnect();
-                httpsConn = null;
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * set alpha
      *
      * @param alpha
@@ -1202,152 +827,6 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         mSeeking = false;
 
         refreshPlaybackPosition(0, 0);
-    }
-
-    /**
-     * Get video url list
-     *
-     * @param result
-     */
-    private void processVideoUrls(String result) {
-        videoUrls.clear();
-
-        // {"status":200,"data":[{"url":"http:\/\/v.youku.com\/v_show\/id_XODUwMDM0NDUy.html?from=y1.3-tv-grid-1007-9910.86804.1-1","id":"","num":"","vid":"","source":"youku","sourceName":"\u4f18\u9177\u89c6\u9891","playUrl":{"HD":["http:\/\/pl.youku.com\/playlist\/m3u8?ts=1427076444&keyframe=1&vid=XODUwMDM0NDUy&type=hd2&sid=442707644496121c78ca6&token=5158&oip=1008521675&ep=v4TS4z2PnxtMZfqTd5f%2FdgrHMEbE4Lhvk9YdQoGTJsv7lbbElD2WtWp9mT7DI5SF&did=3f2189e6a744e68de6761a20ceaf379aa8acfad4&ctype=21&ev=1"],"SD":["http:\/\/pl.youku.com\/playlist\/m3u8?ts=1427076444&keyframe=1&vid=XODUwMDM0NDUy&type=mp4&sid=442707644496121c78ca6&token=5158&oip=1008521675&ep=v4TS4z2PnxtMZfqTd5f%2FdgrHMEbE4Lhvk9YdQoGTJsv7lbbElD2WtWp9mT7DI5SF&did=3f2189e6a744e68de6761a20ceaf379aa8acfad4&ctype=21&ev=1"]}}]}
-        try {
-            JSONObject obj = new JSONObject(result);
-            String status = obj.getString("status");
-
-            if ("200".equals(status)) {
-                JSONArray data = obj.getJSONArray("data");
-
-                JSONObject r = data.getJSONObject(0);
-                final String url = r.getString("url");
-                JSONObject playUrl = r.getJSONObject("playUrl");
-
-                String label = "";
-
-                try {
-                    JSONArray Smooth = playUrl.getJSONArray("Smooth");
-                    videoUrls.put(mContext.getString(R.string.resolution_Smooth),
-                            Smooth.getString(0));
-                    label = mContext.getString(R.string.resolution_Smooth);
-                } catch (Exception e) {
-                    // e.printStackTrace();
-                }
-
-                try {
-                    JSONArray SD = playUrl.getJSONArray("SD");
-                    videoUrls.put(mContext.getString(R.string.resolution_SD),
-                            SD.getString(0));
-                    label = mContext.getString(R.string.resolution_SD);
-                } catch (Exception e) {
-                    // e.printStackTrace();
-                }
-
-                try {
-                    JSONArray HD = playUrl.getJSONArray("HD");
-                    videoUrls.put(mContext.getString(R.string.resolution_HD),
-                            HD.getString(0));
-
-                    label = mContext.getString(R.string.resolution_HD);
-                } catch (Exception e) {
-                    // e.printStackTrace();
-                }
-
-                try {
-                    JSONArray Ultraclear = playUrl.getJSONArray("Ultraclear");
-                    videoUrls.put(mContext.getString(R.string.resolution_Ultraclear),
-                            Ultraclear.getString(0));
-
-                    label = mContext.getString(R.string.resolution_Ultraclear);
-                } catch (Exception e) {
-                    // e.printStackTrace();
-                }
-
-                try {
-                    JSONArray Bluray = playUrl.getJSONArray("Bluray");
-                    videoUrls.put(mContext.getString(R.string.resolution_Bluray),
-                            Bluray.getString(0));
-
-                    label = mContext.getString(R.string.resolution_Bluray);
-                } catch (Exception e) {
-                    // e.printStackTrace();
-                }
-
-                Log.e(TAG,
-                        "playUrl:" + playUrl.toString() + "["
-                                + videoUrls.toString() + "]");
-
-                final String videoQualityLabel = label;
-
-                if (videoUrls.size() > 0) {
-                    mHandler.post(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            // TODO Auto-generated method stub
-
-                            mSiteUrl = url;
-
-                            if (listDialog != null) {
-                                listDialog.setDialogTitile(url);
-                            }
-
-                            videoList.clear();
-
-                            videoList.addAll(videoUrls.keySet());
-
-                            mMediaFlintBar.show();
-
-                            mVideoResolutionTextView.setText(videoQualityLabel);
-
-                            setCurrentVideoUrl(videoUrls.get(videoQualityLabel));
-
-                            mVideoResolutionTextView
-                                    .setVisibility(View.VISIBLE);
-
-                            updateGetVideoRealBtnStatus(true);
-
-                            autoPlayIfIsNecessary(videoUrls
-                                    .get(videoQualityLabel));
-                        }
-
-                    });
-                } else {
-                    mHandler.post(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            // TODO Auto-generated method stub
-
-                            hideVideoResolutionView();
-
-                            updateGetVideoRealBtnStatus(true);
-
-                            autoPlayIfIsNecessary(getCurrentVideoUrl());
-                        }
-
-                    });
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            mHandler.post(new Runnable() {
-
-                @Override
-                public void run() {
-                    // TODO Auto-generated method stub
-
-                    hideVideoResolutionView();
-
-                    updateGetVideoRealBtnStatus(true);
-
-                    autoPlayIfIsNecessary(getCurrentVideoUrl());
-                }
-
-            });
-        }
     }
 
     /**
