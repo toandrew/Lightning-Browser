@@ -105,4 +105,6 @@ dependencies {
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     provided 'javax.annotation:jsr250-api:1.0'
+
+    compile project(':Connect-SDK-Android')
 }

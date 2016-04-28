@@ -1,4 +1,4 @@
 include ':app'
+include ':Connect-SDK-Android'
 include ':libnetcipher'
-
 project(':libnetcipher').projectDir = new File(rootProject.projectDir, 'external/netcipher/libnetcipher')
