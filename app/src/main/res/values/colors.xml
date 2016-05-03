@@ -37,4 +37,6 @@
 
     <color name="error_red">#F44336</color>
 
+  <color name="mediacontroller_bg_pressed">#ff53c1bd</color>
+  <color name="mediacontroller_bg">#99000000</color>
 </resources>

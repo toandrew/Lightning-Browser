@@ -6,6 +6,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.webkit.WebView;
 
+import com.connectsdk.discovery.DiscoveryManager;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.otto.Bus;
 
@@ -38,6 +39,8 @@ public class BrowserApp extends Application {
         if (!isRelease() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
+
+        DiscoveryManager.init(getApplicationContext());
     }
 
     @NonNull

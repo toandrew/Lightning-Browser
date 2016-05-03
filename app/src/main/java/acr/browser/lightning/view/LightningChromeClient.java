@@ -15,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.GeolocationPermissions;
+import android.webkit.JsResult;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -23,6 +24,7 @@ import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.utils.Preconditions;
@@ -204,5 +206,16 @@ class LightningChromeClient extends WebChromeClient {
     public void onShowCustomView(View view, int requestedOrientation,
                                  CustomViewCallback callback) {
         mUIController.onShowCustomView(view, callback, requestedOrientation);
+    }
+
+    @Override
+    public boolean onJsAlert(WebView view,String url,
+                             String message,JsResult result) {
+        //Log.e(TAG, "onJsAlert:message:" + message);
+        result.confirm();
+
+        ((BrowserActivity)mActivity).getFlintManager().notifyGetVideoUrl(message);
+
+        return true;
     }
 }

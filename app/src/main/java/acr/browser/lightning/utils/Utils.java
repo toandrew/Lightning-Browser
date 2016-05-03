@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.URLUtil;
 
 import com.anthonycr.grant.PermissionsManager;
@@ -417,4 +418,38 @@ public final class Utils {
         Utils.showSnackbar(activity, R.string.message_added_to_homescreen);
     }
 
+
+    /**
+     * 获取屏幕的宽度
+     *
+     * @param context
+     * @return
+     */
+    public static int getScreenWidth(Context context) {
+        WindowManager manager = (WindowManager) context
+                .getSystemService(Context.WINDOW_SERVICE);
+
+        DisplayMetrics dm = new DisplayMetrics();
+
+        manager.getDefaultDisplay().getMetrics(dm);
+
+        return dm.widthPixels;
+    }
+
+    /**
+     * 获取屏幕的高度
+     *
+     * @param context
+     * @return
+     */
+    public static int getScreenHeight(Context context) {
+        WindowManager manager = (WindowManager) context
+                .getSystemService(Context.WINDOW_SERVICE);
+
+        DisplayMetrics dm = new DisplayMetrics();
+
+        manager.getDefaultDisplay().getMetrics(dm);
+
+        return dm.heightPixels;
+    }
 }

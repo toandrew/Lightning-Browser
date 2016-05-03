@@ -39,13 +39,13 @@ android {
     productFlavors {
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
-            applicationId "com.crosskr.flint.webview.browser.full"
+            applicationId "com.crosskr.flint.webview.browser"
             versionCode 25
         }
 
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
-            applicationId "com.crosskr.flint.webview.browser"
+            applicationId "com.crosskr.flint.webview.browser.lite"
             versionCode 25
         }
     }
@@ -56,6 +56,12 @@ android {
 
     packagingOptions {
         exclude '.readme'
+    }
+
+    useLibrary 'org.apache.http.legacy'
+
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 }
 
@@ -107,4 +113,5 @@ dependencies {
     provided 'javax.annotation:jsr250-api:1.0'
 
     compile project(':Connect-SDK-Android')
+    compile project(':library')
 }
