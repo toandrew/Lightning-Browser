@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.connectsdk.core.Util;
 import com.connectsdk.device.ConnectableDevice;
 import com.connectsdk.device.ConnectableDeviceListener;
 import com.connectsdk.device.DevicePicker;
@@ -621,6 +622,7 @@ public class FlintVideoManager {
 
                     @Override
                     public void onError(ServiceCommandError error) {
+                        Log.e(Util.T, "playVideo error:" + error.getPayload().toString() + " message:" + error.getMessage());
                         if (mLaunchSession != null) {
                             mLaunchSession
                                     .close(new ResponseListener<Object>() {
@@ -641,6 +643,8 @@ public class FlintVideoManager {
                                         }
 
                                     });
+                        } else {
+                            doStop();
                         }
 
                         mStatusChangeListener.onConnectionFailed();
@@ -694,6 +698,8 @@ public class FlintVideoManager {
                 }
 
             });
+        } else {
+            doStop();
         }
     }
 
