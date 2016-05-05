@@ -448,7 +448,23 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                 // Get Video's url.
                 if (getCurrentView() != null && !isKeyBoardOpened) {
                     // Log.e(TAG, "try to extract real video url!");
-                    String GET_VIDEO_URL_SCRIPT = "(function () {var videos = document.getElementsByTagName('video'); if (videos != null && videos[0] != null) {alert('xxx:' + videos[0].src);}})();";
+                    String GET_VIDEO_URL_SCRIPT = "(" +
+                            "function () " +
+                            "{" +
+                            "  var videos = document.getElementsByTagName('video'); " +
+                            "  if (!videos|| !videos[0]) { " +
+                            "    return;" +
+                            "  }" +
+                            "  if (!!videos[0].src) {" +
+                            "    alert('xxx:' + videos[0].src);" +
+                            "  } else {" +
+                            "    var videoSrc = videos[0].getElementsByTagName('source');" +
+                            "    if (!!videoSrc && !!videoSrc[0]) {" +
+                            "      alert('xxx:' + videoSrc[0].src);" +
+                            "    }" +
+                            "  }" +
+                            "}" +
+                            ")();";
                     getCurrentView().getWebView().loadUrl(
                             "javascript:" + GET_VIDEO_URL_SCRIPT);
                 }
