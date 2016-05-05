@@ -244,6 +244,8 @@
     <string name="app_restart">Please restart the app for the change to take effect.</string>
     <string name="do_fling">Do you want to fling this file？</string>
     <string name="action_fling">Fling</string>
+    <string name="do_fling">Do you want to Cast this file？</string>
+    <string name="action_fling">Cast</string>
     <string name="castappname">NETCAST</string>
     <string name="imguri">www.infthink.com</string>
     <string name="title">NETCAST</string>
@@ -275,7 +277,7 @@
     <string name="cmd_end_session">"End Session"</string>
     <string name="cmd_send_message">"Send Message"</string>
     <string name="bufferingtext">Buffering...</string>
-    <string name="flint">Fling</string>
+    <string name="flint">Cast</string>
     <string name="agent_ipad">Ipad</string>
     <string name="agent_iphone">Iphone</string>
     <string name="agent_android_tablet">Android Tablet</string>
@@ -288,33 +290,36 @@
     <string name="resolution_Ultraclear">Ultraclear</string>
     <string name="resolution_Bluray">Bluray</string>
 
-    <string name="media_autoplay">Auto fling</string>
+    <string name="media_autoplay">Auto Cast</string>
     
     <string name="flint_hint_next">More...</string>
     <string name="flint_hint_close">OK!</string>
     
-    <string name="flint_hint_control_title">How to control fling videos?</string>
+    <string name="flint_hint_control_title">How to control cast videos?</string>
     <string name="flint_hint_control_details">\n
-        \"Auto Fling\": Directly fling videos when device is selected.\n\n
-        \"Fling\" button: Used to connect or disconnect tv devices.\n\n
+        \"Auto Cast\": Directly cast videos when device is selected.\n\n
+        \"Cast\" button: Used to connect or disconnect tv devices.\n\n
         \"video\" controls: Play, Stop, Seek.\n\n
-        \"volume\" control: Please use mobile\'s volume key to control fling video\'s volume.\n
+        \"volume\" control: Please use mobile\'s volume key to control cast video\'s volume.\n
     </string>
 
     <string name="flint_hint_video_quality_title">How to control the video quality?</string>
     <string name="flint_hint_video_quality_details">\n\"Video Quality\" button: Used to get current available video qualities if current site is supported by our server.\n\n\"Resolution\" label: Clicked to show current available video qualities.\n
         \n
         BTW, \n
-        You can also use different \"User Agent\" which is located in menu bar to fling web videos with different video qualities!
+        You can also use different \"User Agent\" which is located in menu bar to cast web videos with different video qualities!
 	</string>
 	
-    <string name="flint_hint_webview_title">How to fling videos on web?</string>
-    <string name="flint_hint_webview_details">\nIn order to fling web videos, firstly, please click the web video link.\nWait until a toast is shown which is the vidoe\'s play url, then you can fling this video to your tv.</string>
+    <string name="flint_hint_webview_title">How to cast videos on web?</string>
+    <string name="flint_hint_webview_details">\nIn order to cast web videos, firstly, please click the web video link.\nWait until a toast is shown which is the vidoe\'s play url, then you can cast this video to your tv.</string>
+
+    <string name="flint_hint_close_btn_title">How to hide the cast panel?</string>
+    <string name="flint_hint_close_btn_details">Please click this \"Close\" button to hide the cast panel. \n\n Please click \"Option Menu\" and select \"Show Cast Panel\" to show it again.</string>
 
     <string name="flint_hint_final_title">Thank You! </string>
-    <string name="flint_hint_final_details">\nFor more info, please visit our web site: \nhttp://www.openflint.org</string>
+    <string name="flint_hint_final_details">\nFor more info, please visit our web site: \nhttps://twitter.com/zember_infthink</string>
     
-    <string name="flint_empty_video_url">Sorry, no video to fling!</string>
+    <string name="flint_empty_video_url">Sorry, no video to cast!</string>
     
     <string name="action_install">Install</string>
     <string name="do_install">Do you want to install this application?</string>
@@ -324,5 +329,5 @@
     <string name="cancel_apk_installing">Cancel installing...</string>
     
     <string name="feedback">Feedback</string>
-    <string name="show_flint">Show Fling Panel</string>
+    <string name="show_flint">Show Cast Panel</string>
 </resources>

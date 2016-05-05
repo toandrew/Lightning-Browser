@@ -206,9 +206,12 @@
     <string name="flint_hint_webview_title">如何投射网络视频？</string>
     <string name="flint_hint_webview_details">\n请先点击网页上要投射的视频（以便获得视频投射地址），当出现地址提示信息后，点击“连接设备”按钮，投射该视频到电视端。
 	</string>
-	
+
+    <string name="flint_hint_close_btn_title">如何隐藏投射控制面板？</string>
+    <string name="flint_hint_close_btn_details">请点击这个\"关闭\"按钮。\n\n如果需要再次显示投射面板，可以选择\"菜单\"里的\"显示投射控制\"选项</string>
+
     <string name="flint_hint_final_title">谢谢！</string>
-    <string name="flint_hint_final_details">\n获取更多信息，请访问我们的网站： \nhttp://www.openflint.org</string>
+    <string name="flint_hint_final_details">\n获取更多信息，请访问我的网站： \nhttps://twitter.com/zember_infthink</string>
     
     <string name="flint_empty_video_url">哎呀~没有可投射的视频?!先找个视频网站转转?...</string>
     

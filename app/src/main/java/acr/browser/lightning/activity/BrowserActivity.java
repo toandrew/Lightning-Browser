@@ -1222,6 +1222,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         mCrossKrFlintManager.onDestroy();
 
+        mSuggestionsAdapter = null;
+
         super.onDestroy();
     }
 

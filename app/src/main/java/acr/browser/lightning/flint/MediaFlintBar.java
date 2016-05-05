@@ -31,6 +31,9 @@ public class MediaFlintBar extends RelativeLayout {
     }
 
     public void hide() {
+        if (!mInflated) {
+            inflateContent();
+        }
         setVisibility(GONE);
     }
 

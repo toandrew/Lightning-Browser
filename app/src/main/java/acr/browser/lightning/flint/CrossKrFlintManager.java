@@ -44,7 +44,9 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
     protected static final int PLAYER_STATE_BUFFERING = 3;
     protected static final int PLAYER_STATE_FINISHED = 4;
 
-    private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS.toMillis(3);
+    private static final int GET_VIDEO_URL_INTERVAL_MS = (int) TimeUnit.SECONDS.toMillis(3);
+
+    private static final int REFRESH_INTERVAL_MS = (int) TimeUnit.SECONDS.toMillis(1);
 
     private static final String VIDEO_URL_PREFIX = "xxx:";
 
@@ -128,7 +130,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                 initFlint();
             }
 
-        }, 500);
+        }, 0);
     }
 
     public void onResume() {
@@ -267,7 +269,9 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
     }
 
     public void showFlintPanel() {
-        mMediaFlintBar.show();
+        if (mMediaFlintBar != null) {
+            mMediaFlintBar.show();
+        }
     }
 
     private static class MyHandler extends Handler {
@@ -292,7 +296,9 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
      */
     private void initFlint() {
         mMediaFlintBar = (MediaFlintBar) mActivity.findViewById(R.id.media_fling);
-        mMediaFlintBar.show();
+
+        // hide it when startup
+        mMediaFlintBar.hide();
 
         mMediaRouteButton = (ImageButton) mMediaFlintBar
                 .findViewById(R.id.media_route_button);
@@ -391,6 +397,10 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                 if (DiscoveryManager.getInstance().getCompatibleDevices()
                         .size() > 0) {
 
+                    if (mMediaFlintBar.getVisibility() != View.VISIBLE) {
+                        mMediaFlintBar.show();
+                    }
+
                     if (getCurrentView() == null || mMediaFlintBar.getVisibility() != View.VISIBLE) {
                         return;
                     }
@@ -445,10 +455,10 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
 
                 mHandler.removeCallbacks(mVideoUrlRunnable);
 
-                mHandler.postDelayed(mVideoUrlRunnable, REFRESH_INTERVAL_MS);
+                mHandler.postDelayed(mVideoUrlRunnable, GET_VIDEO_URL_INTERVAL_MS);
             }
         };
-        mHandler.postDelayed(mVideoUrlRunnable, REFRESH_INTERVAL_MS);
+        mHandler.postDelayed(mVideoUrlRunnable, GET_VIDEO_URL_INTERVAL_MS);
 
         mAutoplayCheckbox = (CheckBox) mMediaFlintBar
                 .findViewById(R.id.media_auto_play);
@@ -660,6 +670,15 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                                     break;
 
                                 case 1:
+                                    mShowcaseView.setShowcase(new ViewTarget(
+                                            mClosePanelButton), true);
+                                    mShowcaseView
+                                            .setContentTitle(mContext.getString(R.string.flint_hint_close_btn_title));
+                                    mShowcaseView
+                                            .setContentText(mContext.getString(R.string.flint_hint_close_btn_details));
+                                    break;
+
+                                case 2:
                                     mShowcaseView.setTarget(Target.NONE);
                                     mShowcaseView
                                             .setContentTitle(mContext.getString(R.string.flint_hint_final_title));
@@ -667,11 +686,15 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                                             .setContentText(mContext.getString(R.string.flint_hint_final_details));
                                     mShowcaseView
                                             .setButtonText(mContext.getString(R.string.flint_hint_close));
-                                    setAlpha(0.4f, mMediaRouteButton, getCurrentView().getWebView());
+                                    setAlpha(0.4f, mMediaRouteButton, mClosePanelButton, getCurrentView().getWebView());
                                     break;
 
-                                case 2:
+                                case 3:
                                     mShowcaseView.hide();
+
+                                    // hide flint control bar.
+                                    mMediaFlintBar.hide();
+
                                     setAlpha(1.0f, mMediaRouteButton, getCurrentView().getWebView());
                                     break;
                             }
@@ -679,6 +702,11 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                         }
 
                     }).build();
+
+            if (mShowcaseView.isShowing()) {
+                showFlintPanel();
+            }
+
         }
         mShowcaseView.setButtonText(mContext.getString(R.string.flint_hint_next));
         mShowcaseView.setShouldCentreText(false);
