@@ -12,12 +12,14 @@ import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
 
 import acr.browser.lightning.R;
+import acr.browser.lightning.activity.BrowserActivity;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.preference.PreferenceManager;
 
 import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
+import com.connectsdk.discovery.DiscoveryManager;
 
 import javax.inject.Inject;
 
@@ -51,18 +53,25 @@ public class LightningDownloadListener implements DownloadListener {
                                         break;
 
                                     case DialogInterface.BUTTON_NEGATIVE:
+                                        if (DiscoveryManager.getInstance().getCompatibleDevices().size() > 0) {
+                                            ((BrowserActivity) mActivity).getFlintManager().notifyGetVideoUrl(url, true);
+                                        }
                                         break;
                                 }
                             }
                         };
 
+                        String action = mActivity.getResources().getString(R.string.action_cancel);
+                        if (DiscoveryManager.getInstance().getCompatibleDevices()
+                                .size() > 0) {
+                            action = mActivity.getResources().getString(R.string.action_fling);
+                        }
+
                         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity); // dialog
                         builder.setTitle(fileName)
                                 .setMessage(mActivity.getResources().getString(R.string.dialog_download))
-                                .setPositiveButton(mActivity.getResources().getString(R.string.action_download),
-                                        dialogClickListener)
-                                .setNegativeButton(mActivity.getResources().getString(R.string.action_cancel),
-                                        dialogClickListener).show();
+                                .setPositiveButton(mActivity.getResources().getString(R.string.action_download), dialogClickListener)
+                                .setNegativeButton(action, dialogClickListener).show();
                         Log.i(Constants.TAG, "Downloading" + fileName);
                     }
 

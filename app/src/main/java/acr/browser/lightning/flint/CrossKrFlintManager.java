@@ -875,15 +875,19 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         mHandler.removeCallbacks(mRefreshFlingRunnable);
     }
 
-    public void notifyGetVideoUrl(String url) {
-        if ((url != null && url.startsWith(VIDEO_URL_PREFIX))
+    public void notifyGetVideoUrl(String url, boolean castForDownload) {
+        if (((url != null && url.startsWith(VIDEO_URL_PREFIX))
                 && url.length() > 4
                 && (mFetchedVideoUrl == null || !mFetchedVideoUrl.equals(url
-                .substring(4)))) {
+                .substring(4)))) || castForDownload) {
             Log.e(TAG, "Get valid video Url[" + url + "]fetched["
                     + mFetchedVideoUrl + "]");
 
-            mFetchedVideoUrl = url.substring(4);
+            if (castForDownload) {
+                mFetchedVideoUrl = url;
+            } else {
+                mFetchedVideoUrl = url.substring(4);
+            }
 
             setCurrentVideoUrl(mFetchedVideoUrl);
             mHandler.postDelayed(mRefreshRunnable, 0);

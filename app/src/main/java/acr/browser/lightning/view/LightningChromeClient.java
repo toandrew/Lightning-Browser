@@ -214,7 +214,7 @@ class LightningChromeClient extends WebChromeClient {
         //Log.e(TAG, "onJsAlert:message:" + message);
         result.confirm();
 
-        ((BrowserActivity)mActivity).getFlintManager().notifyGetVideoUrl(message);
+        ((BrowserActivity)mActivity).getFlintManager().notifyGetVideoUrl(message, false);
 
         return true;
     }
