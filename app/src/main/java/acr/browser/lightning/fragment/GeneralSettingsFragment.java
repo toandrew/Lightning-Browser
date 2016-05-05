@@ -131,7 +131,17 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
                 useragent.setSummary(getResources().getString(R.string.agent_mobile));
                 break;
             case 4:
+                useragent.setSummary(getResources().getString(R.string.agent_ipad));
+                break;
+            case 5:
+                useragent.setSummary(getResources().getString(R.string.agent_iphone));
+                break;
+            case 6:
+                useragent.setSummary(getResources().getString(R.string.agent_android_tablet));
+                break;
+            case 7:
                 useragent.setSummary(getResources().getString(R.string.agent_custom));
+                break;
         }
 
         int flashNum = mPreferenceManager.getFlashSupport();
@@ -410,6 +420,15 @@ public class GeneralSettingsFragment extends LightningPreferenceFragment impleme
                                 useragent.setSummary(getResources().getString(R.string.agent_mobile));
                                 break;
                             case 4:
+                                useragent.setSummary(getResources().getString(R.string.agent_ipad));
+                                break;
+                            case 5:
+                                useragent.setSummary(getResources().getString(R.string.agent_iphone));
+                                break;
+                            case 6:
+                                useragent.setSummary(getResources().getString(R.string.agent_android_tablet));
+                                break;
+                            case 7:
                                 useragent.setSummary(getResources().getString(R.string.agent_custom));
                                 agentPicker();
                                 break;

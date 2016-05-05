@@ -64,4 +64,8 @@ public final class Constants {
     public static final String[] TEXT_ENCODINGS = {"ISO-8859-1", "UTF-8", "GBK", "Big5", "ISO-2022-JP", "SHIFT_JS", "EUC-JP", "EUC-KR"};
 
     public static final String INTENT_ORIGIN = "URL_INTENT_ORIGIN";
+
+    public static final String  IPAD_USER_AGENT = "Mozilla/5.0 (iPad; CPU OS 7_0_3 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11B511 Safari/9537.53";
+    public static final String  IPHONE_USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53";
+    public static final String  ANDROID_TABLET_USER_AGENT = "Mozilla/5.0 (Linux; U; Android 4.0.3; en-gb; HTC_Desire_C Build/IML74K) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
 }
