@@ -451,15 +451,75 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
                     String GET_VIDEO_URL_SCRIPT = "(" +
                             "function () " +
                             "{" +
+                            "function canAccessIFrame(iFrame) {\n" +
+                            "    var ihtml = null;\n" +
+                            "    try {\n" +
+                            "        var doc = iFrame.contentDocument || iFrame.contentWindow.document;\n" +
+                            "        ihtml = doc.body.innerHTML;\n" +
+                            "    } catch (err) {\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    return (ihtml !== null);\n" +
+                            "}" +
+                            "function isDocumentSomewhatReady(doc) {\n" +
+                            "    if (document.readyState === 'complete' || document.readyState === 'interactive') {\n" +
+                            "        return true;\n" +
+                            "    } else {\n" +
+                            "        return false;\n" +
+                            "    }\n" +
+                            "}" +
+                            "function getFirstVideo(d) {\n" +
+                            "  var videos = d.getElementsByTagName('video');\n" +
+                            "  if (!videos|| !videos[0]) {\n" +
+                            "    return null;\n" +
+                            "  }\n" +
+                            "  if (!!videos[0].src) {\n" +
+                            "    return videos[0].src;\n" +
+                            "  }\n" +
+                            "  var videoSrc = videos[0].getElementsByTagName('source');\n" +
+                            "  if (!!videoSrc && !!videoSrc[0]) {\n" +
+                            "    return videoSrc[0].src;\n" +
+                            "  }\n" +
+                            "  \n" +
+                            "  return null;\n" +
+                            "}" +
+                            "function findVideoInIFrames(d) {\n" +
+                            "    var iFrames = d.getElementsByTagName('iframe');\n" +
+                            "    for (var i = 0; i < iFrames.length; i++) {\n" +
+                            "        try {\n" +
+                            "            var iFrame = iFrames[i];\n" +
+                            "            if (canAccessIFrame(iFrame)) {\n" +
+                            "                var doc = iFrame.contentDocument;\n" +
+                            "                if (isDocumentSomewhatReady(doc)) {\n" +
+                            "                    return getFirstVideo(doc);\n" +
+                            "                } else {\n" +
+                            "                }\n" +
+                            "            } else {\n" +
+                            "                console.log(\"Unable to access iframe \" + iFrame.src );\n" +
+                            "            }\n" +
+                            "        } catch (e) {\n" +
+                            "            console.log(e);\n" +
+                            "        }\n" +
+                            "    }\n" +
+                            "    return null;\n" +
+                            "}" +
                             "  var videos = document.getElementsByTagName('video'); " +
+                            "  /*console.log('videos：' + videos.length);*/" +
                             "  if (!videos|| !videos[0]) { " +
+                            "    var v = findVideoInIFrames(document);" +
+                            "    if (!!v) {" +
+                            "      alert('xxx:' + v); " +
+                            "    }" +
                             "    return;" +
                             "  }" +
+                            " /*console.log('haha：' + videos[0].src + ' currentSrc:' + videos[0].currentSrc);*/" +
                             "  if (!!videos[0].src) {" +
+                            "    /*console.log('videos[0].src:' + videos[0].src);*/" +
                             "    alert('xxx:' + videos[0].src);" +
                             "  } else {" +
                             "    var videoSrc = videos[0].getElementsByTagName('source');" +
                             "    if (!!videoSrc && !!videoSrc[0]) {" +
+                            "      /*console.log('videoSrc[0].src:' + videoSrc[0].src);*/" +
                             "      alert('xxx:' + videoSrc[0].src);" +
                             "    }" +
                             "  }" +
