@@ -231,6 +231,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     // flint control
     CrossKrFlintManager mCrossKrFlintManager = new CrossKrFlintManager(this);
 
+    private AdManager mAdManager = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -271,6 +273,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         });
 
         mCrossKrFlintManager.onCreate(this);
+
+        mAdManager = new AdManager(this);
+        mAdManager.onCreate();
     }
 
     private synchronized void initialize(Bundle savedInstanceState) {
@@ -1179,6 +1184,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+
+        mAdManager.onPause();
+
         Log.d(TAG, "onPause");
         mTabsManager.pauseAll();
         try {
@@ -1224,6 +1232,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         mSuggestionsAdapter = null;
 
+        mAdManager.onDestroy();
+
         super.onDestroy();
     }
 
@@ -1244,6 +1254,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        mAdManager.onResume();
+
         Log.d(TAG, "onResume");
         if (mSuggestionsAdapter != null) {
             mSuggestionsAdapter.refreshPreferences();
