@@ -622,7 +622,9 @@ public class FlintVideoManager {
 
                     @Override
                     public void onError(ServiceCommandError error) {
-                        Log.e(Util.T, "playVideo error:" + error.getPayload().toString() + " message:" + error.getMessage());
+                        if (error != null && error.getPayload() != null && error.getMessage() != null) {
+                            Log.e(Util.T, "playVideo error:" + error.getPayload().toString() + " message:" + error.getMessage());
+                        }
                         if (mLaunchSession != null) {
                             mLaunchSession
                                     .close(new ResponseListener<Object>() {
