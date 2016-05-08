@@ -698,6 +698,21 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             // Workaround for stupid LG devices that crash
             return true;
         }
+
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            if (mCrossKrFlintManager != null && mCrossKrFlintManager.canControlVolume()) {
+                mCrossKrFlintManager.onVolumeChange(0.1);
+
+                return true;
+            }
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            if (mCrossKrFlintManager != null && mCrossKrFlintManager.canControlVolume()) {
+                mCrossKrFlintManager.onVolumeChange(-0.1);
+
+                return true;
+            }
+        }
+
         return super.onKeyDown(keyCode, event);
     }
 

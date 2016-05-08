@@ -274,6 +274,62 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         }
     }
 
+    public void notifyGetVideoUrl(String url, boolean castForDownload) {
+        if (((url != null && url.startsWith(VIDEO_URL_PREFIX))
+                && url.length() > 4
+                && (mFetchedVideoUrl == null || !mFetchedVideoUrl.equals(url
+                .substring(4)))) || castForDownload) {
+            Log.e(TAG, "Get valid video Url[" + url + "]fetched["
+                    + mFetchedVideoUrl + "]");
+
+            if (castForDownload) {
+                mFetchedVideoUrl = url;
+            } else {
+                mFetchedVideoUrl = url.substring(4);
+            }
+
+            setCurrentVideoUrl(mFetchedVideoUrl);
+            mHandler.postDelayed(mRefreshRunnable, 0);
+        }
+    }
+
+
+    public boolean canControlVolume() {
+        if (mMediaFlintBar != null
+                && mMediaFlintBar.getVisibility() == View.VISIBLE
+                && mFlintVideoManager.isDeviceConnected()) {
+            return true;
+        }
+
+        return false;
+    }
+    /**
+     * Called when volume changed.
+     *
+     * @param volumeIncrement
+     */
+    public void onVolumeChange(double volumeIncrement) {
+        Log.e(TAG, "volumeIncrement:" + volumeIncrement);
+
+        try {
+            double v = mFlintVideoManager.getMediaVolume();
+
+            Log.e("DLNA", "volumeIncrement:" + volumeIncrement + " v[" + v
+                    + "]");
+            v += volumeIncrement;
+            if (v > 1.0) {
+                v = 1.0;
+            } else if (v < 0) {
+                v = 0.0;
+            }
+
+            mFlintVideoManager.setMediaVolume(v);
+
+        } catch (Exception e) {
+            // showErrorDialog(e.getMessage());
+        }
+    }
+
     private static class MyHandler extends Handler {
         private final WeakReference<BrowserActivity> mActivity;
 
@@ -950,24 +1006,4 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
     private final void cancelRefreshTimer() {
         mHandler.removeCallbacks(mRefreshFlingRunnable);
     }
-
-    public void notifyGetVideoUrl(String url, boolean castForDownload) {
-        if (((url != null && url.startsWith(VIDEO_URL_PREFIX))
-                && url.length() > 4
-                && (mFetchedVideoUrl == null || !mFetchedVideoUrl.equals(url
-                .substring(4)))) || castForDownload) {
-            Log.e(TAG, "Get valid video Url[" + url + "]fetched["
-                    + mFetchedVideoUrl + "]");
-
-            if (castForDownload) {
-                mFetchedVideoUrl = url;
-            } else {
-                mFetchedVideoUrl = url.substring(4);
-            }
-
-            setCurrentVideoUrl(mFetchedVideoUrl);
-            mHandler.postDelayed(mRefreshRunnable, 0);
-        }
-    }
-
 }
