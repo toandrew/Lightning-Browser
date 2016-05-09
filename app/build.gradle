@@ -9,7 +9,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionName "2.7"
+        versionName "2.8"
         generatedDensities = []
     }
 
@@ -40,13 +40,13 @@ android {
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId "com.crosskr.flint.webview.browser"
-            versionCode 26
+            versionCode 27
         }
 
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId "com.crosskr.flint.webview.browser.lite"
-            versionCode 26
+            versionCode 27
 
             dependencies {
                 compile 'com.google.android.gms:play-services-ads:7.8.0'
