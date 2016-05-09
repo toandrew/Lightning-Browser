@@ -129,6 +129,11 @@ import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import com.umeng.analytics.AnalyticsConfig;
+import com.umeng.analytics.MobclickAgent;
+
+import acr.browser.lightning.constant.MyConstants;
+
 public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserView, UIController, OnClickListener, OnLongClickListener {
 
     private static final String TAG = BrowserActivity.class.getSimpleName();
@@ -273,6 +278,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         });
 
         mCrossKrFlintManager.onCreate(this);
+
+        AnalyticsConfig.setAppkey(this, MyConstants.UMENG_APP_KEY);
+        AnalyticsConfig.setChannel(MyConstants.UMENG_CHANNEL);
 
         mAdManager = new AdManager(this);
         mAdManager.onCreate();
@@ -1216,6 +1224,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mEventBus.unregister(mBusEventListener);
 
         mCrossKrFlintManager.onPause();
+
+        // UMENG
+        MobclickAgent.onPause(this);
     }
 
     void saveOpenTabs() {
@@ -1290,6 +1301,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mEventBus.register(mBusEventListener);
 
         mCrossKrFlintManager.onResume();
+
+        // UMENG
+        MobclickAgent.onResume(this);
     }
 
     /**

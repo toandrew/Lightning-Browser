@@ -232,7 +232,7 @@ public class PreferenceManager {
     }
 
     public int getUserAgentChoice() {
-        return mPrefs.getInt(Name.USER_AGENT, 1);
+        return mPrefs.getInt(Name.USER_AGENT, 5); // change default UA to "iphone"
     }
 
     @Nullable
