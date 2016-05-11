@@ -453,6 +453,9 @@ public class PreferenceManager {
      * @param choice the proxy to use.
      */
     public void setProxyChoice(int choice) {
+        if (choice == Constants.NO_PROXY && getCheckedForCrossKrVPN()) {
+            setCheckedForCrossKrVPN(false);
+        }
         putBoolean(Name.USE_PROXY, choice != Constants.NO_PROXY);
         putInt(Name.PROXY_CHOICE, choice);
     }

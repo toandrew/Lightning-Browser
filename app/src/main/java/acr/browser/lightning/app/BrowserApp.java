@@ -9,7 +9,7 @@ import android.util.Log;
 import android.webkit.WebView;
 
 import com.crashlytics.android.Crashlytics;
-import com.squareup.leakcanary.LeakCanary;
+//import com.squareup.leakcanary.LeakCanary;
 import com.squareup.otto.Bus;
 
 import io.fabric.sdk.android.Fabric;
@@ -41,7 +41,7 @@ public class BrowserApp extends Application {
         mAppComponent.inject(this);
 
         if (mPreferenceManager.getUseLeakCanary() && !isRelease()) {
-            LeakCanary.install(this);
+            //LeakCanary.install(this);
         }
         if (!isRelease() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
