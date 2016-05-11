@@ -74,12 +74,12 @@ android {
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId 'com.infthink.browser.full'
-            versionCode 7
+            versionCode 8
         }
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId 'com.infthink.browser.lite'
-            versionCode 7
+            versionCode 8
 
             dependencies {
                 compile 'com.google.android.gms:play-services-ads:7.5.0'
@@ -148,8 +148,8 @@ dependencies {
     //compile project(':libnetcipher')
     compile 'info.guardianproject.netcipher:netcipher:1.2'
     // memory leak analysis
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    //debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
+    //releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
     provided 'javax.annotation:jsr250-api:1.0'
 
     compile(name:'liblantern', ext:'aar')
