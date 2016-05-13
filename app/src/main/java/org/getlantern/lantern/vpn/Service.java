@@ -65,7 +65,8 @@ public class Service extends VpnBuilder implements Runnable {
             int startTimeoutMillis = 60000;
             String analyticsTrackingID = MyConstants.GOOGLE_ANALYTICS_TRACKING_ID;
             //String analyticsTrackingID = null; // does not use gms to track info.
-            org.lantern.mobilesdk.StartResult result = org.lantern.mobilesdk.Lantern.enable(getApplicationContext(), startTimeoutMillis, analyticsTrackingID);
+            boolean updateProxySettings = false;
+            org.lantern.mobilesdk.StartResult result = org.lantern.mobilesdk.Lantern.enable(getApplicationContext(), startTimeoutMillis, updateProxySettings, analyticsTrackingID);
             configure(result.getSOCKS5Addr());
 
             updateVpnStatus(Constants.VPN_SERVICE_STATUS_STARTED);
@@ -89,6 +90,7 @@ public class Service extends VpnBuilder implements Runnable {
         try {
             super.close();
             Log.d(TAG, "Closing VPN interface..");
+             Lantern.RemoveOverrides();
             Utils.clearPreferences(this);
         } catch (Exception e) {
         }
