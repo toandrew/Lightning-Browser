@@ -242,8 +242,6 @@
     <string name="debug_title">Debug Settings</string>
     <string name="debug_leak_canary">LeakCanary</string>
     <string name="app_restart">Please restart the app for the change to take effect.</string>
-    <string name="do_fling">Do you want to fling this file？</string>
-    <string name="action_fling">Fling</string>
     <string name="do_fling">Do you want to Cast this file？</string>
     <string name="action_fling">Cast</string>
     <string name="castappname">NETCAST</string>
