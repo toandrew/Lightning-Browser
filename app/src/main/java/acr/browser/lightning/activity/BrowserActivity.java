@@ -137,10 +137,8 @@ import acr.browser.lightning.view.LightningView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-import com.umeng.analytics.AnalyticsConfig;
 import com.umeng.analytics.MobclickAgent;
 
-import acr.browser.lightning.constant.MyConstants;
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.constant.BookmarkPage;
@@ -309,9 +307,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         mReceiver = new LanternReceiver();
         registerReceiver(mReceiver, filter);
-
-        AnalyticsConfig.setAppkey(this, MyConstants.UMENG_APP_KEY);
-        AnalyticsConfig.setChannel(MyConstants.UMENG_CHANNEL);
 
         mAdManager = new AdManager(this);
         mAdManager.onCreate();
@@ -753,6 +748,19 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+        MenuItem vpnMenuItem = menu.findItem(R.id.action_vpn_control);
+
+        if (Service.isRunning(getApplicationContext())) {
+            vpnMenuItem.setTitle(R.string.action_disable_vpn);
+        } else {
+            vpnMenuItem.setTitle(R.string.action_enable_vpn);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         final LightningView currentView = mTabsManager.getCurrentTab();
         final String currentUrl = currentView != null ? currentView.getUrl() : null;
@@ -826,6 +834,15 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     Intent read = new Intent(this, ReadingActivity.class);
                     read.putExtra(Constants.LOAD_READING_URL, currentUrl);
                     startActivity(read);
+                }
+                return true;
+            case R.id.action_vpn_control:
+                if (Service.isRunning(getApplicationContext())) {
+                    mPreferences.setProxyChoice(Constants.NO_PROXY);
+                    mHandler.sendEmptyMessage(Constants.VPN_SERVICE_DISABLE_VPN);
+                } else {
+                    mPreferences.setProxyChoice(Constants.PROXY_CROSSKR_VPN);
+                    mHandler.sendEmptyMessage(Constants.VPN_SERVICE_ENABLE_VPN);
                 }
                 return true;
             default:
@@ -1299,7 +1316,9 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     protected void onResume() {
         super.onResume();
 
-        enableVPN();
+        if (mPreferences.getUseProxy() && (mPreferences.getProxyChoice() == Constants.PROXY_CROSSKR_VPN)) {
+            mHandler.sendEmptyMessageDelayed(Constants.VPN_SERVICE_ENABLE_VPN, 100);
+        }
 
         mAdManager.onResume();
 
