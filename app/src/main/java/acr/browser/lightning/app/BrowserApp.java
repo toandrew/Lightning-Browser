@@ -11,7 +11,9 @@ import android.webkit.WebView;
 import com.crashlytics.android.Crashlytics;
 //import com.squareup.leakcanary.LeakCanary;
 import com.squareup.otto.Bus;
+import com.umeng.analytics.MobclickAgent;
 
+import acr.browser.lightning.constant.MyConstants;
 import io.fabric.sdk.android.Fabric;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -54,6 +56,8 @@ public class BrowserApp extends Application {
                 MemoryLeakUtils.clearNextServedView(BrowserApp.this);
             }
         });
+
+        MobclickAgent.startWithConfigure(new MobclickAgent.UMAnalyticsConfig(this.getApplicationContext(), MyConstants.UMENG_APP_KEY, MyConstants.UMENG_CHANNEL));
     }
 
     @NonNull

@@ -281,4 +281,7 @@
     <string name="vpn_status_started">VPN service is started!</string>
     <string name="vpn_status_stopped">VPN service is stopped!!</string>
     <string name="vpn_status_not_prepared">VPN service error!!!</string>
+
+    <string name="action_disable_vpn">Disable CrossKr VPN</string>
+    <string name="action_enable_vpn">Enable CrossKr VPN</string>
 </resources>

@@ -300,4 +300,6 @@
     <string name="vpn_status_started">VPN服务已打开!</string>
     <string name="vpn_status_stopped">VPN服务已关闭!!</string>
     <string name="vpn_status_not_prepared">VPN服务出错!!!</string>
+    <string name="action_disable_vpn">关闭恒客VPN</string>
+    <string name="action_enable_vpn">打开恒客VPN</string>
 </resources>
