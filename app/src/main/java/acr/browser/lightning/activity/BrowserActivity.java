@@ -769,10 +769,12 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     public boolean onPrepareOptionsMenu(final Menu menu) {
         MenuItem vpnMenuItem = menu.findItem(R.id.action_vpn_control);
 
-        if (Service.isRunning(getApplicationContext())) {
-            vpnMenuItem.setTitle(R.string.action_disable_vpn);
-        } else {
-            vpnMenuItem.setTitle(R.string.action_enable_vpn);
+        if (vpnMenuItem != null) {
+            if (Service.isRunning(getApplicationContext())) {
+                vpnMenuItem.setTitle(R.string.action_disable_vpn);
+            } else {
+                vpnMenuItem.setTitle(R.string.action_enable_vpn);
+            }
         }
 
         return super.onPrepareOptionsMenu(menu);
