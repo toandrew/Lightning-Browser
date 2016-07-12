@@ -16,7 +16,7 @@ import acr.browser.lightning.activity.TabsManager;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.preference.PreferenceManager;
-import acr.browser.lightning.react.OnSubscribe;
+import com.anthonycr.bonsai.OnSubscribe;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.view.LightningView;
 
