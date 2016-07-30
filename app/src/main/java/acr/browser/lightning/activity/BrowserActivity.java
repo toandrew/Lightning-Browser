@@ -1502,7 +1502,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         if (mArrowImage != null && mShowTabsInDrawer) {
             mArrowImage.setImageBitmap(DrawableUtils.getRoundedNumberImage(number, Utils.dpToPx(24),
-                Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme), Utils.dpToPx(2.5f)));
+                Utils.dpToPx(24), ThemeUtils.getIconThemeColor(this, mDarkTheme, Service.IsRunning && Service.isRunning(getApplicationContext())), Utils.dpToPx(2.5f)));
         }
     }
 
