@@ -151,7 +151,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private static final String TAG_TABS_FRAGMENT = "TAG_TABS_FRAGMENT";
 
     // Static Layout
-    @Bind(Window.ID_ANDROID_CONTENT) View mRoot;
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.content_frame) FrameLayout mBrowserFrame;
     @Bind(R.id.left_drawer) ViewGroup mDrawerLeft;
@@ -1406,7 +1405,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                 } else {
                     finalColor = color;
                 }
-
 
                 final Window window = getWindow();
                 if (!mShowTabsInDrawer) {
