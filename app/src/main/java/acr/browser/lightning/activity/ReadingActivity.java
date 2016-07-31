@@ -259,7 +259,9 @@ public class ReadingActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        mPageLoaderSubscription.unsubscribe();
+        if (mPageLoaderSubscription != null) {
+            mPageLoaderSubscription.unsubscribe();
+        }
 
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
