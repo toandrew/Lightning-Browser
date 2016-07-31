@@ -28,7 +28,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionName "1.1.6"
+        versionName "1.1.7"
         generatedDensities = []
     }
 
@@ -74,12 +74,12 @@ android {
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId 'com.infthink.browser.full'
-            versionCode 15
+            versionCode 16
         }
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId 'com.infthink.browser.lite'
-            versionCode 15
+            versionCode 16
 
             dependencies {
                 compile 'com.google.android.gms:play-services-ads:7.5.0'

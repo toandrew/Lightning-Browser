@@ -216,6 +216,8 @@ public class LightningDialogBuilder {
                         mEventBus.post(new BrowserEvents.OpenUrlInNewTab(url));
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
+                        /*
+                        // this will cause crash issue.
                         BrowserApp.getIOThread().execute(new Runnable() {
                             @Override
                             public void run() {
@@ -224,6 +226,10 @@ public class LightningDialogBuilder {
                                 mEventBus.post(new BrowserEvents.OpenHistoryInCurrentTab());
                             }
                         });
+                        */
+                        mHistoryDatabase.deleteHistoryItem(url);
+                        // openHistory();
+                        mEventBus.post(new BrowserEvents.OpenHistoryInCurrentTab());
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         mEventBus.post(new BrowserEvents.OpenUrlInCurrentTab(url));
