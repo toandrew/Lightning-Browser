@@ -30,26 +30,42 @@ public class AdManager {
     }
 
     public void onCreate() {
-        if (mAdView != null) {
-            mAdView.loadAd(new AdRequest.Builder().build());
+        try {
+            if (mAdView != null) {
+                mAdView.loadAd(new AdRequest.Builder().build());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void onResume() {
-        if (mAdView != null) {
-            mAdView.resume();
+        try {
+            if (mAdView != null) {
+                mAdView.resume();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void onPause() {
-        if (mAdView != null) {
-            mAdView.pause();
+        try {
+            if (mAdView != null) {
+                mAdView.pause();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void onDestroy() {
-        if (mAdView != null) {
-            mAdView.destroy();
+        try {
+            if (mAdView != null) {
+                mAdView.destroy();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
