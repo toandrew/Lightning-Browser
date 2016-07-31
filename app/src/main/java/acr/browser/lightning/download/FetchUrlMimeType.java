@@ -107,16 +107,20 @@ class FetchUrlMimeType extends Thread {
         }
 
         // Start the download
-        DownloadManager manager = (DownloadManager) mContext
-                .getSystemService(Context.DOWNLOAD_SERVICE);
-        manager.enqueue(mRequest);
-        Handler handler = new Handler(Looper.getMainLooper());
-        final String file = filename;
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                eventBus.post(new BrowserEvents.ShowSnackBarMessage(mContext.getString(R.string.download_pending) + ' ' + file));
-            }
-        });
+        try {
+            DownloadManager manager = (DownloadManager) mContext
+                    .getSystemService(Context.DOWNLOAD_SERVICE);
+            manager.enqueue(mRequest);
+            Handler handler = new Handler(Looper.getMainLooper());
+            final String file = filename;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    eventBus.post(new BrowserEvents.ShowSnackBarMessage(mContext.getString(R.string.download_pending) + ' ' + file));
+                }
+            });
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
