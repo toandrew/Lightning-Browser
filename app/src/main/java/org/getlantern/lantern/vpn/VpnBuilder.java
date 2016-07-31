@@ -104,7 +104,11 @@ public class VpnBuilder extends VpnService {
         builder.setSession(mSessionName);
 
         // Create a new interface using the builder and save the parameters.
-        mInterface = builder.establish();
+        try {
+            mInterface = builder.establish();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         Log.i(TAG, "New interface: " + mInterface);
     }
 
