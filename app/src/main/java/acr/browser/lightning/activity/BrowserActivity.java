@@ -259,6 +259,20 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mPresenter = new BrowserPresenter(this, isIncognito());
 
         initialize(savedInstanceState);
+
+        mPrefs = org.getlantern.lantern.model.Utils.getSharedPrefs(this);
+
+        // the ACTION_SHUTDOWN intent is broadcast when the phone is
+        // about to be shutdown. We register a receiver to make sure we
+        // clear the preferences and switch the VpnService to the off
+        // state when this happens
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SHUTDOWN);
+        filter.addAction(Intent.ACTION_SHUTDOWN);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        filter.addAction(Constants.INTENT_UPDATE_VPN_SERVICE_STATUS);
+
         mReceiver = new LanternReceiver();
         registerReceiver(mReceiver, filter);
 
