@@ -1277,7 +1277,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             overridePendingTransition(R.anim.fade_in_scale, R.anim.slide_down_out);
         }
 
-        mEventBus.unregister(mBusEventListener);
+        try {
+            mEventBus.unregister(mBusEventListener);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // UMENG
         MobclickAgent.onPause(this);
@@ -1361,7 +1365,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         filter.addAction(NETWORK_BROADCAST_ACTION);
         BrowserApp.get(this).registerReceiver(mNetworkReceiver, filter);
 
-        mEventBus.register(mBusEventListener);
+        try {
+            mEventBus.register(mBusEventListener);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // UMENG
         MobclickAgent.onResume(this);
