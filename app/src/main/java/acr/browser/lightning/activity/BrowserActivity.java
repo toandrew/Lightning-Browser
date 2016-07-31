@@ -1527,6 +1527,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     Log.e(TAG, "NullPointerException in updateHistory", e);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "SQLiteException in updateHistory", e);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
