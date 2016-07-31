@@ -100,6 +100,8 @@ public class FileUtils {
             Log.e(Constants.TAG, "Unable to read bundle from storage");
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+          e.printStackTrace();
         } finally {
             //noinspection ResultOfMethodCallIgnored
             inputFile.delete();
