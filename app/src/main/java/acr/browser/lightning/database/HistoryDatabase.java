@@ -79,10 +79,14 @@ public class HistoryDatabase extends SQLiteOpenHelper {
     }
 
     public synchronized void deleteHistory() {
-        mDatabase = openIfNecessary();
-        mDatabase.delete(TABLE_HISTORY, null, null);
-        mDatabase.close();
-        mDatabase = this.getWritableDatabase();
+        try {
+            mDatabase = openIfNecessary();
+            mDatabase.delete(TABLE_HISTORY, null, null);
+            mDatabase.close();
+            mDatabase = this.getWritableDatabase();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
