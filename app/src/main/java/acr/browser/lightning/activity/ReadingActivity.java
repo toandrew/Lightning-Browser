@@ -206,7 +206,11 @@ public class ReadingActivity extends AppCompatActivity {
                     subscriber.onError(new Throwable("Out of memory"));
                     Log.e(TAG, "Out of memory", e);
                 }
-                subscriber.onComplete();
+                try {
+                    subscriber.onComplete();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
