@@ -28,7 +28,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionName "1.1.7"
+        versionName "1.1.8"
         generatedDensities = []
         vectorDrawables.useSupportLibrary = true
     }
@@ -75,12 +75,12 @@ android {
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId 'com.infthink.browser.full'
-            versionCode 16
+            versionCode 17
         }
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId 'com.infthink.browser.lite'
-            versionCode 16
+            versionCode 17
 
             dependencies {
                 compile 'com.google.android.gms:play-services-ads:7.5.0'
