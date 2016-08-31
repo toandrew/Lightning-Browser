@@ -1,6 +1,7 @@
 package acr.browser.lightning.utils;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -18,6 +19,8 @@ import javax.inject.Singleton;
 import acr.browser.lightning.R;
 import acr.browser.lightning.app.BrowserApp;
 import acr.browser.lightning.bus.BrowserEvents;
+import acr.browser.lightning.constant.Constants;
+import acr.browser.lightning.dialog.BrowserDialog;
 import acr.browser.lightning.preference.PreferenceManager;
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import info.guardianproject.netcipher.web.WebkitProxy;
@@ -78,7 +81,7 @@ public class ProxyUtils {
                                         mPreferences.setProxyChoice(which);
                                     }
                                 })
-                        .setNeutralButton(activity.getResources().getString(R.string.action_ok),
+                        .setPositiveButton(activity.getResources().getString(R.string.action_ok),
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -107,7 +110,8 @@ public class ProxyUtils {
                         .setPositiveButton(R.string.yes, dialogClickListener)
                         .setNegativeButton(R.string.no, dialogClickListener);
             }
-            builder.show();
+            Dialog dialog = builder.show();
+            BrowserDialog.setDialogSize(activity, dialog);
         }
     }
 

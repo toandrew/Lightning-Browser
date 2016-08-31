@@ -6,6 +6,7 @@ package acr.browser.lightning.activity;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -1051,12 +1052,14 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     @Override
     public void showBlockedLocalFileDialog(DialogInterface.OnClickListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true)
+        Dialog dialog = builder.setCancelable(true)
             .setTitle(R.string.title_warning)
             .setMessage(R.string.message_blocked_local)
             .setNegativeButton(android.R.string.cancel, null)
             .setPositiveButton(R.string.action_open, listener)
             .show();
+
+        BrowserDialog.setDialogSize(this, dialog);
     }
 
     @Override
