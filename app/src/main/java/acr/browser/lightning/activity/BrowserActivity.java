@@ -190,6 +190,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private boolean mIsFullScreen = false;
     private boolean mIsImmersive = false;
     private boolean mShowTabsInDrawer;
+    private boolean mSwapBookmarksAndTabs;
     private int mOriginalOrientation;
     private int mBackgroundColor;
     private int mIconColor;
@@ -292,6 +293,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mDisabledIconColor = mDarkTheme ? ContextCompat.getColor(this, R.color.icon_dark_theme_disabled) :
             ContextCompat.getColor(this, R.color.icon_light_theme_disabled);
         mShowTabsInDrawer = mPreferences.getShowTabsInDrawer(!isTablet());
+        mSwapBookmarksAndTabs = mPreferences.getBookmarksAndTabsSwapped();
 
         // initialize background ColorDrawable
         int primaryColor = ThemeUtils.getPrimaryColor(this);
@@ -334,7 +336,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         final TabsFragment tabsFragment = new TabsFragment();
         mTabsView = tabsFragment;
-        final int containerId = mShowTabsInDrawer ? R.id.left_drawer : R.id.tabs_toolbar_container;
         final Bundle tabsFragmentArguments = new Bundle();
         tabsFragmentArguments.putBoolean(TabsFragment.IS_INCOGNITO, isIncognito());
         tabsFragmentArguments.putBoolean(TabsFragment.VERTICAL_MODE, mShowTabsInDrawer);
@@ -348,8 +349,8 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         final FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager
             .beginTransaction()
-            .replace(containerId, tabsFragment, TAG_TABS_FRAGMENT)
-            .replace(R.id.right_drawer, bookmarksFragment, TAG_BOOKMARK_FRAGMENT)
+            .replace(getTabsFragmentViewId(), tabsFragment, TAG_TABS_FRAGMENT)
+            .replace(getBookmarksFragmentViewId(), bookmarksFragment, TAG_BOOKMARK_FRAGMENT)
             .commit();
         if (mShowTabsInDrawer) {
             mToolbarLayout.removeView(findViewById(R.id.tabs_toolbar_container));
@@ -378,7 +379,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
             updateTabNumber(0);
         } else {
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerLeft);
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mSwapBookmarksAndTabs ? mDrawerRight : mDrawerLeft);
             mArrowImage.setImageResource(R.drawable.ic_action_home);
             mArrowImage.setColorFilter(mIconColor, PorterDuff.Mode.SRC_IN);
         }
@@ -423,6 +424,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             WebIconDatabase.getInstance().open(getDir("icons", MODE_PRIVATE).getPath());
         }
 
+        @SuppressWarnings("VariableNotUsedInsideIf")
         Intent intent = savedInstanceState == null ? getIntent() : null;
 
         boolean launchedFromHistory = intent != null && (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0;
@@ -437,6 +439,19 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             mPresenter.setupTabs(intent);
             setIntent(null);
             mProxyUtils.checkForProxy(BrowserActivity.this);
+        }
+    }
+
+    @IdRes
+    private int getBookmarksFragmentViewId() {
+        return mSwapBookmarksAndTabs ? R.id.left_drawer : R.id.right_drawer;
+    }
+
+    private int getTabsFragmentViewId() {
+        if (mShowTabsInDrawer) {
+            return mSwapBookmarksAndTabs ? R.id.right_drawer : R.id.left_drawer;
+        } else {
+            return R.id.tabs_toolbar_container;
         }
     }
 
@@ -1343,6 +1358,10 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         mAdManager.onResume();
 
         Log.d(TAG, "onResume");
+        if (mSwapBookmarksAndTabs != mPreferences.getBookmarksAndTabsSwapped()) {
+            restart();
+        }
+
         if (mSuggestionsAdapter != null) {
             mSuggestionsAdapter.refreshPreferences();
             mSuggestionsAdapter.refreshBookmarks();
