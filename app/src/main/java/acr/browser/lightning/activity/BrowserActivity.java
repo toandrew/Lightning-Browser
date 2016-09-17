@@ -59,6 +59,7 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
@@ -129,6 +130,7 @@ import acr.browser.lightning.utils.ThemeUtils;
 import acr.browser.lightning.utils.UrlUtils;
 import acr.browser.lightning.utils.Utils;
 import acr.browser.lightning.utils.WebUtils;
+import acr.browser.lightning.view.Handlers;
 import acr.browser.lightning.view.LightningView;
 import acr.browser.lightning.view.SearchView;
 import butterknife.Bind;
@@ -196,6 +198,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
     private int mIconColor;
     private int mDisabledIconColor;
     private int mCurrentUiColor = Color.BLACK;
+    private long mKeyDownStartTime;
     private String mSearchText;
     private String mUntitledTitle;
     private String mCameraPhotoPath;
@@ -721,9 +724,20 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             && (Build.MANUFACTURER.compareTo("LGE") == 0)) {
             // Workaround for stupid LG devices that crash
             return true;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            mKeyDownStartTime = System.currentTimeMillis();
+            Handlers.MAIN.postDelayed(mLongPressBackRunnable, ViewConfiguration.getLongPressTimeout());
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    private final Runnable mLongPressBackRunnable = new Runnable() {
+        @Override
+        public void run() {
+            final LightningView currentTab = mTabsManager.getCurrentTab();
+            showCloseDialog(mTabsManager.positionOf(currentTab));
+        }
+    };
 
     @Override
     public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
@@ -733,6 +747,11 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             // Workaround for stupid LG devices that crash
             openOptionsMenu();
             return true;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Handlers.MAIN.removeCallbacks(mLongPressBackRunnable);
+            if ((System.currentTimeMillis() - mKeyDownStartTime) > ViewConfiguration.getLongPressTimeout()) {
+                return true;
+            }
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -1167,15 +1186,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
 
         // stop vpn???
         stopLantern();
-    }
-
-    @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        final LightningView currentTab = mTabsManager.getCurrentTab();
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            showCloseDialog(mTabsManager.positionOf(currentTab));
-        }
-        return true;
     }
 
     @Override
