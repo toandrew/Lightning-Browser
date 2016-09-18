@@ -256,8 +256,19 @@ public class PreferenceManager {
         return mPrefs.getBoolean(Name.USE_PROXY, true);
     }
 
+    @Constants.PROXY
     public int getProxyChoice() {
-        return mPrefs.getInt(Name.PROXY_CHOICE, Constants.PROXY_CROSSKR_VPN);
+        @Constants.PROXY int proxy = mPrefs.getInt(Name.PROXY_CHOICE, Constants.PROXY_CROSSKR_VPN);
+        switch (proxy) {
+            case Constants.NO_PROXY:
+            case Constants.PROXY_ORBOT:
+            case Constants.PROXY_I2P:
+            case Constants.PROXY_MANUAL:
+            case Constants.PROXY_CROSSKR_VPN:
+                return proxy;
+            default:
+                return Constants.NO_PROXY;
+        }
     }
 
     public int getUserAgentChoice() {
@@ -472,7 +483,7 @@ public class PreferenceManager {
      *
      * @param choice the proxy to use.
      */
-    public void setProxyChoice(int choice) {
+    public void setProxyChoice(@Constants.PROXY int choice) {
         if (choice == Constants.NO_PROXY && getCheckedForCrossKrVPN()) {
             setCheckedForCrossKrVPN(false);
         }
