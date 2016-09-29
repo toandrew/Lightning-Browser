@@ -122,6 +122,7 @@ import acr.browser.lightning.dialog.BrowserDialog;
 import acr.browser.lightning.dialog.LightningDialogBuilder;
 import acr.browser.lightning.fragment.BookmarksFragment;
 import acr.browser.lightning.fragment.TabsFragment;
+import acr.browser.lightning.interpolator.BezierDecelerateInterpolator;
 import acr.browser.lightning.receiver.NetworkReceiver;
 import acr.browser.lightning.search.Suggestions;
 import acr.browser.lightning.utils.DrawableUtils;
@@ -2065,7 +2066,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     }
                 };
                 show.setDuration(250);
-                show.setInterpolator(new DecelerateInterpolator());
+                show.setInterpolator(new BezierDecelerateInterpolator());
                 mBrowserFrame.startAnimation(show);
             }
         }
@@ -2104,7 +2105,7 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
                     }
                 };
                 show.setDuration(250);
-                show.setInterpolator(new DecelerateInterpolator());
+                show.setInterpolator(new BezierDecelerateInterpolator());
                 mBrowserFrame.startAnimation(show);
             }
         }
