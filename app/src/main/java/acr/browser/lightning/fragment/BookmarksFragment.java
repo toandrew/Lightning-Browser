@@ -138,7 +138,7 @@ public class BookmarksFragment extends Fragment implements View.OnClickListener,
                 mScrollIndex = mBookmarksListView.getFirstVisiblePosition();
                 setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(item.getTitle(), true), true);
             } else {
-                mEventBus.post(new BrowserEvents.OpenUrlInCurrentTab(item.getUrl()));
+                mUiController.bookmarkItemClicked(item);
             }
         }
     };
@@ -218,20 +218,6 @@ public class BookmarksFragment extends Fragment implements View.OnClickListener,
         mFolderBitmap = ThemeUtils.getThemedBitmap(activity, R.drawable.ic_folder, darkTheme);
         mIconColor = darkTheme ? ThemeUtils.getIconDarkThemeColor(activity) :
             ThemeUtils.getIconLightThemeColor(activity);
-    }
-
-    @Subscribe
-    public void addBookmark(@NonNull final BrowserEvents.BookmarkAdded event) {
-        updateBookmarkIndicator(event.url);
-        String folder = mBookmarkManager.getCurrentFolder();
-        setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(folder, true), false);
-    }
-
-    @Subscribe
-    public void currentPageInfo(@NonNull final BrowserEvents.CurrentPageUrl event) {
-        updateBookmarkIndicator(event.url);
-        String folder = mBookmarkManager.getCurrentFolder();
-        setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(folder, true), false);
     }
 
     @Subscribe
@@ -330,7 +316,7 @@ public class BookmarksFragment extends Fragment implements View.OnClickListener,
     public void onClick(@NonNull View v) {
         switch (v.getId()) {
             case R.id.action_add_bookmark:
-                mEventBus.post(new BookmarkEvents.ToggleBookmarkForCurrentPage());
+                mUiController.bookmarkButtonClicked();
                 break;
             case R.id.action_reading:
                 LightningView currentTab = mTabsManager.getCurrentTab();
@@ -366,6 +352,13 @@ public class BookmarksFragment extends Fragment implements View.OnClickListener,
             setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(null, true), true);
             mBookmarksListView.setSelection(mScrollIndex);
         }
+    }
+
+    @Override
+    public void handleUpdatedUrl(@NonNull String url) {
+        updateBookmarkIndicator(url);
+        String folder = mBookmarkManager.getCurrentFolder();
+        setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(folder, true), false);
     }
 
     private class BookmarkViewAdapter extends ArrayAdapter<HistoryItem> {
