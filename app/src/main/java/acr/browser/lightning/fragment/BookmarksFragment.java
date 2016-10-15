@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,7 @@ import acr.browser.lightning.async.AsyncExecutor;
 import acr.browser.lightning.async.ImageDownloadTask;
 import acr.browser.lightning.browser.BookmarksView;
 import acr.browser.lightning.bus.BookmarkEvents;
-import acr.browser.lightning.bus.BrowserEvents;
+import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.controller.UIController;
 import acr.browser.lightning.database.BookmarkManager;
 import acr.browser.lightning.database.HistoryItem;
@@ -218,12 +219,6 @@ public class BookmarksFragment extends Fragment implements View.OnClickListener,
         mFolderBitmap = ThemeUtils.getThemedBitmap(activity, R.drawable.ic_folder, darkTheme);
         mIconColor = darkTheme ? ThemeUtils.getIconDarkThemeColor(activity) :
             ThemeUtils.getIconLightThemeColor(activity);
-    }
-
-    @Subscribe
-    public void bookmarkChanged(BookmarkEvents.BookmarkChanged event) {
-        String folder = mBookmarkManager.getCurrentFolder();
-        setBookmarkDataSet(mBookmarkManager.getBookmarksFromFolder(folder, true), false);
     }
 
     private void updateBookmarkIndicator(final String url) {
