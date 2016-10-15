@@ -2383,14 +2383,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
             }
         }
 
-        @Subscribe
-        public void displayInSnackbar(final BrowserEvents.ShowSnackBarMessage event) {
-            if (event.message != null) {
-                Utils.showSnackbar(BrowserActivity.this, event.message);
-            } else {
-                Utils.showSnackbar(BrowserActivity.this, event.stringRes);
-            }
-        }
     };
 
     private final static int REQUEST_VPN = 7777;
