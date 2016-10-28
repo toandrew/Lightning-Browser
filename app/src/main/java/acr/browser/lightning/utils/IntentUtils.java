@@ -24,11 +24,11 @@ public class IntentUtils {
     private final Activity mActivity;
 
     private static final Pattern ACCEPTED_URI_SCHEMA = Pattern.compile("(?i)"
-            + // switch on case insensitive matching
-            '('
-            + // begin group for schema
-            "(?:http|https|file)://" + "|(?:inline|data|about|javascript):" + "|(?:.*:.*@)"
-            + ')' + "(.*)");
+        + // switch on case insensitive matching
+        '('
+        + // begin group for schema
+        "(?:http|https|file)://" + "|(?:inline|data|about|javascript):" + "|(?:.*:.*@)"
+        + ')' + "(.*)");
 
     public IntentUtils(Activity activity) {
         mActivity = activity;
@@ -53,7 +53,7 @@ public class IntentUtils {
             String packagename = intent.getPackage();
             if (packagename != null) {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pname:"
-                        + packagename));
+                    + packagename));
                 intent.addCategory(Intent.CATEGORY_BROWSABLE);
                 mActivity.startActivity(intent);
                 return true;
@@ -86,7 +86,7 @@ public class IntentUtils {
     private boolean isSpecializedHandlerAvailable(Intent intent) {
         PackageManager pm = mActivity.getPackageManager();
         List<ResolveInfo> handlers = pm.queryIntentActivities(intent,
-                PackageManager.GET_RESOLVED_FILTER);
+            PackageManager.GET_RESOLVED_FILTER);
         if (handlers == null || handlers.isEmpty()) {
             return false;
         }
@@ -101,7 +101,9 @@ public class IntentUtils {
             // to launch a new intent for every URL, using OR only
             // launches a new one if there is a non-browser app that
             // can handle it.
-            if (filter.countDataAuthorities() == 0 || filter.countDataPaths() == 0) {
+            // Previously we checked the number of data paths, but it is unnecessary
+            // filter.countDataAuthorities() == 0 || filter.countDataPaths() == 0
+            if (filter.countDataAuthorities() == 0) {
                 // Generic handler, skip
                 continue;
             }

@@ -83,7 +83,7 @@ public class TabsManager {
         mPostInitializationWorkList.clear();
     }
 
-    public void doAfterInitialization(@NonNull Runnable runnable) {
+    public synchronized void doAfterInitialization(@NonNull Runnable runnable) {
         if (mIsInitialized) {
             runnable.run();
         } else {
@@ -91,7 +91,7 @@ public class TabsManager {
         }
     }
 
-    private void finishInitialization() {
+    private synchronized void finishInitialization() {
         mIsInitialized = true;
         for (Runnable runnable : mPostInitializationWorkList) {
             runnable.run();
