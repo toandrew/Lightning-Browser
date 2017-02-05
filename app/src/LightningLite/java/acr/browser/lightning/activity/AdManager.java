@@ -5,6 +5,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.MobileAds;
 
 import android.widget.RelativeLayout;
 
@@ -17,6 +18,8 @@ public class AdManager {
 
     public AdManager(Activity activity) {
         mActivity = activity;
+
+        MobileAds.initialize(mActivity.getApplicationContext());
 
         ViewGroup contentView = (ViewGroup)activity.findViewById(R.id.ui_layout);
         mAdView = new AdView(activity);

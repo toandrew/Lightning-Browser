@@ -72,18 +72,20 @@ android {
     }
 
     productFlavors {
+        /*
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId 'com.infthink.browser.full'
             versionCode 17
-        }
+        }*/
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId 'com.infthink.browser.lite'
             versionCode 17
 
             dependencies {
-                compile 'com.google.android.gms:play-services-ads:7.5.0'
+                //compile 'com.google.android.gms:play-services-ads:10.0.1'
+                compile 'com.google.firebase:firebase-ads:10.0.1'
             }
         }
     }
@@ -176,3 +178,5 @@ dependencies {
 
     compile 'com.umeng.analytics:analytics:latest.integration'
 }
+
+apply plugin: 'com.google.gms.google-services'
