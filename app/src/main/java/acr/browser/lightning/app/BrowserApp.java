@@ -11,13 +11,12 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.WebView;
 
-import com.crashlytics.android.Crashlytics;
+//import com.crashlytics.android.Crashlytics;
 //import com.squareup.leakcanary.LeakCanary;
 import com.squareup.otto.Bus;
-import com.umeng.analytics.MobclickAgent;
+//import com.umeng.analytics.MobclickAgent;
 
 import acr.browser.lightning.constant.MyConstants;
-import io.fabric.sdk.android.Fabric;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -28,7 +27,7 @@ import acr.browser.lightning.preference.PreferenceManager;
 import acr.browser.lightning.utils.FileUtils;
 import acr.browser.lightning.utils.MemoryLeakUtils;
 
-public class BrowserApp extends Application {
+public class BrowserApp extends MyApp {
 
     private static final String TAG = BrowserApp.class.getSimpleName();
 
@@ -42,7 +41,6 @@ public class BrowserApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
 
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
@@ -91,7 +89,7 @@ public class BrowserApp extends Application {
             }
         });
 
-        MobclickAgent.startWithConfigure(new MobclickAgent.UMAnalyticsConfig(this.getApplicationContext(), MyConstants.UMENG_APP_KEY, MyConstants.UMENG_CHANNEL));
+        //MobclickAgent.startWithConfigure(new MobclickAgent.UMAnalyticsConfig(this.getApplicationContext(), MyConstants.UMENG_APP_KEY, MyConstants.UMENG_CHANNEL));
     }
 
     @NonNull

@@ -4,6 +4,7 @@
 /local.properties
 /.idea/workspace.xml
 /build
+/app/google-services.json
 
 # External tool builders
 .externalToolBuilders/

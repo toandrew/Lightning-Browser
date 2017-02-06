@@ -138,15 +138,13 @@ import acr.browser.lightning.view.SearchView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-import com.umeng.analytics.MobclickAgent;
-
 import acr.browser.lightning.constant.Constants;
 import acr.browser.lightning.constant.HistoryPage;
 import acr.browser.lightning.constant.BookmarkPage;
 
 import org.lantern.mobilesdk.Lantern;
 
-public abstract class BrowserActivity extends ThemableBrowserActivity implements BrowserView, UIController, OnClickListener, OnLongClickListener {
+public abstract class BrowserActivity extends MyBrowserActivity implements BrowserView, UIController, OnClickListener, OnLongClickListener {
 
     private static final String TAG = BrowserActivity.class.getSimpleName();
 
@@ -1341,9 +1339,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // UMENG
-        MobclickAgent.onPause(this);
     }
 
     void saveOpenTabs() {
@@ -1439,9 +1434,6 @@ public abstract class BrowserActivity extends ThemableBrowserActivity implements
         } else {
             putToolbarInRoot();
         }
-
-        // UMENG
-        MobclickAgent.onResume(this);
     }
 
     /**

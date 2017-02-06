@@ -7,13 +7,14 @@ buildscript {
         classpath 'io.fabric.tools:gradle:1.+'
     }
 }
+
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 
 android {
-    useLibrary 'org.apache.http.legacy'
+    //useLibrary 'org.apache.http.legacy'
 
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
@@ -28,7 +29,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 24
-        versionName "1.1.8"
+        versionName "1.1.9"
         generatedDensities = []
         vectorDrawables.useSupportLibrary = true
     }
@@ -72,21 +73,16 @@ android {
     }
 
     productFlavors {
-        /*
         lightningPlus {
             buildConfigField "boolean", "FULL_VERSION", "true"
             applicationId 'com.infthink.browser.full'
-            versionCode 17
-        }*/
+            versionCode 18
+        }
+
         lightningLite {
             buildConfigField "boolean", "FULL_VERSION", "false"
             applicationId 'com.infthink.browser.lite'
-            versionCode 17
-
-            dependencies {
-                //compile 'com.google.android.gms:play-services-ads:10.0.1'
-                compile 'com.google.firebase:firebase-ads:10.0.1'
-            }
+            versionCode 18
         }
     }
 
@@ -172,11 +168,37 @@ dependencies {
     compile ('com.mandrillapp.wrapper.lutung:lutung:0.0.7') {
         exclude group: 'org.apache.commons', module: 'commons-io'
     }
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+
+    lightningLiteCompile 'com.google.firebase:firebase-ads:10.0.1'
+    lightningLiteCompile 'com.google.android.gms:play-services-analytics:10.0.1'
+
+
+    lightningPlusCompile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true
     }
+    lightningPlusCompile 'com.umeng.analytics:analytics:latest.integration'
+}
 
-    compile 'com.umeng.analytics:analytics:latest.integration'
+task switchToLite(type: Copy) {
+    description = 'Switches to Lite google-services.json'
+    from "src/LightningLite"
+    include "google-services.json"
+    into "."
+}
+
+task switchToFull(type: Copy) {
+    description = 'Switches to Full google-services.json'
+    from "src/LightningPlus"
+    include "google-services.json"
+    into "."
+}
+
+afterEvaluate {
+    processLightningLiteDebugGoogleServices.dependsOn switchToLite
+    processLightningLiteReleaseGoogleServices.dependsOn switchToLite
+
+    processLightningPlusDebugGoogleServices.dependsOn switchToFull
+    processLightningPlusReleaseGoogleServices.dependsOn switchToFull
 }
 
 apply plugin: 'com.google.gms.google-services'
