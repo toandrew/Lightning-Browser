@@ -53,14 +53,14 @@ android {
         lightningPlus {
             dimension "capabilities"
             buildConfigField "boolean", "FULL_VERSION", "Boolean.parseBoolean(\"true\")"
-            applicationId "acr.browser.lightning"
+            applicationId "com.infthink.browser.full"
             versionCode project.versionCode_plus
         }
 
         lightningLite {
             dimension "capabilities"
             buildConfigField "boolean", "FULL_VERSION", "Boolean.parseBoolean(\"false\")"
-            applicationId "acr.browser.barebones"
+            applicationId "com.infthink.browser.lite"
             versionCode project.versionCode_lite
         }
     }
@@ -157,6 +157,9 @@ dependencies {
 
     // kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+
+    // firebase
+    implementation 'com.google.firebase:firebase-core:11.8.0'
 }
 
 kapt {
@@ -184,3 +187,5 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testLightningPlusDebugUni
             "outputs/code-coverage/connected/*coverage.ec"
     ])
 }
+
+apply plugin: 'com.google.gms.google-services'
