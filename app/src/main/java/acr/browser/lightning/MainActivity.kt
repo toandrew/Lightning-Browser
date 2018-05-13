@@ -1,6 +1,6 @@
 package acr.browser.lightning
 
-import acr.browser.lightning.browser.activity.BrowserActivity
+import acr.browser.lightning.base.MyBrowserActivity
 import android.content.Intent
 import android.os.Build
 import android.view.KeyEvent
@@ -9,7 +9,7 @@ import android.webkit.CookieManager
 import android.webkit.CookieSyncManager
 import io.reactivex.Completable
 
-class MainActivity : BrowserActivity() {
+class MainActivity : MyBrowserActivity() {
 
     @Suppress("DEPRECATION")
     public override fun updateCookiePreference(): Completable = Completable.fromAction {

@@ -1,5 +1,6 @@
 package acr.browser.lightning
 
+import acr.browser.lightning.app.MyApp
 import acr.browser.lightning.database.bookmark.BookmarkExporter
 import acr.browser.lightning.database.bookmark.BookmarkRepository
 import acr.browser.lightning.di.AppComponent
@@ -9,7 +10,6 @@ import acr.browser.lightning.preference.DeveloperPreferences
 import acr.browser.lightning.utils.FileUtils
 import acr.browser.lightning.utils.MemoryLeakUtils
 import android.app.Activity
-import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -25,7 +25,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import javax.inject.Inject
 import javax.inject.Named
 
-class BrowserApp : Application() {
+class BrowserApp : MyApp() {
 
     @Inject internal lateinit var developerPreferences: DeveloperPreferences
     @Inject internal lateinit var bookmarkModel: BookmarkRepository
