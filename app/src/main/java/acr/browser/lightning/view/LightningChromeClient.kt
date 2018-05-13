@@ -26,6 +26,12 @@ import com.anthonycr.grant.PermissionsManager
 import com.anthonycr.grant.PermissionsResultAction
 import io.reactivex.android.schedulers.AndroidSchedulers
 import javax.inject.Inject
+import acr.browser.lightning.browser.activity.BrowserActivity
+import android.util.Log
+import android.webkit.JsResult
+import android.webkit.WebView
+
+
 
 class LightningChromeClient(
         private val activity: Activity,
@@ -209,5 +215,17 @@ class LightningChromeClient(
     override fun onShowCustomView(view: View, requestedOrientation: Int,
                                   callback: WebChromeClient.CustomViewCallback) =
             uiController.onShowCustomView(view, callback, requestedOrientation)
+
+
+    override fun onJsAlert(view: WebView, url: String,
+                           message: String, result: JsResult): Boolean {
+        result.confirm()
+
+        if (activity is BrowserActivity) {
+            activity.getFlintManager().notifyGetVideoUrl(message, false)
+        }
+
+        return true
+    }
 
 }

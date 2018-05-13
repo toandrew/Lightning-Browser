@@ -1,8 +1,8 @@
 package acr.browser.lightning.app
 
-import android.app.Application
+import android.support.multidex.MultiDexApplication
 
-open class MyApp : Application() {
+open class MyApp : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
     }

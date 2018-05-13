@@ -21,6 +21,7 @@ import acr.browser.lightning.dialog.LightningDialogBuilder
 import acr.browser.lightning.extensions.doOnLayout
 import acr.browser.lightning.extensions.removeFromParent
 import acr.browser.lightning.extensions.resizeAndShow
+import acr.browser.lightning.flint.CrossKrFlintManager
 import acr.browser.lightning.html.download.DownloadsPage
 import acr.browser.lightning.html.history.HistoryPage
 import acr.browser.lightning.interpolator.BezierDecelerateInterpolator
@@ -98,6 +99,9 @@ import javax.inject.Inject
 import javax.inject.Named
 
 abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIController, OnClickListener {
+
+    // flint control
+    private val crossKrFlintManager: CrossKrFlintManager = CrossKrFlintManager(this)
 
     // Toolbar Views
     private var searchBackground: View? = null
@@ -218,6 +222,9 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
         presenter = BrowserPresenter(this, isIncognito())
 
         initialize(savedInstanceState)
+
+        // flint
+        crossKrFlintManager.onCreate(this)
     }
 
     private fun initialize(savedInstanceState: Bundle?) {
@@ -648,6 +655,23 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
             keyDownStartTime = System.currentTimeMillis()
             Handlers.MAIN.postDelayed(longPressBackRunnable, ViewConfiguration.getLongPressTimeout().toLong())
         }
+
+
+        // flint volume control
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            if (crossKrFlintManager != null && crossKrFlintManager.canControlVolume()) {
+                crossKrFlintManager.onVolumeChange(0.1);
+
+                return true;
+            }
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            if (crossKrFlintManager != null && crossKrFlintManager.canControlVolume()) {
+                crossKrFlintManager.onVolumeChange(-0.1);
+
+                return true;
+            }
+        }
+
         return super.onKeyDown(keyCode, event)
     }
 
@@ -1224,6 +1248,8 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
         if (isIncognito() && isFinishing) {
             overridePendingTransition(R.anim.fade_in_scale, R.anim.slide_down_out)
         }
+
+        crossKrFlintManager.onPause()
     }
 
     protected fun saveOpenTabs() {
@@ -1235,6 +1261,8 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
     override fun onStop() {
         super.onStop()
         proxyUtils.onStop()
+
+        crossKrFlintManager.onStop()
     }
 
     override fun onDestroy() {
@@ -1244,12 +1272,16 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
 
         presenter?.shutdown()
 
+        crossKrFlintManager.onDestroy()
+
         super.onDestroy()
     }
 
     override fun onStart() {
         super.onStart()
         proxyUtils.onStart(this)
+
+        crossKrFlintManager.onStart()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -1284,6 +1316,8 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
         } else {
             putToolbarInRoot()
         }
+
+        crossKrFlintManager.onResume()
     }
 
     /**
@@ -2042,4 +2076,12 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
 
     }
 
+
+    fun getCurrentView() : LightningView? {
+        return tabsManager.currentTab;
+    }
+
+    fun getFlintManager() : CrossKrFlintManager {
+        return crossKrFlintManager
+    }
 }

@@ -5,6 +5,7 @@
 package acr.browser.lightning.view
 
 import acr.browser.lightning.BrowserApp
+import acr.browser.lightning.browser.activity.BrowserActivity
 import acr.browser.lightning.constant.DESKTOP_USER_AGENT
 import acr.browser.lightning.constant.MOBILE_USER_AGENT
 import acr.browser.lightning.constant.SCHEME_BOOKMARKS
@@ -12,6 +13,7 @@ import acr.browser.lightning.constant.SCHEME_HOMEPAGE
 import acr.browser.lightning.controller.UIController
 import acr.browser.lightning.dialog.LightningDialogBuilder
 import acr.browser.lightning.download.LightningDownloadListener
+import acr.browser.lightning.flint.CrossKrFlintManager
 import acr.browser.lightning.html.bookmark.BookmarkPage
 import acr.browser.lightning.html.download.DownloadsPage
 import acr.browser.lightning.html.homepage.StartPage
@@ -251,6 +253,8 @@ class LightningView(
                 .subscribeOn(databaseScheduler)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::loadUrl)
+
+        showHint()
     }
 
     /**
@@ -1030,5 +1034,17 @@ class LightningView(
                 0f, 0f, 2.0f, 0f, -160f, // blue
                 0f, 0f, 0f, 1.0f, 0f // alpha
         )
+    }
+
+    private fun showHint() {
+        var flintManager : CrossKrFlintManager? = null
+
+        if (activity is BrowserActivity) {
+            flintManager = activity.getFlintManager()
+        }
+
+        if (flintManager != null) {
+            flintManager.showHint(this)
+        }
     }
 }

@@ -25,6 +25,8 @@ import io.reactivex.plugins.RxJavaPlugins
 import javax.inject.Inject
 import javax.inject.Named
 
+import com.connectsdk.discovery.DiscoveryManager
+
 class BrowserApp : MyApp() {
 
     @Inject internal lateinit var developerPreferences: DeveloperPreferences
@@ -89,6 +91,8 @@ class BrowserApp : MyApp() {
                 MemoryLeakUtils.clearNextServedView(activity, this@BrowserApp)
             }
         })
+
+        DiscoveryManager.init(getApplicationContext())
     }
 
     companion object {

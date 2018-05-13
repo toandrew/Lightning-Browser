@@ -284,4 +284,52 @@
     </plurals>
     <string name="notification_incognito_running_message">Touch to open</string>
     <string name="notification_incognito_running_description">Ongoing incognito notification</string>
+
+
+    <!-- flint related -->
+    <string name="resolution">Resolution</string>
+    <string name="resolution_Smooth">Smooth</string>
+    <string name="resolution_SD">SD</string>
+    <string name="resolution_HD">HD</string>
+    <string name="resolution_Ultraclear">Ultraclear</string>
+    <string name="resolution_Bluray">Bluray</string>
+    <string name="media_autoplay">Auto Cast</string>
+    <string name="flint_hint_next">More...</string>
+    <string name="flint_hint_close">OK!</string>
+
+    <string name="flint_hint_control_title">How to control cast videos?</string>
+    <string name="flint_hint_control_details">\n
+        \"Auto Cast\": Directly cast videos when device is selected.\n\n
+        \"Cast\" button: Used to connect or disconnect tv devices.\n\n
+        \"video\" controls: Play, Stop, Seek.\n\n
+        \"volume\" control: Please use mobile\'s volume key to control cast video\'s volume.\n
+    </string>
+
+    <string name="flint_hint_video_quality_title">How to control the video quality?</string>
+    <string name="flint_hint_video_quality_details">\n\"Video Quality\" button: Used to get current available video qualities if current site is supported by our server.\n\n\"Resolution\" label: Clicked to show current available video qualities.\n
+        \n
+        BTW, \n
+        You can also use different \"User Agent\" which is located in menu bar to cast web videos with different video qualities!
+	</string>
+
+    <string name="flint_hint_webview_title">How to cast videos on web?</string>
+    <string name="flint_hint_webview_details">\nIn order to cast web videos, firstly, please click the web video link.\nWait until a toast is shown which is the vidoe\'s play url, then you can cast this video to your tv.</string>
+
+    <string name="flint_hint_close_btn_title">How to hide the cast panel?</string>
+    <string name="flint_hint_close_btn_details">Please click this \"Close\" button to hide the cast panel. \n\n Please click \"Option Menu\" and select \"Show Cast Panel\" to show it again.</string>
+
+    <string name="flint_hint_final_title">Thank You! </string>
+    <string name="flint_hint_final_details">\nFor more info, please visit our web site: \nhttps://twitter.com/zember_infthink</string>
+
+    <string name="flint_empty_video_url">Sorry, no video to cast!</string>
+
+    <string name="action_install">Install</string>
+    <string name="do_install">Do you want to install this application?</string>
+    <string name="install_apk_desc">Please select the device to install the application!</string>
+    <string name="apk_installing">Installing...</string>
+
+    <string name="cancel_apk_installing">Cancel installing...</string>
+
+    <string name="feedback">Feedback</string>
+    <string name="show_flint">Show Cast Panel</string>
 </resources>

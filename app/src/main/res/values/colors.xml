@@ -45,4 +45,7 @@
     <color name="ssl_secured">#4CAF50</color>
     <color name="ssl_unsecured">#F44336</color>
 
+    <!-- flint related -->
+    <color name="mediacontroller_bg_pressed">#ff53c1bd</color>
+    <color name="mediacontroller_bg">#99000000</color>
 </resources>
