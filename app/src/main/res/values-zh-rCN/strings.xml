@@ -62,7 +62,7 @@
 
     <string name="title_search_engine">搜索引擎</string>
     <string name="action_ok">确认</string>
-    <string name="dialog_download">您想下载本文件吗？ (%1$s)</string>
+    <string name="dialog_download">您想下载/投射本文件吗？ (只能投射视频类文件)(%1$s)</string>
     <string name="unknown_size">未知大小</string>
     <string name="action_cancel">取消</string>
     <string name="title_warning">警告</string>
@@ -290,4 +290,58 @@
     </plurals>
     <string name="notification_incognito_running_message">轻点打开</string>
     <string name="notification_incognito_running_description">正在进行无痕通知</string>
+
+    <!--flint related -->
+    <string name="do_fling">您是否需要投射此文件？</string>
+    <string name="action_fling">投射</string>
+    <string name="flint">投射</string>
+    <string name="action_user_agent">User Agent</string>
+    <string name="custom_dialog_list_title_str">选择清晰度</string>
+    <string name="resolution">清晰度</string>
+    <string name="resolution_Smooth">流畅</string>
+    <string name="resolution_SD">标清</string>
+    <string name="resolution_HD">高清</string>
+    <string name="resolution_Ultraclear">超清</string>
+    <string name="resolution_Bluray">蓝光</string>
+    <string name="media_autoplay">自动投射</string>
+
+    <string name="flint_hint_next">更多...</string>
+    <string name="flint_hint_close">知道啦!</string>
+
+    <string name="flint_hint_control_title">如何控制视频投射？</string>
+    <string name="flint_hint_control_details">\n
+        \"自动投射\": 当处于连接设备状态时，直接投射当前播放的视频。\n\n
+        \"设备连接\"按钮: 可以连接或断开设备。\n\n
+        播放控制：播放、暂停、进度控制。\n\n
+        音量控制：使用手机音量侧键控制投射视频音量。\n
+    </string>
+
+    <string name="flint_hint_video_quality_title">如何投射不同清晰度的视频？</string>
+    <string name="flint_hint_video_quality_details">\n
+        \"清晰度\"按钮: 点击后获取视频各种清晰度的播放地址。\n\n
+        \"清晰度\"指示标签: 点击后可显示当前视频所有可用的清晰度\n\n
+        另外，\n你也可以通过选择不同\"User Agent\"(应用程序菜单内)来投射更清晰的视频（取决于该网站能提供的视频清晰度）。
+	</string>
+
+    <string name="flint_hint_webview_title">如何投射网络视频？</string>
+    <string name="flint_hint_webview_details">\n请先点击网页上要投射的视频（以便获得视频投射地址），当出现地址提示信息后，点击“连接设备”按钮，投射该视频到电视端。
+	</string>
+
+    <string name="flint_hint_close_btn_title">如何隐藏投射控制面板？</string>
+    <string name="flint_hint_close_btn_details">请点击这个\"关闭\"按钮。\n\n如果需要再次显示投射面板，可以选择\"菜单\"里的\"显示投射控制\"选项</string>
+
+    <string name="flint_hint_final_title">谢谢！</string>
+    <string name="flint_hint_final_details">\n获取更多信息，请访问我的网站： \nhttps://twitter.com/zember_infthink</string>
+
+    <string name="flint_empty_video_url">哎呀~没有可投射的视频?!先找个视频网站转转?...</string>
+
+    <string name="action_install">安装</string>
+    <string name="do_install">您是否需要安装此应用？</string>
+    <string name="install_apk_desc">请选择要安装该应用的设备</string>
+    <string name="apk_installing">安装中...</string>
+
+    <string name="cancel_apk_installing">取消安装...</string>
+
+    <string name="feedback">用户反馈</string>
+    <string name="show_flint">显示投射控制</string>
 </resources>

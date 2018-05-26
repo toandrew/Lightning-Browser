@@ -62,7 +62,7 @@
 
     <string name="title_search_engine">Search engine</string>
     <string name="action_ok">OK</string>
-    <string name="dialog_download">Do you want to download this file? (%1$s)</string>
+    <string name="dialog_download">Do you want to download/cast this file? (Please note, only Video files can be cast.)(%1$s)</string>
     <string name="unknown_size">Unknown size</string>
     <string name="action_cancel">Cancel</string>
     <string name="title_warning">Warning</string>
@@ -293,6 +293,11 @@
 
 
     <!-- flint related -->
+    <string name="action_fling">Cast</string>
+    <string name="flint">Cast</string>
+    <string name="action_user_agent">User Agent</string>
+    <string name="custom_dialog_list_title_str">Choose a Resolution</string>
+    <string name="do_fling">Do you want to Cast this file？</string>
     <string name="resolution">Resolution</string>
     <string name="resolution_Smooth">Smooth</string>
     <string name="resolution_SD">SD</string>

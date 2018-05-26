@@ -16,11 +16,13 @@ import android.webkit.URLUtil;
 
 import com.anthonycr.grant.PermissionsManager;
 import com.anthonycr.grant.PermissionsResultAction;
+import com.connectsdk.discovery.DiscoveryManager;
 
 import javax.inject.Inject;
 
 import acr.browser.lightning.BrowserApp;
 import acr.browser.lightning.R;
+import acr.browser.lightning.browser.activity.BrowserActivity;
 import acr.browser.lightning.database.downloads.DownloadsRepository;
 import acr.browser.lightning.dialog.BrowserDialog;
 import acr.browser.lightning.preference.UserPreferences;
@@ -64,6 +66,13 @@ public class LightningDownloadListener implements DownloadListener {
                                 case DialogInterface.BUTTON_POSITIVE:
                                     mDownloadHandler.onDownloadStart(mActivity, mUserPreferences, url, userAgent, contentDisposition, mimetype, downloadSize);
                                     break;
+
+                                case DialogInterface.BUTTON_NEUTRAL:
+                                    if (DiscoveryManager.getInstance().getCompatibleDevices().size() > 0) {
+                                        ((BrowserActivity) mActivity).getFlintManager().notifyGetVideoUrl(url, true);
+                                    }
+                                    break;
+
                                 case DialogInterface.BUTTON_NEGATIVE:
                                     break;
                             }
@@ -76,6 +85,7 @@ public class LightningDownloadListener implements DownloadListener {
                         .setMessage(message)
                         .setPositiveButton(mActivity.getResources().getString(R.string.action_download),
                             dialogClickListener)
+                        .setNeutralButton(mActivity.getResources().getString(R.string.action_fling), dialogClickListener)
                         .setNegativeButton(mActivity.getResources().getString(R.string.action_cancel),
                             dialogClickListener).show();
                     BrowserDialog.setDialogSize(mActivity, dialog);
