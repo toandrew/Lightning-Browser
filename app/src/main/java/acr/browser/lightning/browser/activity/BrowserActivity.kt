@@ -860,6 +860,10 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
                 }
                 return true
             }
+            R.id.action_show_flint -> {
+                crossKrFlintManager.showFlintPanel()
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
     }
