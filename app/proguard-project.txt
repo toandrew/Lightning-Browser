@@ -75,3 +75,6 @@
 -dontwarn okio.**
 -dontwarn javax.annotation.Nullable
 -dontwarn javax.annotation.ParametersAreNonnullByDefault
+
+-keep class com.connectsdk.**       { * ; }
+-keep public class acr.browser.lightning.flint.*
