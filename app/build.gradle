@@ -55,14 +55,14 @@ android {
         lightningPlus {
             dimension "capabilities"
             buildConfigField "boolean", "FULL_VERSION", "Boolean.parseBoolean(\"true\")"
-            applicationId "com.infthink.browser.full"
+            applicationId "com.crosskr.flint.webview.browser"
             versionCode project.versionCode_plus
         }
 
         lightningLite {
             dimension "capabilities"
             buildConfigField "boolean", "FULL_VERSION", "Boolean.parseBoolean(\"false\")"
-            applicationId "com.infthink.browser.lite"
+            applicationId "com.crosskr.flint.webview.browser.lite"
             versionCode project.versionCode_lite
         }
     }

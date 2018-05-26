@@ -1,39 +1,71 @@
 {
   "project_info": {
-    "project_number": "525647359629",
-    "firebase_url": "https://crosskr-vpn-browser-pro.firebaseio.com",
-    "project_id": "crosskr-vpn-browser-pro",
-    "storage_bucket": "crosskr-vpn-browser-pro.appspot.com"
+    "project_number": "765491545582",
+    "firebase_url": "https://crossker-web-cast-browser.firebaseio.com",
+    "project_id": "crossker-web-cast-browser",
+    "storage_bucket": "crossker-web-cast-browser.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:525647359629:android:4bfcd9028a4678a5",
+        "mobilesdk_app_id": "1:765491545582:android:e801f8a3dd28c514",
         "android_client_info": {
-          "package_name": "com.infthink.browser.full"
+          "package_name": "com.crosskr.flint.webview.browser"
         }
       },
       "oauth_client": [
         {
-          "client_id": "525647359629-9sihfcoegg084c4qa23ie8aeua353uv4.apps.googleusercontent.com",
+          "client_id": "765491545582-a2d3f2m7llk4376dkvs9vff174qg3521.apps.googleusercontent.com",
           "client_type": 3
         },
         {
-          "client_id": "525647359629-c9gp085mv34svfvul71qod6ki5rth5lf.apps.googleusercontent.com",
+          "client_id": "765491545582-a2d3f2m7llk4376dkvs9vff174qg3521.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAfMTDhjbmyCOXFFmCEKqT5qzMXeAWqwF0"
+          "current_key": "AIzaSyDY3fR9aLbH-j4KVzXD0IbKvEuhpU-ZIic"
         }
       ],
       "services": {
         "analytics_service": {
-          "status": 2,
-          "analytics_property": {
-            "tracking_id": "UA-76768762-3"
-          }
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765491545582:android:7b49b76be66976ef",
+        "android_client_info": {
+          "package_name": "com.crosskr.flint.webview.browser.lite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765491545582-a2d3f2m7llk4376dkvs9vff174qg3521.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "765491545582-a2d3f2m7llk4376dkvs9vff174qg3521.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY3fR9aLbH-j4KVzXD0IbKvEuhpU-ZIic"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
         },
         "appinvite_service": {
           "status": 1,
