@@ -35,7 +35,7 @@ class StartPage {
 
     companion object {
 
-        const val FILENAME = "homepage.html"
+        const val FILENAME = "index_en.html"
 
         @JvmStatic
         fun getStartPageFile(application: Application): File = File(application.filesDir, FILENAME)

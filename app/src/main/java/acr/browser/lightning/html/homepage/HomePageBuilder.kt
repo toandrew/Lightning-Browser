@@ -22,19 +22,19 @@ internal class HomePageBuilder(private val app: Application,
             outputSettings().charset(UTF8)
         }
 
-        val currentSearchEngine = searchEngineProvider.getCurrentSearchEngine()
-
-        val iconUrl = currentSearchEngine.iconUrl
-        val searchUrl = currentSearchEngine.queryUrl
-
-        val body = document.body()
-
-        body.getElementById("image_url").attr("src", iconUrl)
-
-        document.getElementsByTag("script").firstOrNull()?.let {
-            val newJavaScript = it.html().replace("\${BASE_URL}", searchUrl).replace("&", "\\u0026")
-            it.html(newJavaScript)
-        }
+//        val currentSearchEngine = searchEngineProvider.getCurrentSearchEngine()
+//
+//        val iconUrl = currentSearchEngine.iconUrl
+//        val searchUrl = currentSearchEngine.queryUrl
+//
+//        val body = document.body()
+//
+//        body.getElementById("image_url").attr("src", iconUrl)
+//
+//        document.getElementsByTag("script").firstOrNull()?.let {
+//            val newJavaScript = it.html().replace("\${BASE_URL}", searchUrl).replace("&", "\\u0026")
+//            it.html(newJavaScript)
+//        }
 
         return document.outerHtml()
     }
