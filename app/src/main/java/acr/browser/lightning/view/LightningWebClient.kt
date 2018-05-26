@@ -270,7 +270,7 @@ class LightningWebClient(
             return continueLoadingUrl(view, url, headers)
         }
 
-        return if (isMailOrIntent(url, view) || intentUtils.startActivityForUrl(view, url)) {
+        return if (isMailOrIntent(url, view)) { //|| intentUtils.startActivityForUrl(view, url)) {
             // If it was a mailto: link, or an intent, or could be launched elsewhere, do that
             true
         } else continueLoadingUrl(view, url, headers)
