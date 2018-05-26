@@ -7,6 +7,7 @@ package acr.browser.lightning.browser.activity
 import acr.browser.lightning.BrowserApp
 import acr.browser.lightning.IncognitoActivity
 import acr.browser.lightning.R
+import acr.browser.lightning.ad.AdManager
 import acr.browser.lightning.browser.*
 import acr.browser.lightning.browser.fragment.BookmarksFragment
 import acr.browser.lightning.browser.fragment.TabsFragment
@@ -202,6 +203,8 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
      */
     protected abstract fun updateCookiePreference(): Completable
 
+    private var adManager : AdManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         BrowserApp.appComponent.inject(this)
@@ -225,6 +228,9 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
 
         // flint
         crossKrFlintManager.onCreate(this)
+
+        adManager = AdManager(this)
+        adManager?.onCreate()
     }
 
     private fun initialize(savedInstanceState: Bundle?) {
@@ -1250,6 +1256,8 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
         }
 
         crossKrFlintManager.onPause()
+
+        adManager?.onPause()
     }
 
     protected fun saveOpenTabs() {
@@ -1273,6 +1281,8 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
         presenter?.shutdown()
 
         crossKrFlintManager.onDestroy()
+
+        adManager?.onDestroy()
 
         super.onDestroy()
     }
@@ -1318,6 +1328,8 @@ abstract class BrowserActivity : ThemableBrowserActivity(), BrowserView, UIContr
         }
 
         crossKrFlintManager.onResume()
+
+        adManager?.onResume()
     }
 
     /**
