@@ -54,6 +54,12 @@
     <string name="agent_desktop">桌面电脑</string>
     <string name="agent_mobile">移动设备</string>
     <string name="agent_custom">自定义</string>
+
+    <!-- add for flint-->
+    <string name="agent_ipad">iPad</string>
+    <string name="agent_iphone">iPhone</string>
+    <string name="agent_android_tablet">Android平板</string>
+
     <string name="title_search_engine">搜索引擎</string>
     <string name="action_ok">确认</string>
     <string name="dialog_download">您想下载本文件吗？ (%1$s)</string>

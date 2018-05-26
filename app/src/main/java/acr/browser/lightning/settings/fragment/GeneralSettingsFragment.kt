@@ -229,6 +229,9 @@ class GeneralSettingsFragment : AbstractSettingsFragment() {
         2 -> resources.getString(R.string.agent_desktop)
         3 -> resources.getString(R.string.agent_mobile)
         4 -> resources.getString(R.string.agent_custom)
+        5 -> resources.getString(R.string.agent_ipad)
+        6 -> resources.getString(R.string.agent_iphone)
+        7 -> resources.getString(R.string.agent_android_tablet)
         else -> resources.getString(R.string.agent_default)
     }
 
@@ -244,6 +247,7 @@ class GeneralSettingsFragment : AbstractSettingsFragment() {
                         summaryUpdater.updateSummary(resources.getString(R.string.agent_custom))
                         showCustomUserAgentPicker(summaryUpdater)
                     }
+                    in 4..6 -> Unit
                 }
             }
             setPositiveButton(resources.getString(R.string.action_ok), null)

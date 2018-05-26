@@ -6,10 +6,7 @@ package acr.browser.lightning.view
 
 import acr.browser.lightning.BrowserApp
 import acr.browser.lightning.browser.activity.BrowserActivity
-import acr.browser.lightning.constant.DESKTOP_USER_AGENT
-import acr.browser.lightning.constant.MOBILE_USER_AGENT
-import acr.browser.lightning.constant.SCHEME_BOOKMARKS
-import acr.browser.lightning.constant.SCHEME_HOMEPAGE
+import acr.browser.lightning.constant.*
 import acr.browser.lightning.controller.UIController
 import acr.browser.lightning.dialog.LightningDialogBuilder
 import acr.browser.lightning.download.LightningDownloadListener
@@ -518,6 +515,9 @@ class LightningView(
                 }
                 settings.userAgentString = ua
             }
+            5 -> settings.userAgentString = IPAD_USER_AGENT
+            6 -> settings.userAgentString = IPHONE_USER_AGENT
+            7 -> settings.userAgentString = ANDROID_TABLET_USER_AGENT
         }
     }
 
@@ -899,6 +899,7 @@ class LightningView(
             return
         }
 
+        Log.e(TAG, "loadUrl: url[" + url + "]agent[" + webView?.settings?.userAgentString + "]")
         webView?.loadUrl(url, requestHeaders)
     }
 

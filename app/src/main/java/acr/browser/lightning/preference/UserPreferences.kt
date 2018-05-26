@@ -62,9 +62,9 @@ class UserPreferences @Inject constructor(application: Application, screenSize: 
 
     var useWideViewportEnabled by BooleanPreference(USE_WIDE_VIEWPORT, true, preferences).delegate()
 
-    var userAgentChoice by IntPreference(USER_AGENT, 1, preferences).delegate()
+    var userAgentChoice by IntPreference(USER_AGENT, 6, preferences).delegate() // default for iphone
 
-    var userAgentString by StringPreference(USER_AGENT_STRING, "", preferences).delegate()
+    var userAgentString by StringPreference(USER_AGENT_STRING, "Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53", preferences).delegate() // default for iphone
 
     var clearHistoryExitEnabled by BooleanPreference(CLEAR_HISTORY_EXIT, false, preferences).delegate()
 

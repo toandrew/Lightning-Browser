@@ -54,6 +54,12 @@
     <string name="agent_desktop">Desktop</string>
     <string name="agent_mobile">Mobile</string>
     <string name="agent_custom">Custom</string>
+
+    <!-- add for flint-->
+    <string name="agent_ipad">iPad</string>
+    <string name="agent_iphone">iPhone</string>
+    <string name="agent_android_tablet">Android Tablet</string>
+
     <string name="title_search_engine">Search engine</string>
     <string name="action_ok">OK</string>
     <string name="dialog_download">Do you want to download this file? (%1$s)</string>
