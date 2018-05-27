@@ -220,7 +220,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
         Log.e(TAG, "onDeviceUnselected!");
 
         mMediaRouteButton
-                .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
+                .setImageResource(R.drawable.mediacontroller_route_off_button);
 
         cancelRefreshTimer();
 
@@ -240,7 +240,7 @@ public class CrossKrFlintManager implements FlintStatusChangeListener {
             @Override
             public void run() {
                 mMediaRouteButton
-                        .setImageResource(R.drawable.mr_ic_media_route_off_holo_dark);
+                        .setImageResource(R.drawable.mediacontroller_route_off_button);
 
                 updateButtonStates();
                 clearMediaState();

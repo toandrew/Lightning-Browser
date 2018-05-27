@@ -92,7 +92,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="5dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/mr_ic_media_route_off_holo_dark" />
+            android:src="@drawable/mediacontroller_route_off_button" />
 
         <ImageButton
             android:id="@+id/mediacontroller_play_pause"
