@@ -26,6 +26,19 @@ android {
         lightningLite.setRoot('src/LightningLite')
     }
 
+    signingConfigs {
+        debug {
+        }
+
+        release {
+            storeFile file(KEY_FILE)
+            storePassword STORE_PASSWORD
+            keyAlias KEY_ALIAS
+            keyPassword KEY_PASSWORD
+        }
+    }
+
+
     buildTypes {
         debug {
             minifyEnabled false
@@ -39,6 +52,8 @@ android {
             shrinkResources false
             proguardFiles 'proguard-project.txt'
             testCoverageEnabled false
+
+            signingConfig signingConfigs.release
         }
     }
 
