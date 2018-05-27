@@ -170,7 +170,8 @@ dependencies {
 
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
 
-    implementation 'com.connectsdk:connect-sdk-android:1.6.0'
+//    implementation 'com.connectsdk:connect-sdk-android:1.6.0'
+    implementation project(':Connect-SDK-Android')
 
     // admob
     implementation 'com.google.android.gms:play-services-ads:15.0.0'
